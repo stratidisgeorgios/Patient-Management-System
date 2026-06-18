@@ -1,0 +1,3 @@
+### Delete Patient
+DELETE http://localhost:4000/api/patients/delete/123e4567-e89b-12d3-a456-426614174001
+
