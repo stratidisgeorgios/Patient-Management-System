@@ -31,29 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-### PostgreSQL data ###
-postgres-data/
-
-### Docker ###
-**/postgres-data/
-
-### Metals / Bloop (VS Code Java tooling) ###
-**/.metals/
-**/.bloop/
-.metals/
-.bloop/
-
-### Logs ###
-*.log
-app.log
-
-### VS Code workspace ###
-.vscode/
-
-### Stale Spring Boot exploded JARs ###
-BOOT-INF/
-
-
-###env
-.env
