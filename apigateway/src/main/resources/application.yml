@@ -1,0 +1,39 @@
+server:
+  port: 4004
+
+auth:
+  service:
+    url: http://auth-service:4005
+
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: patient-management-route
+              uri: http://patient-management:4000
+              predicates:
+                - Path=/api/patients/**
+              filters:
+                - JwtValidation
+            - id: api-docs-patient-route
+              uri: http://patient-management:4000
+              predicates:
+                - Path=/api-docs/patient
+              filters:
+                - RewritePath=/api-docs/patient,/v3/api-docs
+            - id: auth-service-route
+              uri: http://auth-service:4005
+              predicates:
+                - Path=/api/auth/**
+            - id: api-docs-auth-route
+              uri: http://auth-service:4005
+              predicates:
+                - Path=/api-docs/auth
+              filters:
+                - RewritePath=/api-docs/auth,/v3/api-docs

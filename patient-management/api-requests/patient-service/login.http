@@ -1,0 +1,9 @@
+### Login request to retrieve a token.
+POST http://localhost:4004/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser@test.com",
+  "password": "password123"
+}
+

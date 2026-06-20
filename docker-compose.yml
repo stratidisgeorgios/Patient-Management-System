@@ -18,6 +18,24 @@ services:
       timeout: 5s
       retries: 5
 
+  auth-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin_user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: auth_db
+    ports:
+      - "5433:5432"
+    networks:
+      - patient-network
+    volumes:
+      - ./auth-service/postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin_user -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   kafka:
     image: apache/kafka:latest
     hostname: kafka
@@ -29,6 +47,9 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
     ports:
       - "9092:9092"
       - "9094:9094"
@@ -39,6 +60,7 @@ services:
     build:
       context: .
       dockerfile: patient-management/Dockerfile
+    image: patient-management:latest
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://patient-db:5432/patient_db
       SPRING_DATASOURCE_USERNAME: admin_user
@@ -48,8 +70,8 @@ services:
       BILLING_SERVICE_ADDRESS: billing-service
       BILLING_SERVICE_GRPC_PORT: 9001
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    ports:
-      - "4000:4000"
+    # ports:
+    #   - "4000:4000" # documentation
     networks:
       - patient-network
     depends_on:
@@ -62,16 +84,67 @@ services:
     build:
       context: .
       dockerfile: billing-service/Dockerfile
+    image: billing-service:latest
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    ports:
-      - "4001:4001"
-      - "9001:9001"
+    # ports:
+    #   - "4001:4001" # documentation
+    #   - "9001:9001" # documentation (gRPC)
     networks:
       - patient-network
     depends_on:
       - kafka
 
+  analytics-service:
+    build:
+      context: .
+      dockerfile: analytics-service/Dockerfile
+    image: analytics-service:latest
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    # ports:
+    #   - "4002:4002" # documentation
+    networks:
+      - patient-network
+    depends_on:
+      - kafka
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    image: auth-service:latest
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: admin_user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+      JWT_SECRET: ${JWT_SECRET}
+    # ports:
+    #   - "4005:4005" # documentation
+    networks:
+      - patient-network
+    depends_on:
+      auth-db:
+        condition: service_healthy
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apigateway/Dockerfile
+    image: api-gateway:latest
+    environment:
+      SERVER_PORT: 4004
+      AUTH_SERVICE_URL: http://auth-service:4005
+    ports:
+      - "4004:4004"
+    networks:
+      - patient-network
+    depends_on:
+      - patient-management
+      - billing-service
+      - auth-service
 networks:
   patient-network:
     driver: bridge

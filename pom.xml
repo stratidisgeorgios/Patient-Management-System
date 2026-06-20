@@ -12,6 +12,10 @@
         <module>proto</module>
         <module>patient-management</module>
         <module>billing-service</module>
+        <module>analytics-service</module>
+        <module>apigateway</module>
+        <module>auth-service</module>
+        <module>integration-tests</module>
     </modules>
 
 </project>
