@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { border-radius: 0 !important; }
+
+  body {
+    background-color: #E3E2DE;
+    color: #141414;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { text-decoration: none; }
+}
+
+@layer components {
+  /* Typography */
+  .label {
+    @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A];
+  }
+
+  .section-index {
+    @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] mb-8;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-[#1351AA] text-[#E3E2DE] text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 hover:bg-[#141414] transition-colors duration-300 inline-block disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-[#141414] text-[#E3E2DE] text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 hover:bg-[#1351AA] transition-colors duration-300 inline-block;
+  }
+
+  .btn-outline {
+    @apply border border-[#C7C7C7] text-[#141414] text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 hover:border-[#141414] transition-colors duration-300;
+  }
+
+  .btn-ghost {
+    @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] hover:text-[#141414] transition-colors duration-300;
+  }
+
+  /* Forms */
+  .form-field {
+    @apply flex flex-col gap-2 border-b border-[#C7C7C7] py-5;
+  }
+
+  .form-label {
+    @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A];
+  }
+
+  .form-input {
+    @apply bg-transparent py-2 text-base text-[#141414] placeholder:text-[#C7C7C7] focus:outline-none border-b border-transparent focus:border-[#1351AA] transition-colors duration-300 w-full;
+  }
+
+  .form-error {
+    @apply text-xs text-red-500 font-mono;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    @apply fixed inset-0 bg-[#141414]/60 flex items-center justify-center z-50;
+  }
+
+  .modal-card {
+    @apply bg-[#E3E2DE] w-full max-w-lg border border-[#C7C7C7];
+  }
+
+  .modal-header {
+    @apply border-b border-[#C7C7C7] px-10 py-6 flex items-center justify-between;
+  }
+
+  .modal-body {
+    @apply px-10 py-8 flex flex-col gap-0;
+  }
+
+  .modal-actions {
+    @apply flex gap-4 pt-8;
+  }
+}

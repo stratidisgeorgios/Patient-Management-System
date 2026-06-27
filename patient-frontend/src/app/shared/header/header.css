@@ -1,0 +1,15 @@
+.header {
+  @apply border-b border-[#C7C7C7] bg-[#E3E2DE] px-8 py-5 flex items-center justify-between;
+}
+
+.header-logo {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A];
+}
+
+.header-nav {
+  @apply flex items-center gap-8;
+}
+
+.nav-link {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] hover:text-[#141414] transition-colors duration-300;
+}

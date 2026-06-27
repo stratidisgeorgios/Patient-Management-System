@@ -17,3 +17,11 @@ message BillingResponse {
   string accountId = 1;
   string status = 2;
 }
+
+message ChargeEvent {
+    string patientId = 1;
+    string treatmentName = 2;
+    string category = 3;
+    string price = 4;
+    string timestamp = 5;
+}

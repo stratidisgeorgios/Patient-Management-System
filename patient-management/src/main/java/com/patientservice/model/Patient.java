@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,6 +25,9 @@ public class Patient {
     @Email
     @Column(unique = true)
     private String email;
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @NotNull
     private String address;
@@ -55,6 +60,14 @@ public class Patient {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
     }
 
     public String getAddress() {

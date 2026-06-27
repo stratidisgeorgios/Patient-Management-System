@@ -18,23 +18,23 @@ services:
       timeout: 5s
       retries: 5
 
-  auth-db:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: admin_user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: auth_db
-    ports:
-      - "5433:5432"
-    networks:
-      - patient-network
-    volumes:
-      - ./auth-service/postgres-data:/var/lib/postgresql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin_user -d auth_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+  # auth-db: (replaced by Keycloak — kept for reference, custom auth-service is in /auth-service)
+  # image: postgres:latest
+  # environment:
+  #   POSTGRES_USER: admin_user
+  #   POSTGRES_PASSWORD: password
+  #   POSTGRES_DB: auth_db
+  # ports:
+  #   - "5433:5432"
+  # networks:
+  #   - patient-network
+  # volumes:
+  #   - ./auth-service/postgres-data:/var/lib/postgresql
+  # healthcheck:
+  #   test: ["CMD-SHELL", "pg_isready -U admin_user -d auth_db"]
+  #   interval: 5s
+  #   timeout: 5s
+  #   retries: 5
 
   kafka:
     image: apache/kafka:latest
@@ -80,12 +80,34 @@ services:
       kafka:
         condition: service_started
 
+  billing-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin_user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: billing_db
+    ports:
+      - "5434:5432"
+    networks:
+      - patient-network
+    volumes:
+      - ./billing-service/postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin_user -d billing_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   billing-service:
     build:
       context: .
       dockerfile: billing-service/Dockerfile
     image: billing-service:latest
     environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://billing-db:5432/billing_db
+      SPRING_DATASOURCE_USERNAME: admin_user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     # ports:
     #   - "4001:4001" # documentation
@@ -93,7 +115,36 @@ services:
     networks:
       - patient-network
     depends_on:
-      - kafka
+      billing-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  analytics-db:
+    image: timescale/timescaledb:latest-pg16
+    environment:
+      POSTGRES_USER: admin_user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: analytics_db
+    ports:
+      - "5435:5432"
+    networks:
+      - patient-network
+    volumes:
+      - ./analytics-service/postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin_user -d analytics_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+      
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - patient-network
 
   analytics-service:
     build:
@@ -102,31 +153,75 @@ services:
     image: analytics-service:latest
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://analytics-db:5432/analytics_db
+      SPRING_DATASOURCE_USERNAME: admin_user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_DATA_REDIS_HOST: redis
     # ports:
     #   - "4002:4002" # documentation
     networks:
       - patient-network
     depends_on:
-      - kafka
+      analytics-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_started
 
-  auth-service:
-    build:
-      context: .
-      dockerfile: auth-service/Dockerfile
-    image: auth-service:latest
+  # auth-service: (replaced by Keycloak — kept for reference, custom auth-service is in /auth-service)
+  # build:
+  #   context: .
+  #   dockerfile: auth-service/Dockerfile
+  # image: auth-service:latest
+  # environment:
+  #   SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
+  #   SPRING_DATASOURCE_USERNAME: admin_user
+  #   SPRING_DATASOURCE_PASSWORD: password
+  #   SPRING_JPA_HIBERNATE_DDL_AUTO: update
+  #   SPRING_SQL_INIT_MODE: always
+  #   JWT_SECRET: ${JWT_SECRET}
+  # networks:
+  #   - patient-network
+  # depends_on:
+  #   auth-db:
+  #     condition: service_healthy
+
+  keycloak-db:
+    image: postgres:latest
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth_db
-      SPRING_DATASOURCE_USERNAME: admin_user
-      SPRING_DATASOURCE_PASSWORD: password
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_SQL_INIT_MODE: always
-      JWT_SECRET: ${JWT_SECRET}
-    # ports:
-    #   - "4005:4005" # documentation
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+      POSTGRES_DB: keycloak_db
+    networks:
+      - patient-network
+    volumes:
+      - ./keycloak/postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak_db
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: localhost
+      KC_HTTP_PORT: 8080
+    ports:
+      - "8080:8080"
     networks:
       - patient-network
     depends_on:
-      auth-db:
+      keycloak-db:
         condition: service_healthy
 
   api-gateway:
@@ -136,7 +231,6 @@ services:
     image: api-gateway:latest
     environment:
       SERVER_PORT: 4004
-      AUTH_SERVICE_URL: http://auth-service:4005
     ports:
       - "4004:4004"
     networks:
@@ -144,7 +238,19 @@ services:
     depends_on:
       - patient-management
       - billing-service
-      - auth-service
+      - keycloak
+  localstack:
+    image: localstack/localstack-pro:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN}
+      - SERVICES=ecs,rds,ec2,iam,logs,ecr,lambda,s3,secretsmanager,elasticloadbalancing,elbv2,cloudformation,kafka,route53,acm,ssm,servicediscovery
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - patient-network
+
 networks:
   patient-network:
     driver: bridge

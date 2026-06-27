@@ -1,0 +1,7 @@
+.footer {
+  @apply border-t border-[#C7C7C7] px-8 py-6 flex items-center justify-between;
+}
+
+.footer-text {
+  @apply text-xs text-[#7A7A7A];
+}

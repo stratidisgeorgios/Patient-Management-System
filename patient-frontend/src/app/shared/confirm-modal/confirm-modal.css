@@ -1,0 +1,19 @@
+.confirm-card {
+  @apply bg-[#E3E2DE] w-full max-w-sm border border-[#C7C7C7];
+}
+
+.confirm-header {
+  @apply border-b border-[#C7C7C7] px-8 py-5;
+}
+
+.confirm-body {
+  @apply px-8 py-8;
+}
+
+.confirm-message {
+  @apply text-base text-[#141414] font-medium mb-8;
+}
+
+.confirm-actions {
+  @apply flex gap-4;
+}

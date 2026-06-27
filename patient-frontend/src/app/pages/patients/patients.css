@@ -1,0 +1,11 @@
+.admin-section {
+  @apply flex flex-col gap-10;
+}
+
+.admin-header {
+  @apply border-b border-[#C7C7C7] pb-8;
+}
+
+.admin-hero {
+  @apply text-5xl font-black leading-[0.9] tracking-[-0.03em] text-[#141414] uppercase;
+}

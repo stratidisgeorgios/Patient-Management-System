@@ -1,0 +1,149 @@
+<div class="patient-list">
+  <div class="patient-list-header">
+    <span class="label">Patient Records</span>
+    <button (click)="createPatient()" class="btn-primary">+ Add Patient</button>
+  </div>
+
+  <table class="patient-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Address</th>
+        <th>DOB</th>
+        <th>Registered</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (patient of patients(); track patient.id) {
+        <tr class="patient-row">
+          <td class="patient-name">{{ patient.name }}</td>
+          <td class="patient-mono">{{ patient.email }}</td>
+          <td>{{ patient.address }}</td>
+          <td class="patient-mono">{{ patient.dateOfBirth }}</td>
+          <td class="patient-mono">{{ patient.registeredDate }}</td>
+          <td>
+            <div class="patient-actions">
+              <button (click)="editPatient(patient)" class="action-edit">Edit</button>
+              <button (click)="deletePatient(patient)" class="action-delete">Delete</button>
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (showEditModal()) {
+  <div class="modal-overlay">
+    <div class="patient-modal-card">
+      <div class="modal-header">
+        <span class="label">Edit Patient</span>
+        <button (click)="showEditModal.set(false)" class="btn-ghost">✕ Close</button>
+      </div>
+      <form [formGroup]="editForm" (ngSubmit)="submitUpdate()" class="modal-body">
+        <div class="form-field">
+          <label class="form-label">Name</label>
+          <input formControlName="name" placeholder="Full name" class="form-input" />
+          @if (editForm.get('name')?.touched && editForm.get('name')?.errors?.['required']) {
+            <span class="form-error">Name is required</span>
+          }
+          @if (editForm.get('name')?.touched && editForm.get('name')?.errors?.['maxlength']) {
+            <span class="form-error">Max 100 characters</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Email</label>
+          <input formControlName="email" type="email" placeholder="email@example.com" class="form-input patient-mono" />
+          @if (editForm.get('email')?.touched && editForm.get('email')?.errors?.['required']) {
+            <span class="form-error">Email is required</span>
+          }
+          @if (editForm.get('email')?.touched && editForm.get('email')?.errors?.['email']) {
+            <span class="form-error">Enter a valid email</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Address</label>
+          <input formControlName="address" placeholder="Street address" class="form-input" />
+          @if (editForm.get('address')?.touched && editForm.get('address')?.errors?.['required']) {
+            <span class="form-error">Address is required</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Date of Birth</label>
+          <input formControlName="dateOfBirth" type="date" class="form-input patient-mono" />
+          @if (editForm.get('dateOfBirth')?.touched && editForm.get('dateOfBirth')?.errors?.['required']) {
+            <span class="form-error">Date of birth is required</span>
+          }
+        </div>
+        <div class="modal-actions">
+          <button type="submit" [disabled]="editForm.invalid" class="btn-primary flex-1 text-center">Save Changes</button>
+          <button type="button" (click)="showEditModal.set(false)" class="btn-secondary flex-1 text-center">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showCreateModal()) {
+  <div class="modal-overlay">
+    <div class="patient-modal-card">
+      <div class="modal-header">
+        <span class="label">New Patient</span>
+        <button (click)="showCreateModal.set(false)" class="btn-ghost">✕ Close</button>
+      </div>
+      <form [formGroup]="createForm" (ngSubmit)="submitCreate()" class="modal-body">
+        <div class="form-field">
+          <label class="form-label">Name</label>
+          <input formControlName="name" placeholder="Full name" class="form-input" />
+          @if (createForm.get('name')?.touched && createForm.get('name')?.errors?.['required']) {
+            <span class="form-error">Name is required</span>
+          }
+          @if (createForm.get('name')?.touched && createForm.get('name')?.errors?.['maxlength']) {
+            <span class="form-error">Max 100 characters</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Email</label>
+          <input formControlName="email" type="email" placeholder="email@example.com" class="form-input patient-mono" />
+          @if (createForm.get('email')?.touched && createForm.get('email')?.errors?.['required']) {
+            <span class="form-error">Email is required</span>
+          }
+          @if (createForm.get('email')?.touched && createForm.get('email')?.errors?.['email']) {
+            <span class="form-error">Enter a valid email</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Address</label>
+          <input formControlName="address" placeholder="Street address" class="form-input" />
+          @if (createForm.get('address')?.touched && createForm.get('address')?.errors?.['required']) {
+            <span class="form-error">Address is required</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Date of Birth</label>
+          <input formControlName="dateOfBirth" type="date" class="form-input patient-mono" />
+          @if (createForm.get('dateOfBirth')?.touched && createForm.get('dateOfBirth')?.errors?.['required']) {
+            <span class="form-error">Required</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Registered Date</label>
+          <input formControlName="registeredDate" type="date" class="form-input patient-mono" />
+          @if (createForm.get('registeredDate')?.touched && createForm.get('registeredDate')?.errors?.['required']) {
+            <span class="form-error">Required</span>
+          }
+        </div>
+        <div class="modal-actions">
+          <button type="submit" [disabled]="createForm.invalid" class="btn-primary flex-1 text-center">Create Patient</button>
+          <button type="button" (click)="showCreateModal.set(false)" class="btn-secondary flex-1 text-center">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showDeleteModal()) {
+  <app-confirm-modal (confirm)="confirmDelete()" (cancel)="cancelDelete()"></app-confirm-modal>
+}

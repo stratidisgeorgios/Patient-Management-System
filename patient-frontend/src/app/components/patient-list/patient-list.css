@@ -1,0 +1,47 @@
+.patient-list {
+  @apply flex flex-col;
+}
+
+.patient-list-header {
+  @apply flex items-center justify-between border-b border-[#C7C7C7] pb-6 mb-0;
+}
+
+.patient-table {
+  @apply w-full border-collapse;
+}
+
+.patient-table th {
+  @apply py-4 pr-6 text-left text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] border-b border-[#C7C7C7];
+}
+
+.patient-table td {
+  @apply py-5 pr-6 text-sm text-[#444343] border-b border-[#C7C7C7];
+}
+
+.patient-name {
+  @apply font-semibold text-[#141414];
+}
+
+.patient-mono {
+  @apply font-mono;
+}
+
+.patient-row {
+  @apply hover:bg-[#1351AA]/5 transition-colors duration-300;
+}
+
+.patient-actions {
+  @apply flex gap-4;
+}
+
+.action-edit {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#1351AA] hover:text-[#141414] transition-colors duration-300;
+}
+
+.action-delete {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] hover:text-[#141414] transition-colors duration-300;
+}
+
+.patient-modal-card {
+  @apply bg-[#E3E2DE] w-full max-w-lg border border-[#C7C7C7];
+}

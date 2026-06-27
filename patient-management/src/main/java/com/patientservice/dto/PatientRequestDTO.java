@@ -12,6 +12,9 @@ public class PatientRequestDTO {
     @Email(message = "Email should be valid")
     private String email;
 
+    @NotBlank(message = "Gender is required")
+    private String gender;
+
     @NotBlank(message = "Address is required")
     @Size(max = 200, message = "Address must be at most 200 characters")
     private String address;
@@ -27,6 +30,9 @@ public class PatientRequestDTO {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }

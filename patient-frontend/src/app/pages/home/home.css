@@ -1,0 +1,19 @@
+.home-section {
+  @apply px-8 py-24 border-b border-[#C7C7C7];
+}
+
+.home-inner {
+  @apply max-w-6xl mx-auto;
+}
+
+.home-hero {
+  @apply text-[8rem] font-black leading-[0.85] tracking-[-0.04em] text-[#141414] uppercase mb-12;
+}
+
+.home-bottom {
+  @apply flex items-end justify-between border-t border-[#C7C7C7] pt-8;
+}
+
+.home-tagline {
+  @apply text-lg text-[#444343] max-w-md leading-relaxed;
+}

@@ -1,0 +1,7 @@
+.home-layout {
+  @apply min-h-screen flex flex-col bg-[#E3E2DE];
+}
+
+.home-layout-main {
+  @apply flex-1;
+}

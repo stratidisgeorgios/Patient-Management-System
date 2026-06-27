@@ -1,0 +1,19 @@
+.about-section {
+  @apply px-8 py-24;
+}
+
+.about-inner {
+  @apply max-w-6xl mx-auto;
+}
+
+.about-hero {
+  @apply text-[6rem] font-black leading-[0.85] tracking-[-0.04em] text-[#141414] uppercase mb-16;
+}
+
+.about-grid {
+  @apply border-t border-[#C7C7C7] pt-8 grid grid-cols-12 gap-8;
+}
+
+.about-body {
+  @apply text-lg text-[#444343] leading-relaxed max-w-2xl;
+}

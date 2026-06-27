@@ -1,0 +1,11 @@
+.app-layout {
+  @apply min-h-screen flex flex-col bg-[#E3E2DE];
+}
+
+.app-layout-body {
+  @apply flex flex-1;
+}
+
+.app-layout-main {
+  @apply flex-1 p-12;
+}
