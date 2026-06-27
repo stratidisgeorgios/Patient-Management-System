@@ -57,3 +57,21 @@ BOOT-INF/
 
 ###env
 .env
+
+### Node ###
+node_modules/
+.angular/
+
+### CDK ###
+cdk.out/
+
+### LocalStack ###
+localstack.temp
+*.read.*
+manifest.json
+
+### Angular build output ###
+patient-frontend/dist/
+
+### Project specific ###
+FUTURE.md

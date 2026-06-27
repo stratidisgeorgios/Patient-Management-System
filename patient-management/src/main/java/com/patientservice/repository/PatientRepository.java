@@ -11,7 +11,5 @@ import com.patientservice.model.Patient;
 
 @Repository
 public interface PatientRepository extends JpaRepository<Patient, UUID> {
-    @Override
-    boolean existsById(UUID id);
     boolean existsByEmail(String email);
 }

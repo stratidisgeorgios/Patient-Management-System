@@ -1,0 +1,14 @@
+<div class="modal-overlay">
+  <div class="confirm-card">
+    <div class="confirm-header">
+      <span class="label">Confirm Action</span>
+    </div>
+    <div class="confirm-body">
+      <p class="confirm-message">{{ message }}</p>
+      <div class="confirm-actions">
+        <button (click)="confirm.emit()" class="btn-secondary flex-1 text-center">Confirm</button>
+        <button (click)="cancel.emit()" class="btn-outline flex-1 text-center">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

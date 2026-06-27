@@ -16,6 +16,7 @@
         <module>apigateway</module>
         <module>auth-service</module>
         <module>integration-tests</module>
+        <module>infrastructure</module>
     </modules>
 
 </project>

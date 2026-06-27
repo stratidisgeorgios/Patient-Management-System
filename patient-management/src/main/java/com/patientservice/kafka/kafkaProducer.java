@@ -1,5 +1,7 @@
 package com.patientservice.kafka;
 
+import java.time.LocalDateTime;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -20,12 +22,15 @@ public class kafkaProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void sendEvent(Patient patient){
+    public void sendEvent(Patient patient, String eventType) {
         PatientEvent patientEvent = PatientEvent.newBuilder()
                 .setPatientId(patient.getId().toString())
                 .setName(patient.getName())
                 .setEmail(patient.getEmail())
-                .setEventType("PatientCreated")
+                .setGender(patient.getGender().toString())
+                .setDateOfBirth(patient.getDateOfBirth().toString())
+                .setEventType(eventType)
+                .setTimestamp(LocalDateTime.now().toString())
                 .build();
         try {
             kafkaTemplate.send("patient-events", patientEvent.toByteArray());

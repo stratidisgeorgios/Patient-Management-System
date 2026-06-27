@@ -1,0 +1,118 @@
+<div class="catalog-list">
+  <div class="catalog-list-header">
+    <span class="label">Catalog</span>
+    <button (click)="createTreatment()" class="btn-primary">+ Add Treatment</button>
+  </div>
+
+  <table class="treatment-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (treatment of treatments(); track treatment.id) {
+        <tr class="treatment-row">
+          <td class="treatment-name">{{ treatment.name }}</td>
+          <td class="treatment-category">{{ treatment.category }}</td>
+          <td class="treatment-price">{{ treatment.price | currency }}</td>
+          <td>
+            <div class="treatment-actions">
+              <button (click)="editTreatment(treatment)" class="action-edit">Edit</button>
+              <button (click)="deleteTreatment(treatment)" class="action-delete">Delete</button>
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (showEditModal()) {
+  <div class="modal-overlay">
+    <div class="patient-modal-card">
+      <div class="modal-header">
+        <span class="label">Edit Treatment</span>
+        <button (click)="showEditModal.set(false)" class="btn-ghost">✕ Close</button>
+      </div>
+      <form [formGroup]="editForm" (ngSubmit)="submitUpdate()" class="modal-body">
+        <div class="form-field">
+          <label class="form-label">Name</label>
+          <input formControlName="name" placeholder="Treatment name" class="form-input" />
+          @if (editForm.get('name')?.touched && editForm.get('name')?.errors?.['required']) {
+            <span class="form-error">Name is required</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Category</label>
+          <input formControlName="category" placeholder="e.g. Surgery, Consultation" class="form-input" />
+          @if (editForm.get('category')?.touched && editForm.get('category')?.errors?.['required']) {
+            <span class="form-error">Category is required</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Price</label>
+          <input formControlName="price" type="number" min="0" placeholder="0.00" class="form-input patient-mono" />
+          @if (editForm.get('price')?.touched && editForm.get('price')?.errors?.['required']) {
+            <span class="form-error">Price is required</span>
+          }
+          @if (editForm.get('price')?.touched && editForm.get('price')?.errors?.['min']) {
+            <span class="form-error">Price must be 0 or more</span>
+          }
+        </div>
+        <div class="modal-actions">
+          <button type="submit" [disabled]="editForm.invalid" class="btn-primary flex-1 text-center">Save Changes</button>
+          <button type="button" (click)="showEditModal.set(false)" class="btn-secondary flex-1 text-center">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showCreateModal()) {
+  <div class="modal-overlay">
+    <div class="patient-modal-card">
+      <div class="modal-header">
+        <span class="label">New Treatment</span>
+        <button (click)="showCreateModal.set(false)" class="btn-ghost">✕ Close</button>
+      </div>
+      <form [formGroup]="createForm" (ngSubmit)="submitCreate()" class="modal-body">
+        <div class="form-field">
+          <label class="form-label">Name</label>
+          <input formControlName="name" placeholder="Treatment name" class="form-input" />
+          @if (createForm.get('name')?.touched && createForm.get('name')?.errors?.['required']) {
+            <span class="form-error">Name is required</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Category</label>
+          <input formControlName="category" placeholder="e.g. Surgery, Consultation" class="form-input" />
+          @if (createForm.get('category')?.touched && createForm.get('category')?.errors?.['required']) {
+            <span class="form-error">Category is required</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Price</label>
+          <input formControlName="price" type="number" min="0" placeholder="0.00" class="form-input patient-mono" />
+          @if (createForm.get('price')?.touched && createForm.get('price')?.errors?.['required']) {
+            <span class="form-error">Price is required</span>
+          }
+          @if (createForm.get('price')?.touched && createForm.get('price')?.errors?.['min']) {
+            <span class="form-error">Price must be 0 or more</span>
+          }
+        </div>
+        <div class="modal-actions">
+          <button type="submit" [disabled]="createForm.invalid" class="btn-primary flex-1 text-center">Create Treatment</button>
+          <button type="button" (click)="showCreateModal.set(false)" class="btn-secondary flex-1 text-center">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (showDeleteModal()) {
+  <app-confirm-modal (confirm)="confirmDelete()" (cancel)="cancelDelete()"></app-confirm-modal>
+}

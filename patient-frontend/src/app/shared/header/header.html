@@ -1,0 +1,13 @@
+<header class="header">
+  <span class="header-logo">Patient Management</span>
+  <nav class="header-nav">
+    <a routerLink="/" class="nav-link">Home</a>
+    <a routerLink="/about" class="nav-link">About</a>
+    @if (keycloakService.authenticated()) {
+      <a routerLink="/app/patients" class="nav-link">Patients</a>
+      <button (click)="keycloakService.logout()" class="btn-secondary">Logout</button>
+    } @else {
+      <a routerLink="/login" class="btn-primary">Login</a>
+    }
+  </nav>
+</header>

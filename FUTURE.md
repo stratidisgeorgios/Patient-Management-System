@@ -1,5 +1,7 @@
 # Future TODO
 
+- Recreate the Java CDK infrastructure from the tutorial in Terraform, following the module/environment structure from the team-2 project. User will provide the tutorial's Java CDK resources and they will be translated to Terraform.
+
 - Remove `.mvn/`, `mvnw`, and `mvnw.cmd` from each service module and keep only the copies in the root folder. Update each service Dockerfile to copy the wrapper from the root instead of its own module folder.
 - Add rate limiting to API gateway routes to prevent abuse. Spring Cloud Gateway has a built-in `RequestRateLimiter` filter that works with Redis.
 - Add retry logic to API gateway routes for transient failures. Spring Cloud Gateway has a built-in `Retry` filter.

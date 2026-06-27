@@ -1,0 +1,15 @@
+.sidebar {
+  @apply w-48 border-r border-[#C7C7C7] py-12 px-8 flex flex-col gap-6;
+}
+
+.sidebar-label {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] sticky top-32;
+}
+
+.sidebar-nav {
+  @apply flex flex-col gap-4;
+}
+
+.sidebar-link {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#444343] hover:text-[#1351AA] transition-colors duration-300;
+}
