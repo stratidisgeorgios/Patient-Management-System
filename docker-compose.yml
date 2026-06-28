@@ -4,7 +4,7 @@ services:
     image: postgres:latest
     environment:
       POSTGRES_USER: admin_user
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${PATIENT_DB_PASSWORD}
       POSTGRES_DB: patient_db
     ports:
       - "5432:5432"
@@ -64,7 +64,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://patient-db:5432/patient_db
       SPRING_DATASOURCE_USERNAME: admin_user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_PASSWORD: ${PATIENT_DB_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_SQL_INIT_MODE: always
       BILLING_SERVICE_ADDRESS: billing-service
@@ -84,7 +84,7 @@ services:
     image: postgres:latest
     environment:
       POSTGRES_USER: admin_user
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${BILLING_DB_PASSWORD}
       POSTGRES_DB: billing_db
     ports:
       - "5434:5432"
@@ -106,7 +106,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://billing-db:5432/billing_db
       SPRING_DATASOURCE_USERNAME: admin_user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_PASSWORD: ${BILLING_DB_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       TREATMENT_SERVICE_ADDRESS: treatment-service
@@ -128,7 +128,7 @@ services:
     image: timescale/timescaledb:latest-pg16
     environment:
       POSTGRES_USER: admin_user
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${ANALYTICS_DB_PASSWORD}
       POSTGRES_DB: analytics_db
     ports:
       - "5435:5432"
@@ -142,12 +142,12 @@ services:
       timeout: 5s
       retries: 5
 
-      
+
   treatment-db:
     image: postgres:latest
     environment:
       POSTGRES_USER: admin_user
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${TREATMENT_DB_PASSWORD}
       POSTGRES_DB: treatment_db
     ports:
       - "5436:5432"
@@ -169,7 +169,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://treatment-db:5432/treatment_db
       SPRING_DATASOURCE_USERNAME: admin_user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_PASSWORD: ${TREATMENT_DB_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       TREATMENT_SERVICE_ADDRESS: treatment-service
@@ -201,7 +201,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_DATASOURCE_URL: jdbc:postgresql://analytics-db:5432/analytics_db
       SPRING_DATASOURCE_USERNAME: admin_user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_PASSWORD: ${ANALYTICS_DB_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_DATA_REDIS_HOST: redis
     # ports:
@@ -238,7 +238,7 @@ services:
     image: postgres:latest
     environment:
       POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: keycloak
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       POSTGRES_DB: keycloak_db
     networks:
       - patient-network
@@ -257,9 +257,9 @@ services:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak_db
       KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_HOSTNAME: patientsystem.me
       KC_HTTP_PORT: 8080
       KC_HOSTNAME_STRICT: false
@@ -289,6 +289,7 @@ services:
       - patient-service
       - billing-service
       - keycloak
+
   opensearch-init:
     image: busybox
     privileged: true
@@ -370,4 +371,3 @@ services:
 networks:
   patient-network:
     driver: bridge
-
