@@ -15,7 +15,6 @@ export class KeycloakService {
     try {
       const result = await this.keycloak.init({
         onLoad: 'check-sso',
-        silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
         checkLoginIframe: false
       });
       this.authenticated.set(result);
