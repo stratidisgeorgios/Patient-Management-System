@@ -11,9 +11,6 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: http://keycloak:8080/realms/patientmanagement/protocol/openid-connect/certs
-
-jwt:
-  issuer-uri: https://patientsystem.me/realms/patientmanagement
   cloud:
     gateway:
       server:
@@ -47,3 +44,6 @@ jwt:
                 - Path=/api-docs/billing
               filters:
                 - RewritePath=/api-docs/billing,/v3/api-docs
+
+jwt:
+  issuer-uri: https://patientsystem.me/realms/patientmanagement
