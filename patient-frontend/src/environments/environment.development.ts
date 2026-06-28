@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:4004'
+  apiUrl: 'https://patientsystem.duckdns.org'
 };
