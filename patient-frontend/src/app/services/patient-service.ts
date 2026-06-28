@@ -10,15 +10,15 @@ import { PatientRequest } from "../models/patient.model";
 export class PatientService {
   constructor(@Inject(APP_SERVICE_CONFIG) private config: AppConfig, private http: HttpClient) {}
   getAll(){
-    return this.http.get(`/api/patients`).pipe(tap(response => console.log('Get All Patients response:', response)));
+    return this.http.get(`${this.config.apiUrl}/api/patients`).pipe(tap(response => console.log('Get All Patients response:', response)));
   }
   create(patient: PatientRequest){
-    return this.http.post(`/api/patients/create`, patient).pipe(tap(response => console.log('Create Patient response:', response)));
+    return this.http.post(`${this.config.apiUrl}/api/patients/create`, patient).pipe(tap(response => console.log('Create Patient response:', response)));
   }
   delete(id:string){
-    return this.http.delete(`/api/patients/delete/${id}`).pipe(tap(response => console.log('Delete Patient response:', response)));
+    return this.http.delete(`${this.config.apiUrl}/api/patients/delete/${id}`).pipe(tap(response => console.log('Delete Patient response:', response)));
   }
   update(id:string,patient: Omit<PatientRequest, "registeredDate">){
-    return this.http.put(`/api/patients/update/${id}`, patient).pipe(tap(response => console.log('Update Patient response:', response)));
+    return this.http.put(`${this.config.apiUrl}/api/patients/update/${id}`, patient).pipe(tap(response => console.log('Update Patient response:', response)));
   }
 }
