@@ -11,18 +11,18 @@ export class CatalogService {
   constructor(@Inject(APP_SERVICE_CONFIG) private config: AppConfig, private http: HttpClient) {}
 
   getCatalog(): Observable<TreatmentResponse[]> {
-    return this.http.get<TreatmentResponse[]>(`${this.config.apiUrl}/api/catalog`);
+    return this.http.get<TreatmentResponse[]>(`${this.config.apiUrl}/api/treatments`);
   }
 
   createTreatment(treatment: TreatmentRequest): Observable<void> {
-    return this.http.post<void>(`${this.config.apiUrl}/api/catalog`, treatment);
+    return this.http.post<void>(`${this.config.apiUrl}/api/treatments`, treatment);
   }
 
   updateTreatment(treatmentId: string, treatment: TreatmentRequest): Observable<void> {
-    return this.http.put<void>(`${this.config.apiUrl}/api/catalog/${treatmentId}`, treatment);
+    return this.http.put<void>(`${this.config.apiUrl}/api/treatments/${treatmentId}`, treatment);
   }
 
   deleteTreatment(treatmentId: string): Observable<void> {
-    return this.http.delete<void>(`${this.config.apiUrl}/api/catalog/${treatmentId}`);
+    return this.http.delete<void>(`${this.config.apiUrl}/api/treatments/${treatmentId}`);
   }
 }
