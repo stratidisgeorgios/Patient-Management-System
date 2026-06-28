@@ -1,0 +1,8 @@
+[Unit]
+Description=Update Cloudflare IP ranges in firewall
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/opc/patient-system/update-cloudflare-ips.sh
