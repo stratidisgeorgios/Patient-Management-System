@@ -1,8 +1,8 @@
 FROM eclipse-temurin:25-jdk AS build
 WORKDIR /app
 
-COPY patient-management/.mvn .mvn
-COPY patient-management/mvnw .
+COPY patient-service/.mvn .mvn
+COPY patient-service/mvnw .
 
 COPY pom.xml .
 COPY proto ./proto

@@ -4,31 +4,34 @@
     <button (click)="createTreatment()" class="btn-primary">+ Add Treatment</button>
   </div>
 
-  <table class="treatment-table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Category</th>
-        <th>Price</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (treatment of treatments(); track treatment.id) {
-        <tr class="treatment-row">
-          <td class="treatment-name">{{ treatment.name }}</td>
-          <td class="treatment-category">{{ treatment.category }}</td>
-          <td class="treatment-price">{{ treatment.price | currency }}</td>
-          <td>
-            <div class="treatment-actions">
-              <button (click)="editTreatment(treatment)" class="action-edit">Edit</button>
-              <button (click)="deleteTreatment(treatment)" class="action-delete">Delete</button>
-            </div>
-          </td>
-        </tr>
+  @if (treatments().length === 0) {
+    <div class="no-patients">
+      <span class="label">No treatments found</span>
+    </div>
+  } @else {
+    <div class="treatment-grid">
+      @for (treatment of pagedTreatments(); track treatment.id) {
+        <div class="treatment-card">
+          <div class="treatment-card-header">
+            <span class="treatment-card-category">{{ treatment.category }}</span>
+            <span class="treatment-card-price">{{ treatment.price | currency }}</span>
+          </div>
+          <div class="treatment-card-name">{{ treatment.name }}</div>
+          <div class="treatment-card-actions">
+            <button (click)="editTreatment(treatment)" class="action-edit">Edit</button>
+            <button (click)="deleteTreatment(treatment)" class="action-delete">Delete</button>
+          </div>
+        </div>
       }
-    </tbody>
-  </table>
+    </div>
+    @if (totalPages() > 1) {
+      <div class="catalog-pagination">
+        <button (click)="prevPage()" [disabled]="currentPage() === 0" class="btn-ghost">← Prev</button>
+        <span class="label">{{ currentPage() + 1 }} / {{ totalPages() }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage() === totalPages() - 1" class="btn-ghost">Next →</button>
+      </div>
+    }
+  }
 </div>
 
 @if (showEditModal()) {

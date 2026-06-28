@@ -1,0 +1,46 @@
+// This custom filter called the auth-service to validate every token.
+// Replaced by Spring Security OAuth2 Resource Server which validates JWTs
+// locally using Keycloak's public key — no extra network hop needed.
+
+// package com.patientsystem.apigateway.filter;
+//
+// import org.springframework.cloud.gateway.filter.GatewayFilter;
+// import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+// import org.springframework.http.HttpStatus;
+// import org.springframework.stereotype.Component;
+// import org.springframework.web.reactive.function.client.WebClient;
+// import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.http.HttpHeaders;
+//
+// @Component
+// public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFactory<Object> {
+//
+//     private final WebClient webClient;
+//
+//     public JwtValidationGatewayFilterFactory(@Value("${auth.service.url}") String authServiceUrl) {
+//         this.webClient = WebClient.builder().baseUrl(authServiceUrl).build();
+//     }
+//
+//     @Override
+//     public GatewayFilter apply(Object config) {
+//         return (exchange, chain) -> {
+//             String token = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+//             if (token == null || !token.startsWith("Bearer ")) {
+//                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+//                 return exchange.getResponse().setComplete();
+//             }
+//             return webClient.get()
+//                     .uri("/api/auth/validate")
+//                     .header(HttpHeaders.AUTHORIZATION, token)
+//                     .retrieve()
+//                     .toBodilessEntity()
+//                     .then(chain.filter(exchange))
+//                     .onErrorResume(e -> {
+//                         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+//                         return exchange.getResponse().setComplete();
+//                     });
+//         };
+//     }
+//
+//     public static class Config {}
+// }

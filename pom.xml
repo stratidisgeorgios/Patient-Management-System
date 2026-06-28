@@ -3,18 +3,19 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.example</groupId>
+    <groupId>com.patientsystem</groupId>
     <artifactId>patient-system</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <modules>
         <module>proto</module>
-        <module>patient-management</module>
+        <module>patient-service</module>
         <module>billing-service</module>
         <module>analytics-service</module>
-        <module>apigateway</module>
+        <module>api-gateway</module>
         <module>auth-service</module>
+        <module>treatment-service</module>
         <module>integration-tests</module>
         <module>infrastructure</module>
     </modules>

@@ -8,7 +8,7 @@
 		<version>4.0.7</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.example</groupId>
+	<groupId>com.patientsystem</groupId>
 	<artifactId>analytics-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>analytics-service</name>
@@ -35,7 +35,7 @@
 			<artifactId>spring-boot-starter-kafka</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.example</groupId>
+			<groupId>com.patientsystem</groupId>
 			<artifactId>grpc-requests</artifactId>
 			<version>1.0.0</version>
 		</dependency>
