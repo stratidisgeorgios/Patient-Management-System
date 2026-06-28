@@ -11,25 +11,13 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: http://keycloak:8080/realms/patientmanagement/protocol/openid-connect/certs
+
+jwt:
+  issuer-uri: https://patientsystem.me/realms/patientmanagement
   cloud:
     gateway:
       server:
         webflux:
-          globalcors:
-            corsConfigurations:
-              '[/**]':
-                allowedOrigins:
-                  - "http://localhost:4200"
-                  - "https://patientsystem.me"
-                allowedMethods:
-                  - GET
-                  - POST
-                  - PUT
-                  - DELETE
-                  - OPTIONS
-                allowedHeaders:
-                  - "*"
-                allowCredentials: true
           routes:
             - id: patient-service-route
               uri: http://patient-service:4000
