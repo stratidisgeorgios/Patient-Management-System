@@ -25,9 +25,13 @@ spring:
               predicates:
                 - Path=/api/billing/**
             - id: treatment-route
-              uri: http://billing-service:4001
+              uri: http://treatment-service:4003
               predicates:
                 - Path=/api/catalog/**
+            - id: search-service-route
+              uri: http://search-service:8080
+              predicates:
+                - Path=/api/search/**
             - id: analytics-service-route
               uri: http://analytics-service:4002
               predicates:
