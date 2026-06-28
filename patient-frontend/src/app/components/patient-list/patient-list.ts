@@ -1,10 +1,12 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, computed, signal } from "@angular/core";
 import { PatientResponse } from "../../models/patient.model";
 import { PatientService } from "../../services/patient-service";
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import {signal} from "@angular/core";
 import { ConfirmModal } from "../../shared/confirm-modal/confirm-modal";
 import { NotificationService } from "../../services/notification-service";
+
+const PAGE_SIZE = 30;
+
 @Component({
   selector: "app-patient-list",
   imports: [ReactiveFormsModule, ConfirmModal],
@@ -14,8 +16,14 @@ import { NotificationService } from "../../services/notification-service";
 })
 export class PatientList implements OnInit {
   patients = signal<PatientResponse[]>([]);
-  patientToEdit = signal<PatientResponse | null>(null);
-  patientToDelete = signal<PatientResponse | null>(null);
+  selectedPatient = signal<PatientResponse | null>(null);
+  currentPage = signal(0);
+
+  pagedPatients = computed(() =>
+    this.patients().slice(this.currentPage() * PAGE_SIZE, (this.currentPage() + 1) * PAGE_SIZE)
+  );
+  totalPages = computed(() => Math.ceil(this.patients().length / PAGE_SIZE));
+
   editForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -32,19 +40,33 @@ export class PatientList implements OnInit {
   showCreateModal = signal(false);
   showEditModal = signal(false);
   showDeleteModal = signal(false);
+
   constructor(private patientService: PatientService, private notificationService: NotificationService) {}
+
   ngOnInit() {
-    this.patientService.getAll().subscribe((data: any) => {
-      this.patients.set(data.sort((a: PatientResponse, b: PatientResponse) => a.name.localeCompare(b.name)));
+    this.patientService.getAll().subscribe({
+      next: (data: any) => {
+        this.patients.set(data.sort((a: PatientResponse, b: PatientResponse) => a.name.localeCompare(b.name)));
+      },
+      error: (err) => {
+        this.notificationService.error("Failed to load patients: " + err.message);
+      }
     });
   }
 
+  private closeAllModals() {
+    this.showCreateModal.set(false);
+    this.showEditModal.set(false);
+    this.showDeleteModal.set(false);
+    this.selectedPatient.set(null);
+  }
+
   createPatient() {
-    this.patientToEdit.set(null);
+    this.closeAllModals();
     this.showCreateModal.set(true);
     this.createForm.reset();
     this.createForm.patchValue({
-      registeredDate: new Date().toISOString().split('T')[0]  // "2026-06-24"
+      registeredDate: new Date().toISOString().split('T')[0]
     });
   }
 
@@ -56,8 +78,9 @@ export class PatientList implements OnInit {
     });
   }
 
-  editPatient(patient: PatientResponse) {
-    this.patientToEdit.set(patient);
+  updatePatient(patient: PatientResponse) {
+    this.closeAllModals();
+    this.selectedPatient.set(patient);
     this.showEditModal.set(true);
     this.editForm.patchValue({
       name: patient.name,
@@ -68,37 +91,39 @@ export class PatientList implements OnInit {
   }
 
   submitUpdate() {
-    this.patientService.update(this.patientToEdit()!.id, this.editForm.value).subscribe((updatedPatient: any) => {
+    this.patientService.update(this.selectedPatient()!.id, this.editForm.value).subscribe((updatedPatient: any) => {
       const index = this.patients().findIndex((p) => p.id === updatedPatient.id);
       if (index !== -1) {
         const updatedPatients = [...this.patients()];
         updatedPatients[index] = updatedPatient;
         this.patients.set(updatedPatients);
       }
-      this.patientToEdit.set(null);
       this.showEditModal.set(false);
       this.notificationService.success('Patient updated successfully');
     });
   }
 
-    
   deletePatient(patient: PatientResponse) {
-    this.patientToDelete.set(patient);
+    this.closeAllModals();
+    this.selectedPatient.set(patient);
     this.showDeleteModal.set(true);
   }
 
-  confirmDelete() {
-    this.patientService.delete(this.patientToDelete()!.id).subscribe(() => {
-      this.patients.set(this.patients().filter((p) => p.id !== this.patientToDelete()!.id));
+  submitDelete() {
+    const id = this.selectedPatient()!.id;
+    this.patientService.delete(id).subscribe(() => {
+      this.patients.set(this.patients().filter((p) => p.id !== id));
       this.showDeleteModal.set(false);
-      this.patientToDelete.set(null);
       this.notificationService.success('Patient deleted successfully');
+      if (this.currentPage() >= this.totalPages()) this.currentPage.set(Math.max(0, this.totalPages() - 1));
     });
   }
 
   cancelDelete() {
     this.showDeleteModal.set(false);
-    this.patientToDelete.set(null);
+    this.selectedPatient.set(null);
   }
 
+  prevPage() { if (this.currentPage() > 0) this.currentPage.update(p => p - 1); }
+  nextPage() { if (this.currentPage() < this.totalPages() - 1) this.currentPage.update(p => p + 1); }
 }

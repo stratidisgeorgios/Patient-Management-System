@@ -3,36 +3,48 @@
     <span class="label">Patient Records</span>
     <button (click)="createPatient()" class="btn-primary">+ Add Patient</button>
   </div>
-
-  <table class="patient-table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Address</th>
-        <th>DOB</th>
-        <th>Registered</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (patient of patients(); track patient.id) {
-        <tr class="patient-row">
-          <td class="patient-name">{{ patient.name }}</td>
-          <td class="patient-mono">{{ patient.email }}</td>
-          <td>{{ patient.address }}</td>
-          <td class="patient-mono">{{ patient.dateOfBirth }}</td>
-          <td class="patient-mono">{{ patient.registeredDate }}</td>
-          <td>
-            <div class="patient-actions">
-              <button (click)="editPatient(patient)" class="action-edit">Edit</button>
-              <button (click)="deletePatient(patient)" class="action-delete">Delete</button>
-            </div>
-          </td>
+  @if (patients().length === 0) {
+    <div class="no-patients">
+      <span class="label">No patients found</span>
+    </div>
+  } @else {
+    <table class="patient-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Address</th>
+          <th>Date of Birth</th>
+          <th>Registered</th>
+          <th>Actions</th>
         </tr>
-      }
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        @for (patient of pagedPatients(); track patient.id) {
+          <tr class="patient-row">
+            <td class="patient-name">{{ patient.name }}</td>
+            <td class="patient-mono">{{ patient.email }}</td>
+            <td>{{ patient.address }}</td>
+            <td class="patient-mono">{{ patient.dateOfBirth }}</td>
+            <td class="patient-mono">{{ patient.registeredDate }}</td>
+            <td>
+              <div class="patient-actions">
+                <button (click)="updatePatient(patient)" class="action-edit">Edit</button>
+                <button (click)="deletePatient(patient)" class="action-delete">Delete</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (totalPages() > 1) {
+      <div class="patient-pagination">
+        <button (click)="prevPage()" [disabled]="currentPage() === 0" class="btn-ghost">← Prev</button>
+        <span class="label">{{ currentPage() + 1 }} / {{ totalPages() }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage() === totalPages() - 1" class="btn-ghost">Next →</button>
+      </div>
+    }
+  }
 </div>
 
 @if (showEditModal()) {
@@ -145,5 +157,5 @@
 }
 
 @if (showDeleteModal()) {
-  <app-confirm-modal (confirm)="confirmDelete()" (cancel)="cancelDelete()"></app-confirm-modal>
+  <app-confirm-modal (confirm)="submitDelete()" (cancel)="cancelDelete()"></app-confirm-modal>
 }

@@ -1,0 +1,14 @@
+### Get token from Keycloak (requires Direct Access Grants enabled on patient-frontend client)
+# @name login
+POST http://localhost:8080/realms/patientmanagement/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&client_id=patient-frontend&username=testuser@test.com&password=password123
+
+###
+
+@token = {{login.response.body.access_token}}
+
+### Get All Patients (uses token from above)
+GET http://localhost:4004/api/patients
+Authorization: Bearer {{token}}

@@ -11,7 +11,7 @@ services:
     networks:
       - patient-network
     volumes:
-      - ./patient-management/postgres-data:/var/lib/postgresql
+      - ./patient-service/postgres-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin_user -d patient_db"]
       interval: 5s
@@ -56,11 +56,11 @@ services:
     networks:
       - patient-network
 
-  patient-management:
+  patient-service:
     build:
       context: .
-      dockerfile: patient-management/Dockerfile
-    image: patient-management:latest
+      dockerfile: patient-service/Dockerfile
+    image: patient-service:latest
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://patient-db:5432/patient_db
       SPRING_DATASOURCE_USERNAME: admin_user
@@ -109,6 +109,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      TREATMENT_SERVICE_ADDRESS: treatment-service
+      TREATMENT_SERVICE_GRPC_PORT: 9002
     # ports:
     #   - "4001:4001" # documentation
     #   - "9001:9001" # documentation (gRPC)
@@ -118,6 +120,8 @@ services:
       billing-db:
         condition: service_healthy
       kafka:
+        condition: service_started
+      treatment-service:
         condition: service_started
 
   analytics-db:
@@ -139,6 +143,48 @@ services:
       retries: 5
 
       
+  treatment-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin_user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: treatment_db
+    ports:
+      - "5436:5432"
+    networks:
+      - patient-network
+    volumes:
+      - ./treatment-service/postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin_user -d treatment_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  treatment-service:
+    build:
+      context: .
+      dockerfile: treatment-service/Dockerfile
+    image: treatment-service:latest
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://treatment-db:5432/treatment_db
+      SPRING_DATASOURCE_USERNAME: admin_user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      TREATMENT_SERVICE_ADDRESS: treatment-service
+      TREATMENT_SERVICE_GRPC_PORT: 9002
+    # ports:
+    #   - "4003:4003" # documentation
+    #   - "9002:9002" # documentation (gRPC)
+    networks:
+      - patient-network
+    depends_on:
+      treatment-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
   redis:
     image: redis:latest
     ports:
@@ -227,7 +273,7 @@ services:
   api-gateway:
     build:
       context: .
-      dockerfile: apigateway/Dockerfile
+      dockerfile: api-gateway/Dockerfile
     image: api-gateway:latest
     environment:
       SERVER_PORT: 4004
@@ -236,9 +282,60 @@ services:
     networks:
       - patient-network
     depends_on:
-      - patient-management
+      - patient-service
       - billing-service
       - keycloak
+  opensearch-init:
+    image: busybox
+    privileged: true
+    command: sysctl -w vm.max_map_count=262144
+    networks:
+      - patient-network
+
+  opensearch:
+    image: opensearchproject/opensearch:2.11.0
+    depends_on:
+      - opensearch-init
+    environment:
+      - discovery.type=single-node
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - DISABLE_SECURITY_PLUGIN=true
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    networks:
+      - patient-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  search-service:
+    build:
+      context: .
+      dockerfile: search-service/Dockerfile
+    image: search-service:latest
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      OPENSEARCH_HOST: opensearch
+      OPENSEARCH_PORT: 9200
+    networks:
+      - patient-network
+    depends_on:
+      opensearch:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
   localstack:
     image: localstack/localstack-pro:latest
     ports:

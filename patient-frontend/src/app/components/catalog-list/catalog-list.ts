@@ -1,10 +1,12 @@
-import { Component, signal } from "@angular/core";
+import { Component, computed, signal } from "@angular/core";
 import { TreatmentResponse } from "../../models/catalog.model";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { CatalogService } from "../../services/catalog-service";
 import { NotificationService } from "../../services/notification-service";
 import { ConfirmModal } from "../../shared/confirm-modal/confirm-modal";
 import { CurrencyPipe } from "@angular/common";
+
+const PAGE_SIZE = 30;
 
 @Component({
   selector: "app-catalog-list",
@@ -16,6 +18,13 @@ export class CatalogList {
   treatments = signal<TreatmentResponse[]>([]);
   treatmentToEdit = signal<TreatmentResponse | null>(null);
   treatmentToDelete = signal<TreatmentResponse | null>(null);
+  currentPage = signal(0);
+
+  pagedTreatments = computed(() =>
+    this.treatments().slice(this.currentPage() * PAGE_SIZE, (this.currentPage() + 1) * PAGE_SIZE)
+  );
+  totalPages = computed(() => Math.ceil(this.treatments().length / PAGE_SIZE));
+
   editForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
     category: new FormControl('', [Validators.required]),
@@ -29,7 +38,9 @@ export class CatalogList {
   showCreateModal = signal(false);
   showEditModal = signal(false);
   showDeleteModal = signal(false);
+
   constructor(private catalogService: CatalogService, private notificationService: NotificationService) {}
+
   ngOnInit() {
     this.catalogService.getCatalog().subscribe((data: any) => {
       this.treatments.set(data.sort((a: TreatmentResponse, b: TreatmentResponse) => a.name.localeCompare(b.name)));
@@ -85,6 +96,7 @@ export class CatalogList {
         this.treatments.set(data.sort((a: TreatmentResponse, b: TreatmentResponse) => a.name.localeCompare(b.name)));
         this.showDeleteModal.set(false);
         this.notificationService.success("Treatment deleted successfully!");
+        if (this.currentPage() >= this.totalPages()) this.currentPage.set(this.totalPages() - 1);
       });
     });
   }
@@ -94,4 +106,6 @@ export class CatalogList {
     this.showDeleteModal.set(false);
   }
 
+  prevPage() { if (this.currentPage() > 0) this.currentPage.update(p => p - 1); }
+  nextPage() { if (this.currentPage() < this.totalPages() - 1) this.currentPage.update(p => p + 1); }
 }

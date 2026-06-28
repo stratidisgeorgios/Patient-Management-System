@@ -1,0 +1,39 @@
+.catalog-list {
+  @apply flex flex-col;
+}
+
+.catalog-list-header {
+  @apply flex items-center justify-between border-b border-[#C7C7C7] pb-6 mb-0;
+}
+
+.treatment-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[#C7C7C7] border-t border-[#C7C7C7];
+}
+
+.treatment-card {
+  @apply bg-[#E3E2DE] p-6 flex flex-col gap-4 hover:bg-[#1351AA]/5 transition-colors duration-300 cursor-default;
+}
+
+.treatment-card-header {
+  @apply flex items-start justify-between gap-4;
+}
+
+.treatment-card-category {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#1351AA];
+}
+
+.treatment-card-price {
+  @apply font-mono text-sm font-bold text-[#141414] whitespace-nowrap;
+}
+
+.treatment-card-name {
+  @apply text-base font-semibold text-[#141414] flex-1 leading-snug;
+}
+
+.treatment-card-actions {
+  @apply flex gap-4 pt-2 border-t border-[#C7C7C7] justify-center;
+}
+
+.catalog-pagination {
+  @apply flex items-center justify-center gap-8 py-6 border-t border-[#C7C7C7];
+}
