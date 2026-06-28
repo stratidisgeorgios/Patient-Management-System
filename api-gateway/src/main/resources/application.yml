@@ -27,7 +27,7 @@ spring:
             - id: treatment-route
               uri: http://treatment-service:4003
               predicates:
-                - Path=/api/catalog/**
+                - Path=/api/treatments/**
             - id: search-service-route
               uri: http://search-service:8080
               predicates:
