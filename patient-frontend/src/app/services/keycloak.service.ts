@@ -4,7 +4,7 @@ import Keycloak from 'keycloak-js';
 @Injectable({ providedIn: 'root' })
 export class KeycloakService {
   private keycloak = new Keycloak({
-    url: 'http://localhost:8080',
+    url: 'https://patientsystem.duckdns.org',
     realm: 'patientmanagement',
     clientId: 'patient-frontend'
   });
