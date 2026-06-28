@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://patientsystem.duckdns.org'
+  apiUrl: 'https://patientsystem.me'
 };
