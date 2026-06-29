@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.patientsystem.treatment.grpc";
+
+service TreatmentService {
+  rpc GetTreatment (TreatmentRequest) returns (TreatmentResponse);
+}
+
+message TreatmentRequest {
+    string id = 1;
+}
+
+message TreatmentResponse {
+    string id = 1;
+    string name = 2;
+    string category = 3;
+    string price = 4;
+}

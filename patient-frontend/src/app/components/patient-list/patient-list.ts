@@ -51,7 +51,7 @@ export class PatientList implements OnInit {
         this.patients.set(data.sort((a: PatientResponse, b: PatientResponse) => a.name.localeCompare(b.name)));
       },
       error: (err) => {
-        this.notificationService.error("Failed to load patients: " + err.message);
+        this.notificationService.error("Failed to load patients: " + this.extractError(err));
       }
     });
   }
@@ -73,10 +73,13 @@ export class PatientList implements OnInit {
   }
 
   submitCreate() {
-    this.patientService.create(this.createForm.value).subscribe((newPatient: any) => {
-      this.patients.set([...this.patients(), newPatient].sort((a: PatientResponse, b: PatientResponse) => a.name.localeCompare(b.name)));
-      this.showCreateModal.set(false);
-      this.notificationService.success("Patient created successfully!");
+    this.patientService.create(this.createForm.value).subscribe({
+      next: (newPatient: any) => {
+        this.patients.set([...this.patients(), newPatient].sort((a: PatientResponse, b: PatientResponse) => a.name.localeCompare(b.name)));
+        this.showCreateModal.set(false);
+        this.notificationService.success("Patient created successfully!");
+      },
+      error: (err) => this.notificationService.error("Failed to create patient: " + this.extractError(err))
     });
   }
 
@@ -94,15 +97,18 @@ export class PatientList implements OnInit {
   }
 
   submitUpdate() {
-    this.patientService.update(this.selectedPatient()!.id, this.editForm.value).subscribe((updatedPatient: any) => {
-      const index = this.patients().findIndex((p) => p.id === updatedPatient.id);
-      if (index !== -1) {
-        const updatedPatients = [...this.patients()];
-        updatedPatients[index] = updatedPatient;
-        this.patients.set(updatedPatients);
-      }
-      this.showEditModal.set(false);
-      this.notificationService.success('Patient updated successfully');
+    this.patientService.update(this.selectedPatient()!.id, this.editForm.value).subscribe({
+      next: (updatedPatient: any) => {
+        const index = this.patients().findIndex((p) => p.id === updatedPatient.id);
+        if (index !== -1) {
+          const updatedPatients = [...this.patients()];
+          updatedPatients[index] = updatedPatient;
+          this.patients.set(updatedPatients);
+        }
+        this.showEditModal.set(false);
+        this.notificationService.success('Patient updated successfully');
+      },
+      error: (err) => this.notificationService.error("Failed to update patient: " + this.extractError(err))
     });
   }
 
@@ -114,17 +120,27 @@ export class PatientList implements OnInit {
 
   submitDelete() {
     const id = this.selectedPatient()!.id;
-    this.patientService.delete(id).subscribe(() => {
-      this.patients.set(this.patients().filter((p) => p.id !== id));
-      this.showDeleteModal.set(false);
-      this.notificationService.success('Patient deleted successfully');
-      if (this.currentPage() >= this.totalPages()) this.currentPage.set(Math.max(0, this.totalPages() - 1));
+    this.patientService.delete(id).subscribe({
+      next: () => {
+        this.patients.set(this.patients().filter((p) => p.id !== id));
+        this.showDeleteModal.set(false);
+        this.notificationService.success('Patient deleted successfully');
+        if (this.currentPage() >= this.totalPages()) this.currentPage.set(Math.max(0, this.totalPages() - 1));
+      },
+      error: (err) => this.notificationService.error("Failed to delete patient: " + this.extractError(err))
     });
   }
 
   cancelDelete() {
     this.showDeleteModal.set(false);
     this.selectedPatient.set(null);
+  }
+
+  private extractError(err: any): string {
+    if (err.error?.message) return err.error.message;
+    if (typeof err.error === 'string') return err.error;
+    if (err.error && typeof err.error === 'object') return Object.values(err.error).join(', ');
+    return this.extractError(err) || 'An unexpected error occurred';
   }
 
   prevPage() { if (this.currentPage() > 0) this.currentPage.update(p => p - 1); }

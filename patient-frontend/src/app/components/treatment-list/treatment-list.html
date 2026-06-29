@@ -35,14 +35,14 @@
   }
 </div>
 
-@if (showEditModal()) {
+@if (showTreatmentEditModal()) {
   <div class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
         <span class="label">Edit Treatment</span>
-        <button (click)="showEditModal.set(false)" class="btn-ghost">✕ Close</button>
+        <button (click)="showTreatmentEditModal.set(false)" class="btn-ghost">✕ Close</button>
       </div>
-      <form [formGroup]="editTreatmentForm" (ngSubmit)="submitUpdate()" class="modal-body">
+      <form [formGroup]="editTreatmentForm" (ngSubmit)="submitTreatmentUpdate()" class="modal-body">
         <div class="form-field">
           <label class="form-label">Name</label>
           <input formControlName="name" placeholder="Treatment name" class="form-input" />
@@ -69,21 +69,21 @@
         </div>
         <div class="modal-actions">
           <button type="submit" [disabled]="editTreatmentForm.invalid" class="btn-primary flex-1 text-center">Save Changes</button>
-          <button type="button" (click)="showEditModal.set(false)" class="btn-secondary flex-1 text-center">Cancel</button>
+          <button type="button" (click)="showTreatmentEditModal.set(false)" class="btn-secondary flex-1 text-center">Cancel</button>
         </div>
       </form>
     </div>
   </div>
 }
 
-@if (showCreateModal()) {
+@if (showTreatmentCreateModal()) {
   <div class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
         <span class="label">New Treatment</span>
-        <button (click)="showCreateModal.set(false)" class="btn-ghost">✕ Close</button>
+        <button (click)="showTreatmentCreateModal.set(false)" class="btn-ghost">✕ Close</button>
       </div>
-      <form [formGroup]="createTreatmentForm" (ngSubmit)="submitCreate()" class="modal-body">
+      <form [formGroup]="createTreatmentForm" (ngSubmit)="submitTreatmentCreate()" class="modal-body">
         <div class="form-field">
           <label class="form-label">Name</label>
           <input formControlName="name" placeholder="Treatment name" class="form-input" />
@@ -110,15 +110,15 @@
         </div>
         <div class="modal-actions">
           <button type="submit" [disabled]="createTreatmentForm.invalid" class="btn-primary flex-1 text-center">Create Treatment</button>
-          <button type="button" (click)="showCreateModal.set(false)" class="btn-secondary flex-1 text-center">Cancel</button>
+          <button type="button" (click)="showTreatmentCreateModal.set(false)" class="btn-secondary flex-1 text-center">Cancel</button>
         </div>
       </form>
     </div>
   </div>
 }
 
-@if (showDeleteModal()) {
-  <app-confirm-modal (confirm)="confirmDelete()" (cancel)="cancelDelete()"></app-confirm-modal>
+@if (showTreatmentDeleteModal()) {
+  <app-confirm-modal (confirm)="confirmTreatmentDelete()" (cancel)="cancelTreatmentDelete()"></app-confirm-modal>
 }
 
 
@@ -127,24 +127,106 @@
     <div class="modal-card">
       <div class="modal-header">
         <span class="label">Treatment Categories</span>
-        <button (click)="createCategory()" class="btn-secondary">+ Add Category</button>
+        <button (click)="createCategory()" class="btn-primary">+ Add Category</button>
         <button (click)="showCategoriesModal.set(false)" class="btn-ghost">✕ Close</button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" style="padding: 0">
         @if (categories().length === 0) {
-          <div class="no-categories">
+          <div class="modal-body">
             <span class="label">No categories found</span>
           </div>
         } @else {
-          <ul class="category-list">
-            @for (category of categories(); track category.id) {
-              <li class="category-item">{{ category.name }}</li>
-              <button (click)="deleteCategory()" class="btn-secondary">- Delete Category</button>
-              <button (click)="editCategory()" class="btn-secondary">✎ Edit Category</button>
-            }
-          </ul>
+          <table class="category-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (category of categories(); track category.id) {
+                <tr class="category-row">
+                  <td>{{ category.name }}</td>
+                  <td>{{ category.description }}</td>
+                  <td>
+                    <div class="category-actions">
+                      <button (click)="editCategory(category)" class="action-edit">Edit</button>
+                      <button (click)="deleteCategory(category)" class="action-delete">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         }
       </div>
     </div>
   </div>
+}
+
+@if (showCategoryEditModal()) {
+  <div class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="label">Edit Category</span>
+        <button (click)="showCategoryEditModal.set(false)" class="btn-ghost">✕ Close</button>
+      </div>
+      <form [formGroup]="editCategoryForm" (ngSubmit)="submitCategoryUpdate()" class="modal-body">
+        <div class="form-field">
+          <label class="form-label">Name</label>
+          <input formControlName="name" placeholder="Category name" class="form-input" />
+          @if (editCategoryForm.get('name')?.touched && editCategoryForm.get('name')?.errors?.['required']) {
+            <span class="form-error">Name is required</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Description</label>
+          <input formControlName="description" placeholder="Category description" class="form-input" />
+          @if (editCategoryForm.get('description')?.touched && editCategoryForm.get('description')?.errors?.['required']) {
+            <span class="form-error">Description is required</span>
+          }
+        </div>
+        <div class="modal-actions">
+          <button type="submit" [disabled]="editCategoryForm.invalid" class="btn-primary flex-1 text-center">Save Changes</button>
+          <button type="button" (click)="showCategoryEditModal.set(false)" class="btn-secondary flex-1 text-center">Cancel</button>
+        </div>  
+    </form>
+    </div>
+  </div>
+}
+
+@if (showCategoryCreateModal()) {
+  <div class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="label">New Category</span>
+        <button (click)="showCategoryCreateModal.set(false)" class="btn-ghost">✕ Close</button>
+      </div>
+      <form [formGroup]="createCategoryForm" (ngSubmit)="submitCategoryCreate()" class="modal-body">
+        <div class="form-field  ">
+          <label class="form-label">Name</label> 
+          <input formControlName="name" placeholder="Category name" class="form-input" />
+          @if (createCategoryForm.get('name')?.touched && createCategoryForm.get  ('name')?.errors?.['required']) {
+            <span class="form-error">Name is required</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Description</label>
+          <input formControlName="description" placeholder="Category description" class="form-input" />
+          @if (createCategoryForm.get('description')?.touched && createCategoryForm.get('description')?.errors?.['required']) {
+            <span class="form-error">Description is required</span>
+          }
+        </div>
+        <div class="modal-actions"> 
+          <button type="submit" [disabled]="createCategoryForm.invalid" class="btn-primary flex-1 text-center">Create Category</button>
+          <button type="button" (click)="showCategoryCreateModal.set(false)" class="btn-secondary flex-1 text-center">Cancel</button>
+        </div>  
+    </form>
+    </div>  
+  </div>
+} 
+
+@if (showCategoryDeleteModal()) {
+  <app-confirm-modal (confirm)="confirmCategoryDelete()" (cancel)="cancelCategoryDelete()"></app-confirm-modal>
 }
