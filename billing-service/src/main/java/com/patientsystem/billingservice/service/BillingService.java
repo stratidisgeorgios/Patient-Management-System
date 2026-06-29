@@ -6,7 +6,7 @@ import com.patientsystem.billingservice.repository.BillingAccountRepository;
 import com.patientsystem.billingservice.repository.ChargeRepository;
 import com.patientsystem.billingservice.model.Charge;
 import com.patientsystem.billingservice.dto.BillingResponseDTO;
-import com.patientsystem.billingservice.dto.ChargeResponse;
+import com.patientsystem.billingservice.dto.ChargeResponseDTO;
 import com.patientsystem.billingservice.grpc.BillingServiceGrpcClient;
 import com.patientsystem.billingservice.kafka.KafkaProducer;
 import com.patientsystem.treatment.grpc.TreatmentResponse;
@@ -62,9 +62,9 @@ public class BillingService {
 
     public BillingResponseDTO getBillingInfo(String patientId) {
         BillingAccount account = getAccount(patientId);
-        List<ChargeResponse> charges = chargeRepository.findAllByBillingAccountId(account.getId())
+        List<ChargeResponseDTO> charges = chargeRepository.findAllByBillingAccountId(account.getId())
                 .stream()
-                .map(c -> new ChargeResponse(c.getId(), c.getTreatmentId(), c.getTreatmentName(), c.getTreatmentCategory(), c.getPrice(), c.getTimestamp()))
+                .map(c -> new ChargeResponseDTO(c.getId(), c.getTreatmentId(), c.getTreatmentName(), c.getTreatmentCategory(), c.getPrice(), c.getTimestamp()))
                 .toList();
         return new BillingResponseDTO(account.getPatientId(), account.getPatientName(), account.getPatientEmail(), account.getBalance(), charges);
     }

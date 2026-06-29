@@ -3,7 +3,7 @@ package com.patientsystem.treatmentservice.grpc;
 import com.patientsystem.treatmentservice.service.TreatmentService;
 import com.patientsystem.treatment.grpc.TreatmentServiceGrpc;
 import io.grpc.stub.StreamObserver;
-import com.patientsystem.treatmentservice.model.Treatment;
+import com.patientsystem.treatmentservice.dto.TreatmentResponseDTO;
 import com.patientsystem.treatment.grpc.TreatmentRequest;
 import com.patientsystem.treatment.grpc.TreatmentResponse;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -17,7 +17,7 @@ public class TreatmentGrpcService extends TreatmentServiceGrpc.TreatmentServiceI
     @Override
     public void getTreatment(TreatmentRequest treatmentRequest, StreamObserver<TreatmentResponse> responseObserver) {
         
-        Treatment found = treatmentService.getTreatmentById(treatmentRequest.getId());
+        TreatmentResponseDTO found = treatmentService.getTreatmentById(treatmentRequest.getId());
 
         TreatmentResponse response = TreatmentResponse.newBuilder()
                 .setId(found.getId())

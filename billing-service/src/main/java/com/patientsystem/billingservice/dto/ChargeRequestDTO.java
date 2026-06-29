@@ -1,6 +1,6 @@
 package com.patientsystem.billingservice.dto;
 
-public class ChargeRequest {
+public class ChargeRequestDTO {
     private String treatmentId;
 
 
