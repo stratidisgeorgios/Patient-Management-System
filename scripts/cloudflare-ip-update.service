@@ -5,4 +5,4 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/home/opc/patient-system/update-cloudflare-ips.sh
+ExecStart=/home/opc/patient-system/scripts/cloudflare-ip-update.sh
