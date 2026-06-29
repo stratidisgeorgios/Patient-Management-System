@@ -1,6 +1,5 @@
 package com.patientsystem.searchservice.opensearch;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patientsystem.searchservice.documents.PatientDocument;
 import com.patientsystem.searchservice.documents.TreatmentDocument;
 import jakarta.annotation.PostConstruct;
@@ -19,11 +18,9 @@ import java.util.List;
 public class OpenSearchService {
 
     private final OpenSearchClient openSearchClient;
-    private final ObjectMapper objectMapper;
 
-    public OpenSearchService(OpenSearchClient openSearchClient, ObjectMapper objectMapper) {
+    public OpenSearchService(OpenSearchClient openSearchClient) {
         this.openSearchClient = openSearchClient;
-        this.objectMapper = objectMapper;
     }
 
     @PostConstruct

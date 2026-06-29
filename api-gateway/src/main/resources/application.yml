@@ -28,6 +28,10 @@ spring:
               uri: http://treatment-service:4003
               predicates:
                 - Path=/api/treatments/**
+            - id: category-route
+              uri: http://treatment-service:4003
+              predicates:
+                - Path=/api/categories/**
             - id: search-service-route
               uri: http://search-service:8080
               predicates:
