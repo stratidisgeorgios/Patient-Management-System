@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.patientsystem.billingservice.dto.ChargeRequest;
+import com.patientsystem.billingservice.dto.ChargeRequestDTO;
 
 @RestController
 @RequestMapping("/api/billing")
@@ -31,7 +31,7 @@ public class BillingServiceController {
 
     @PostMapping("/{patientId}/charge")
     @Operation(summary = "Add a charge to a patient's billing account", description = "Add a new charge to the billing account of a specific patient identified by their unique ID. The request body")
-    public ResponseEntity<Void> addCharge(@PathVariable String patientId, @RequestBody ChargeRequest chargeRequest) {
+    public ResponseEntity<Void> addCharge(@PathVariable String patientId, @RequestBody ChargeRequestDTO chargeRequest) {
         billingService.addCharge(patientId, chargeRequest.getTreatmentId());
         return ResponseEntity.ok().build();
     }

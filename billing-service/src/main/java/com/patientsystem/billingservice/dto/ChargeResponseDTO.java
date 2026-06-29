@@ -3,7 +3,7 @@ package com.patientsystem.billingservice.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class ChargeResponse {
+public class ChargeResponseDTO {
     private String id;
     private String treatmentId;
     private String treatmentName;
@@ -11,7 +11,7 @@ public class ChargeResponse {
     private BigDecimal price;
     private LocalDateTime timestamp;
 
-    public ChargeResponse(String id, String treatmentId, String treatmentName, String treatmentCategory, BigDecimal price, LocalDateTime timestamp) {
+    public ChargeResponseDTO(String id, String treatmentId, String treatmentName, String treatmentCategory, BigDecimal price, LocalDateTime timestamp) {
         this.id = id;
         this.treatmentId = treatmentId;
         this.treatmentName = treatmentName;

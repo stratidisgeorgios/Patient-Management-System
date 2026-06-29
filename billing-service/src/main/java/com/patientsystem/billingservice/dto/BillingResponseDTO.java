@@ -8,9 +8,9 @@ public class BillingResponseDTO {
     private String patientName;
     private String patientEmail;
     private BigDecimal balance;
-    private List<ChargeResponse> charges;
+    private List<ChargeResponseDTO> charges;
 
-    public BillingResponseDTO(String patientId, String patientName, String patientEmail, BigDecimal balance, List<ChargeResponse> charges) {
+    public BillingResponseDTO(String patientId, String patientName, String patientEmail, BigDecimal balance, List<ChargeResponseDTO> charges) {
         this.patientId = patientId;
         this.patientName = patientName;
         this.patientEmail = patientEmail;
@@ -22,5 +22,5 @@ public class BillingResponseDTO {
     public String getPatientName() { return patientName; }
     public String getPatientEmail() { return patientEmail; }
     public BigDecimal getBalance() { return balance; }
-    public List<ChargeResponse> getCharges() { return charges; }
+    public List<ChargeResponseDTO> getCharges() { return charges; }
 }
