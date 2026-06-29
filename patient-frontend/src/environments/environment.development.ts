@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://patientsystem.me'
+  apiUrl: 'https://api.patientsystem.me'
 };

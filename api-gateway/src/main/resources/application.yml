@@ -50,4 +50,4 @@ spring:
                 - RewritePath=/api-docs/billing,/v3/api-docs
 
 jwt:
-  issuer-uri: https://patientsystem.me/realms/patientmanagement
+  issuer-uri: https://api.patientsystem.me/realms/patientmanagement
