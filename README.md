@@ -2,6 +2,11 @@
 
 A microservices-based patient management system built with Spring Boot, Angular, and Docker.
 
+## Production
+
+- Frontend: [patientsystem.me](https://patientsystem.me)
+- API & Auth: [api.patientsystem.me](https://api.patientsystem.me)
+
 ## Architecture
 
 | Service | Description | Port |
@@ -87,8 +92,3 @@ The app will be available at `http://localhost:4200`.
 | `KEYCLOAK_DB_PASSWORD` | Keycloak database password |
 | `KEYCLOAK_ADMIN_PASSWORD` | Keycloak admin console password |
 | `LOCALSTACK_AUTH_TOKEN` | LocalStack Pro auth token |
-
-## Production
-
-- Frontend: [patientsystem.me](https://patientsystem.me)
-- API & Auth: [api.patientsystem.me](https://api.patientsystem.me)
