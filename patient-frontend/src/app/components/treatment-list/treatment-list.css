@@ -3,11 +3,11 @@
 }
 
 .treatment-list-header {
-  @apply flex items-center justify-between border-b border-[#C7C7C7] pb-6 mb-0 gap-4;
+  @apply flex items-center gap-4 border-b border-[#C7C7C7] pb-6 mb-0;
 }
 
-.treatment-list-actions {
-  @apply flex items-center gap-3;
+.treatment-search {
+  @apply flex-1 w-auto;
 }
 
 .treatment-table {

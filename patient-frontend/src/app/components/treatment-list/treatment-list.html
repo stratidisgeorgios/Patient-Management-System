@@ -1,11 +1,9 @@
 <div class="treatment-list">
   <div class="treatment-list-header">
     <span class="label">Treatments</span>
-    <div class="treatment-list-actions">
-      <input type="text" class="form-input treatment-search" placeholder="Search treatments..." (input)="onSearch($event.target.value)" />
-      <button (click)="showCategories()" class="btn-secondary">Categories</button>
-      <button (click)="createTreatment()" class="btn-primary">+ Add Treatment</button>
-    </div>
+    <input type="text" class="form-input treatment-search" placeholder="Search treatments..." (input)="onSearch($event.target.value)" />
+    <button (click)="showCategories()" class="btn-secondary">Categories</button>
+    <button (click)="createTreatment()" class="btn-primary">+ Add Treatment</button>
   </div>
 
   @if (treatments().length === 0) {

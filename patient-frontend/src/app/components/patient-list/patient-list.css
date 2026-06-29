@@ -3,7 +3,11 @@
 }
 
 .patient-list-header {
-  @apply flex items-center justify-between border-b border-[#C7C7C7] pb-6 mb-0;
+  @apply flex items-center gap-4 border-b border-[#C7C7C7] pb-6 mb-0;
+}
+
+.patient-search {
+  @apply flex-1 w-auto;
 }
 
 .patient-table {
@@ -43,13 +47,6 @@
   @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] hover:text-[#141414] transition-colors duration-300;
 }
 
-.patient-modal-card {
-  @apply bg-[#E3E2DE] w-full max-w-lg border border-[#C7C7C7];
-}
-
-select.form-input {
-  @apply appearance-none cursor-pointer;
-}
 
 .patient-pagination {
   @apply flex items-center justify-center gap-8 py-6 border-t border-[#C7C7C7];

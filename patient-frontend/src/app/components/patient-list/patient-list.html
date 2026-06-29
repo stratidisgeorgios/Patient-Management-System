@@ -1,6 +1,7 @@
 <div class="patient-list">
   <div class="patient-list-header">
     <span class="label">Patient Records</span>
+    <input type="text" class="form-input patient-search" placeholder="Search patients..." (input)="onSearch($event.target.value)" />
     <button (click)="createPatient()" class="btn-primary">+ Add Patient</button>
   </div>
   @if (patients().length === 0) {
@@ -49,7 +50,7 @@
 
 @if (showEditModal()) {
   <div class="modal-overlay">
-    <div class="patient-modal-card">
+    <div class="modal-card">
       <div class="modal-header">
         <span class="label">Edit Patient</span>
         <button (click)="showEditModal.set(false)" class="btn-ghost">✕ Close</button>
@@ -111,7 +112,7 @@
 
 @if (showCreateModal()) {
   <div class="modal-overlay">
-    <div class="patient-modal-card">
+    <div class="modal-card">
       <div class="modal-header">
         <span class="label">New Patient</span>
         <button (click)="showCreateModal.set(false)" class="btn-ghost">✕ Close</button>
