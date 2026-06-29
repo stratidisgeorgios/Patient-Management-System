@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { APP_SERVICE_CONFIG } from "./app-config.interface";
-import { environment } from "../environments/environment.development";
+import { environment } from "../environments/environment";
 import { authInterceptor } from './interceptors/auth.interceptor';
 import { errorInterceptor } from './interceptors/error.interceptor';
 import { KeycloakService } from './services/keycloak.service';

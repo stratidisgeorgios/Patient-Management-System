@@ -260,8 +260,8 @@ services:
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      KC_HOSTNAME: https://patientsystem.me
-      KC_HOSTNAME_ADMIN: https://patientsystem.me
+      KC_HOSTNAME: https://api.patientsystem.me
+      KC_HOSTNAME_ADMIN: https://api.patientsystem.me
       KC_HTTP_PORT: 8080
       KC_HTTP_ENABLED: true
       KC_PROXY_HEADERS: xforwarded
