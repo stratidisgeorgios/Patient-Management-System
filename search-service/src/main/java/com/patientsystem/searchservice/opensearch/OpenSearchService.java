@@ -29,7 +29,7 @@ public class OpenSearchService {
             openSearchClient.indices().create(b -> b
                 .index("patients")
                 .mappings(m -> m
-                    .properties("patientId", p -> p.keyword(k -> k))
+                    .properties("id", p -> p.keyword(k -> k))
                     .properties("name", p -> p.searchAsYouType(s -> s))
                     .properties("email", p -> p.searchAsYouType(s -> s))
                     .properties("dateOfBirth", p -> p.keyword(k -> k))
@@ -41,7 +41,7 @@ public class OpenSearchService {
             openSearchClient.indices().create(b -> b
                 .index("treatments")
                 .mappings(m -> m
-                    .properties("treatmentId", p -> p.keyword(k -> k))
+                    .properties("id", p -> p.keyword(k -> k))
                     .properties("name", p -> p.searchAsYouType(s -> s))
                     .properties("category", p -> p.keyword(k -> k))
                     .properties("price", p -> p.keyword(k -> k))
@@ -54,7 +54,7 @@ public class OpenSearchService {
         try {
             openSearchClient.index(IndexRequest.of(i -> i
                 .index("patients")
-                .id(doc.getPatientId())
+                .id(doc.getId())
                 .document(doc)
             ));
         } catch (IOException e) {
@@ -77,7 +77,7 @@ public class OpenSearchService {
         try {
             openSearchClient.index(IndexRequest.of(i -> i
                 .index("treatments")
-                .id(doc.getTreatmentId())
+                .id(doc.getId())
                 .document(doc)
             ));
         } catch (IOException e) {

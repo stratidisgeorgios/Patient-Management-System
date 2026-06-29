@@ -7,6 +7,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req).pipe(
         catchError((error:HttpErrorResponse) => {
             switch (error.status) {
+                case 400:
+                    break;
                 case 401:
                     notificationService.error('Unauthorized access. Please log in.');
                     break;
@@ -22,7 +24,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
                 default:
                     notificationService.error('An unexpected error occurred. Please try again later.');
             }
-            return throwError(() => error);     
+            return throwError(() => error);
         })
     );
 };

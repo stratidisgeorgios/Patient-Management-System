@@ -6,6 +6,7 @@ import { NotificationService } from "../../services/notification-service";
 import { ConfirmModal } from "../../shared/confirm-modal/confirm-modal";
 import { CurrencyPipe } from "@angular/common";
 import { CategoryService } from "../../services/category-service";
+import { SearchService } from "../../services/search-service";
 
 const PAGE_SIZE = 30;
 
@@ -56,7 +57,7 @@ export class TreatmentList implements OnInit {
   showCategoryEditModal = signal(false);
   showCategoryDeleteModal = signal(false);
 
-  constructor(private treatmentService: TreatmentService, private categoryService: CategoryService, private notificationService: NotificationService) {}
+  constructor(private treatmentService: TreatmentService, private categoryService: CategoryService, private searchService: SearchService, private notificationService: NotificationService) {}
 
   ngOnInit() {
     this.treatmentService.getTreatments().subscribe({
@@ -117,7 +118,7 @@ export class TreatmentList implements OnInit {
     this.showTreatmentEditModal.set(true);
     this.editTreatmentForm.patchValue({
       name: treatment.name,
-      category: treatment.category.name,
+      category: treatment.category.id,
       price: treatment.price
     });
   }
@@ -242,11 +243,24 @@ export class TreatmentList implements OnInit {
     if (err.error?.message) return err.error.message;
     if (typeof err.error === 'string') return err.error;
     if (err.error && typeof err.error === 'object') return Object.values(err.error).join(', ');
-    return this.extractError(err) || 'An unexpected error occurred';
+    return err.message || 'An unexpected error occurred';
   }
 
   prevPage() { if (this.currentPage() > 0) this.currentPage.update(p => p - 1); }
   nextPage() { if (this.currentPage() < this.totalPages() - 1) this.currentPage.update(p => p + 1); }
+
+  onSearch(value: string) {
+    this.searchService.searchTreatments(value).subscribe({
+      next: (data: any) => {
+        this.treatments.set(data.sort((a: TreatmentResponse, b: TreatmentResponse) => a.name.localeCompare(b.name)));
+        this.currentPage.set(0);
+      },
+      error: (err) => {
+        this.notificationService.error("Failed to search treatments: " + this.extractError(err));
+      }
+    });
+    
+
+  }
+
 }
-
-
