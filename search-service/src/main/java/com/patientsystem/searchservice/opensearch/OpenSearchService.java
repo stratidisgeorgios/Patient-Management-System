@@ -8,6 +8,7 @@ import org.opensearch.client.opensearch.core.DeleteRequest;
 import org.opensearch.client.opensearch.core.IndexRequest;
 import org.opensearch.client.opensearch.core.SearchRequest;
 import org.opensearch.client.opensearch.core.SearchResponse;
+import org.opensearch.client.opensearch._types.query_dsl.TextQueryType;
 import org.opensearch.client.opensearch.core.search.Hit;
 import org.springframework.stereotype.Service;
 
@@ -103,6 +104,7 @@ public class OpenSearchService {
                 .query(q -> q
                     .multiMatch(m -> m
                         .query(query)
+                        .type(TextQueryType.BoolPrefix)
                         .fields("name", "name._2gram", "name._3gram", "email", "email._2gram", "email._3gram")
                     )
                 )
@@ -120,6 +122,7 @@ public class OpenSearchService {
                 .query(q -> q
                     .multiMatch(m -> m
                         .query(query)
+                        .type(TextQueryType.BoolPrefix)
                         .fields("name", "name._2gram", "name._3gram", "category")
                     )
                 )
