@@ -59,6 +59,10 @@
     @apply absolute bottom-2 text-xs text-red-500 font-mono;
   }
 
+  select.form-input {
+    @apply appearance-none cursor-pointer;
+  }
+
   /* Modal */
   .modal-overlay {
     @apply fixed inset-0 bg-[#141414]/60 flex items-center justify-center z-50;

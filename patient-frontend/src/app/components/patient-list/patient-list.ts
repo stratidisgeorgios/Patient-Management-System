@@ -4,6 +4,7 @@ import { PatientService } from "../../services/patient-service";
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ConfirmModal } from "../../shared/confirm-modal/confirm-modal";
 import { NotificationService } from "../../services/notification-service";
+import { SearchService } from "../../services/search-service";
 
 const PAGE_SIZE = 30;
 
@@ -43,7 +44,7 @@ export class PatientList implements OnInit {
   showEditModal = signal(false);
   showDeleteModal = signal(false);
 
-  constructor(private patientService: PatientService, private notificationService: NotificationService) {}
+  constructor(private patientService: PatientService, private searchService: SearchService, private notificationService: NotificationService) {}
 
   ngOnInit() {
     this.patientService.getAll().subscribe({
@@ -145,4 +146,20 @@ export class PatientList implements OnInit {
 
   prevPage() { if (this.currentPage() > 0) this.currentPage.update(p => p - 1); }
   nextPage() { if (this.currentPage() < this.totalPages() - 1) this.currentPage.update(p => p + 1); }
+
+  onSearch(value: string) {
+    if(!value.trim()) {
+      this.patients.set([]);
+      return;
+    }
+    this.searchService.searchPatients(value).subscribe({
+      next: (data: any) => {
+        this.patients.set(data.sort((a: PatientResponse, b: PatientResponse) => a.name.localeCompare(b.name)));
+        this.currentPage.set(0);
+      },
+      error: (err) => {
+        this.notificationService.error("Failed to search patients: " + this.extractError(err));
+      }
+    });
+  }
 }

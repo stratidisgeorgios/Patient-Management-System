@@ -250,6 +250,10 @@ export class TreatmentList implements OnInit {
   nextPage() { if (this.currentPage() < this.totalPages() - 1) this.currentPage.update(p => p + 1); }
 
   onSearch(value: string) {
+    if(!value.trim()) {
+      this.treatments.set([]);
+      return;
+    }
     this.searchService.searchTreatments(value).subscribe({
       next: (data: any) => {
         this.treatments.set(data.sort((a: TreatmentResponse, b: TreatmentResponse) => a.name.localeCompare(b.name)));
@@ -259,8 +263,6 @@ export class TreatmentList implements OnInit {
         this.notificationService.error("Failed to search treatments: " + this.extractError(err));
       }
     });
-    
-
   }
 
 }
