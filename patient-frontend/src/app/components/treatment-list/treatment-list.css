@@ -1,3 +1,31 @@
+.category-table {
+  @apply w-full border-collapse;
+}
+
+.category-table th {
+  @apply py-4 pr-6 text-center text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] border-b border-[#C7C7C7];
+}
+
+.category-table td {
+  @apply py-5 pr-6 text-center text-sm text-[#444343] border-b border-[#C7C7C7];
+}
+
+.category-row {
+  @apply hover:bg-[#1351AA]/5 transition-colors duration-300;
+}
+
+.category-actions {
+  @apply flex gap-4 justify-center;
+}
+
+.action-edit {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#1351AA] hover:text-[#141414] transition-colors duration-300;
+}
+
+.action-delete {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] hover:text-[#141414] transition-colors duration-300;
+}
+
 .treatment-list {
   @apply flex flex-col;
 }

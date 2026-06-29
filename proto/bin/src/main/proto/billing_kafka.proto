@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.patientsystem.billing.kafka";
+
+message ChargeEvent {
+    string patient_id = 1;
+    string treatment_name = 2;
+    string category = 3;
+    string price = 4;
+    string timestamp = 5;
+}
