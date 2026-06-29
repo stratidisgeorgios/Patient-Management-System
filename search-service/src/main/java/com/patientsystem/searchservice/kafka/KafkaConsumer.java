@@ -22,7 +22,7 @@ public class KafkaConsumer {
         try {
             PatientEvent proto = PatientEvent.parseFrom(event);
             PatientDocument entity = new PatientDocument();
-            entity.setPatientId(proto.getPatientId());
+            entity.setId(proto.getPatientId());
             entity.setName(proto.getName());
             entity.setEmail(proto.getEmail());
             entity.setDateOfBirth(proto.getDateOfBirth());
@@ -39,7 +39,7 @@ public class KafkaConsumer {
         try {
             TreatmentEvent proto = TreatmentEvent.parseFrom(event);
             TreatmentDocument entity = new TreatmentDocument();
-            entity.setTreatmentId(proto.getTreatmentId());
+            entity.setId(proto.getTreatmentId());
             entity.setName(proto.getName());
             entity.setCategory(proto.getCategory());
             entity.setPrice(proto.getPrice());

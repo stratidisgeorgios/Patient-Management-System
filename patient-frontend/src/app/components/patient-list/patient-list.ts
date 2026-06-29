@@ -140,7 +140,7 @@ export class PatientList implements OnInit {
     if (err.error?.message) return err.error.message;
     if (typeof err.error === 'string') return err.error;
     if (err.error && typeof err.error === 'object') return Object.values(err.error).join(', ');
-    return this.extractError(err) || 'An unexpected error occurred';
+    return err.message || 'An unexpected error occurred';
   }
 
   prevPage() { if (this.currentPage() > 0) this.currentPage.update(p => p - 1); }

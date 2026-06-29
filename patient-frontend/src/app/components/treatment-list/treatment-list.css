@@ -1,3 +1,55 @@
+.treatment-list {
+  @apply flex flex-col;
+}
+
+.treatment-list-header {
+  @apply flex items-center justify-between border-b border-[#C7C7C7] pb-6 mb-0 gap-4;
+}
+
+.treatment-list-actions {
+  @apply flex items-center gap-3;
+}
+
+.treatment-table {
+  @apply w-full border-collapse;
+}
+
+.treatment-table th {
+  @apply py-4 pr-6 text-center text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] border-b border-[#C7C7C7];
+}
+
+.treatment-table td {
+  @apply py-5 pr-6 text-center text-sm text-[#444343] border-b border-[#C7C7C7];
+}
+
+.treatment-name {
+  @apply font-semibold text-[#141414] text-center;
+}
+
+.treatment-category {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#1351AA];
+}
+
+.treatment-row {
+  @apply hover:bg-[#1351AA]/5 transition-colors duration-300;
+}
+
+.treatment-actions {
+  @apply flex gap-4 justify-center;
+}
+
+.action-edit {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#1351AA] hover:text-[#141414] transition-colors duration-300;
+}
+
+.action-delete {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] hover:text-[#141414] transition-colors duration-300;
+}
+
+.treatment-pagination {
+  @apply flex items-center justify-center gap-8 py-6 border-t border-[#C7C7C7];
+}
+
 .category-table {
   @apply w-full border-collapse;
 }
@@ -16,52 +68,4 @@
 
 .category-actions {
   @apply flex gap-4 justify-center;
-}
-
-.action-edit {
-  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#1351AA] hover:text-[#141414] transition-colors duration-300;
-}
-
-.action-delete {
-  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] hover:text-[#141414] transition-colors duration-300;
-}
-
-.treatment-list {
-  @apply flex flex-col;
-}
-
-.treatment-list-header {
-  @apply flex items-center justify-between border-b border-[#C7C7C7] pb-6 mb-0;
-}
-
-.treatment-grid {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[#C7C7C7] border-t border-[#C7C7C7];
-}
-
-.treatment-card {
-  @apply bg-[#E3E2DE] p-6 flex flex-col gap-4 hover:bg-[#1351AA]/5 transition-colors duration-300 cursor-default;
-}
-
-.treatment-card-header {
-  @apply flex items-start justify-between gap-4;
-}
-
-.treatment-card-category {
-  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#1351AA];
-}
-
-.treatment-card-price {
-  @apply font-mono text-sm font-bold text-[#141414] whitespace-nowrap;
-}
-
-.treatment-card-name {
-  @apply text-base font-semibold text-[#141414] flex-1 leading-snug;
-}
-
-.treatment-card-actions {
-  @apply flex gap-4 pt-2 border-t border-[#C7C7C7] justify-center;
-}
-
-.treatment-pagination {
-  @apply flex items-center justify-center gap-8 py-6 border-t border-[#C7C7C7];
 }

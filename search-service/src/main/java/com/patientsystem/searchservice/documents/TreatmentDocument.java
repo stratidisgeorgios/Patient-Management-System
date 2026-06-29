@@ -1,12 +1,12 @@
 package com.patientsystem.searchservice.documents;
 public class TreatmentDocument {
-    private String treatmentId;
+    private String id;
     private String name;
     private String category;
     private String price;
 
-    public String getTreatmentId() { return treatmentId; }
-    public void setTreatmentId(String treatmentId) { this.treatmentId = treatmentId; }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getCategory() { return category; }

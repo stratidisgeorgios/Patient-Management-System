@@ -17,7 +17,7 @@ public class SearchService {
             if (eventType.equals("PatientCreated") || eventType.equals("PatientUpdated")) {
                 openSearchService.indexPatient(patientDocument);
             } else if (eventType.equals("PatientDeleted")) {
-                openSearchService.deletePatient(patientDocument.getPatientId());
+                openSearchService.deletePatient(patientDocument.getId());
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to index patient: " + e.getMessage(), e);
@@ -29,7 +29,7 @@ public class SearchService {
             if (eventType.equals("TreatmentCreated") || eventType.equals("TreatmentUpdated")) {
                 openSearchService.indexTreatment(treatmentDocument);
             } else if (eventType.equals("TreatmentDeleted")) {
-                openSearchService.deleteTreatment(treatmentDocument.getTreatmentId());
+                openSearchService.deleteTreatment(treatmentDocument.getId());
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to index treatment: " + e.getMessage(), e);

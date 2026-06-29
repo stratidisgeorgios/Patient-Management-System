@@ -1,8 +1,11 @@
 <div class="treatment-list">
   <div class="treatment-list-header">
     <span class="label">Treatments</span>
-    <button (click)="createTreatment()" class="btn-primary">+ Add Treatment</button>
-    <button (click)="showCategories()" class="btn-primary">+ Show Categories</button>
+    <div class="treatment-list-actions">
+      <input type="text" class="form-input treatment-search" placeholder="Search treatments..." (input)="onSearch($event.target.value)" />
+      <button (click)="showCategories()" class="btn-secondary">Categories</button>
+      <button (click)="createTreatment()" class="btn-primary">+ Add Treatment</button>
+    </div>
   </div>
 
   @if (treatments().length === 0) {
@@ -10,21 +13,31 @@
       <span class="label">No treatments found</span>
     </div>
   } @else {
-    <div class="treatment-grid">
-      @for (treatment of pagedTreatments(); track treatment.id) {
-        <div class="treatment-card">
-          <div class="treatment-card-header">
-            <span class="treatment-card-category">{{ treatment.category.name }}</span>
-            <span class="treatment-card-price">{{ treatment.price | currency }}</span>
-          </div>
-          <div class="treatment-card-name">{{ treatment.name }}</div>
-          <div class="treatment-card-actions">
-            <button (click)="editTreatment(treatment)" class="action-edit">Edit</button>
-            <button (click)="deleteTreatment(treatment)" class="action-delete">Delete</button>
-          </div>
-        </div>
-      }
-    </div>
+    <table class="treatment-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (treatment of pagedTreatments(); track treatment.id) {
+          <tr class="treatment-row">
+            <td class="treatment-name">{{ treatment.name }}</td>
+            <td class="treatment-category">{{ treatment.category.name }}</td>
+            <td class="font-mono">{{ treatment.price | currency }}</td>
+            <td>
+              <div class="treatment-actions">
+                <button (click)="editTreatment(treatment)" class="action-edit">Edit</button>
+                <button (click)="deleteTreatment(treatment)" class="action-delete">Delete</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
     @if (totalPages() > 1) {
       <div class="treatment-pagination">
         <button (click)="prevPage()" [disabled]="currentPage() === 0" class="btn-ghost">← Prev</button>
@@ -52,7 +65,12 @@
         </div>
         <div class="form-field">
           <label class="form-label">Category</label>
-          <input formControlName="category" placeholder="e.g. Surgery, Consultation" class="form-input" />
+          <select formControlName="category" class="form-input">
+            <option value="" disabled>Select category</option>
+            @for (category of categories(); track category.id) {
+              <option value="{{ category.id }}">{{ category.name }}</option>
+            }
+          </select>
           @if (editTreatmentForm.get('category')?.touched && editTreatmentForm.get('category')?.errors?.['required']) {
             <span class="form-error">Category is required</span>
           }
@@ -93,7 +111,12 @@
         </div>
         <div class="form-field">
           <label class="form-label">Category</label>
-          <input formControlName="category" placeholder="e.g. Surgery, Consultation" class="form-input" />
+          <select formControlName="category" class="form-input">
+            <option value="" disabled>Select category</option>
+            @for (category of categories(); track category.id) {
+              <option value="{{ category.id }}">{{ category.name }}</option>
+            }
+          </select>
           @if (createTreatmentForm.get('category')?.touched && createTreatmentForm.get('category')?.errors?.['required']) {
             <span class="form-error">Category is required</span>
           }
