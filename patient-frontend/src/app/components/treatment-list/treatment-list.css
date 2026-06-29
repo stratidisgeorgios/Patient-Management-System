@@ -1,8 +1,8 @@
-.catalog-list {
+.treatment-list {
   @apply flex flex-col;
 }
 
-.catalog-list-header {
+.treatment-list-header {
   @apply flex items-center justify-between border-b border-[#C7C7C7] pb-6 mb-0;
 }
 
@@ -34,6 +34,6 @@
   @apply flex gap-4 pt-2 border-t border-[#C7C7C7] justify-center;
 }
 
-.catalog-pagination {
+.treatment-pagination {
   @apply flex items-center justify-center gap-8 py-6 border-t border-[#C7C7C7];
 }

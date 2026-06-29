@@ -76,6 +76,17 @@
           }
         </div>
         <div class="form-field">
+          <label class="form-label">Gender</label>
+          <select formControlName="gender" class="form-input">
+            <option value="" disabled>Select gender</option>
+            <option value="MALE">Male</option>
+            <option value="FEMALE">Female</option>
+          </select>
+          @if (editForm.get('gender')?.touched && editForm.get('gender')?.errors?.['required']) {
+            <span class="form-error">Gender is required</span>
+          }
+        </div>
+        <div class="form-field">
           <label class="form-label">Address</label>
           <input formControlName="address" placeholder="Street address" class="form-input" />
           @if (editForm.get('address')?.touched && editForm.get('address')?.errors?.['required']) {
@@ -124,6 +135,17 @@
           }
           @if (createForm.get('email')?.touched && createForm.get('email')?.errors?.['email']) {
             <span class="form-error">Enter a valid email</span>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Gender</label>
+          <select formControlName="gender" class="form-input">
+            <option value="" disabled>Select gender</option>
+            <option value="MALE">Male</option>
+            <option value="FEMALE">Female</option>
+          </select>
+          @if (createForm.get('gender')?.touched && createForm.get('gender')?.errors?.['required']) {
+            <span class="form-error">Gender is required</span>
           }
         </div>
         <div class="form-field">

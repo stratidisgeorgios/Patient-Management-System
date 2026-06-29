@@ -1,7 +1,8 @@
-<div class="catalog-list">
-  <div class="catalog-list-header">
-    <span class="label">Catalog</span>
+<div class="treatment-list">
+  <div class="treatment-list-header">
+    <span class="label">Treatments</span>
     <button (click)="createTreatment()" class="btn-primary">+ Add Treatment</button>
+    <button (click)="showCategories()" class="btn-primary">+ Show Categories</button>
   </div>
 
   @if (treatments().length === 0) {
@@ -13,7 +14,7 @@
       @for (treatment of pagedTreatments(); track treatment.id) {
         <div class="treatment-card">
           <div class="treatment-card-header">
-            <span class="treatment-card-category">{{ treatment.category }}</span>
+            <span class="treatment-card-category">{{ treatment.category.name }}</span>
             <span class="treatment-card-price">{{ treatment.price | currency }}</span>
           </div>
           <div class="treatment-card-name">{{ treatment.name }}</div>
@@ -25,7 +26,7 @@
       }
     </div>
     @if (totalPages() > 1) {
-      <div class="catalog-pagination">
+      <div class="treatment-pagination">
         <button (click)="prevPage()" [disabled]="currentPage() === 0" class="btn-ghost">← Prev</button>
         <span class="label">{{ currentPage() + 1 }} / {{ totalPages() }}</span>
         <button (click)="nextPage()" [disabled]="currentPage() === totalPages() - 1" class="btn-ghost">Next →</button>
@@ -36,38 +37,38 @@
 
 @if (showEditModal()) {
   <div class="modal-overlay">
-    <div class="patient-modal-card">
+    <div class="modal-card">
       <div class="modal-header">
         <span class="label">Edit Treatment</span>
         <button (click)="showEditModal.set(false)" class="btn-ghost">✕ Close</button>
       </div>
-      <form [formGroup]="editForm" (ngSubmit)="submitUpdate()" class="modal-body">
+      <form [formGroup]="editTreatmentForm" (ngSubmit)="submitUpdate()" class="modal-body">
         <div class="form-field">
           <label class="form-label">Name</label>
           <input formControlName="name" placeholder="Treatment name" class="form-input" />
-          @if (editForm.get('name')?.touched && editForm.get('name')?.errors?.['required']) {
+          @if (editTreatmentForm.get('name')?.touched && editTreatmentForm.get('name')?.errors?.['required']) {
             <span class="form-error">Name is required</span>
           }
         </div>
         <div class="form-field">
           <label class="form-label">Category</label>
           <input formControlName="category" placeholder="e.g. Surgery, Consultation" class="form-input" />
-          @if (editForm.get('category')?.touched && editForm.get('category')?.errors?.['required']) {
+          @if (editTreatmentForm.get('category')?.touched && editTreatmentForm.get('category')?.errors?.['required']) {
             <span class="form-error">Category is required</span>
           }
         </div>
         <div class="form-field">
           <label class="form-label">Price</label>
-          <input formControlName="price" type="number" min="0" placeholder="0.00" class="form-input patient-mono" />
-          @if (editForm.get('price')?.touched && editForm.get('price')?.errors?.['required']) {
+          <input formControlName="price" type="number" min="0" placeholder="0.00" class="form-input font-mono" />
+          @if (editTreatmentForm.get('price')?.touched && editTreatmentForm.get('price')?.errors?.['required']) {
             <span class="form-error">Price is required</span>
           }
-          @if (editForm.get('price')?.touched && editForm.get('price')?.errors?.['min']) {
+          @if (editTreatmentForm.get('price')?.touched && editTreatmentForm.get('price')?.errors?.['min']) {
             <span class="form-error">Price must be 0 or more</span>
           }
         </div>
         <div class="modal-actions">
-          <button type="submit" [disabled]="editForm.invalid" class="btn-primary flex-1 text-center">Save Changes</button>
+          <button type="submit" [disabled]="editTreatmentForm.invalid" class="btn-primary flex-1 text-center">Save Changes</button>
           <button type="button" (click)="showEditModal.set(false)" class="btn-secondary flex-1 text-center">Cancel</button>
         </div>
       </form>
@@ -77,38 +78,38 @@
 
 @if (showCreateModal()) {
   <div class="modal-overlay">
-    <div class="patient-modal-card">
+    <div class="modal-card">
       <div class="modal-header">
         <span class="label">New Treatment</span>
         <button (click)="showCreateModal.set(false)" class="btn-ghost">✕ Close</button>
       </div>
-      <form [formGroup]="createForm" (ngSubmit)="submitCreate()" class="modal-body">
+      <form [formGroup]="createTreatmentForm" (ngSubmit)="submitCreate()" class="modal-body">
         <div class="form-field">
           <label class="form-label">Name</label>
           <input formControlName="name" placeholder="Treatment name" class="form-input" />
-          @if (createForm.get('name')?.touched && createForm.get('name')?.errors?.['required']) {
+          @if (createTreatmentForm.get('name')?.touched && createTreatmentForm.get('name')?.errors?.['required']) {
             <span class="form-error">Name is required</span>
           }
         </div>
         <div class="form-field">
           <label class="form-label">Category</label>
           <input formControlName="category" placeholder="e.g. Surgery, Consultation" class="form-input" />
-          @if (createForm.get('category')?.touched && createForm.get('category')?.errors?.['required']) {
+          @if (createTreatmentForm.get('category')?.touched && createTreatmentForm.get('category')?.errors?.['required']) {
             <span class="form-error">Category is required</span>
           }
         </div>
         <div class="form-field">
           <label class="form-label">Price</label>
-          <input formControlName="price" type="number" min="0" placeholder="0.00" class="form-input patient-mono" />
-          @if (createForm.get('price')?.touched && createForm.get('price')?.errors?.['required']) {
+          <input formControlName="price" type="number" min="0" placeholder="0.00" class="form-input font-mono" />
+          @if (createTreatmentForm.get('price')?.touched && createTreatmentForm.get('price')?.errors?.['required']) {
             <span class="form-error">Price is required</span>
           }
-          @if (createForm.get('price')?.touched && createForm.get('price')?.errors?.['min']) {
+          @if (createTreatmentForm.get('price')?.touched && createTreatmentForm.get('price')?.errors?.['min']) {
             <span class="form-error">Price must be 0 or more</span>
           }
         </div>
         <div class="modal-actions">
-          <button type="submit" [disabled]="createForm.invalid" class="btn-primary flex-1 text-center">Create Treatment</button>
+          <button type="submit" [disabled]="createTreatmentForm.invalid" class="btn-primary flex-1 text-center">Create Treatment</button>
           <button type="button" (click)="showCreateModal.set(false)" class="btn-secondary flex-1 text-center">Cancel</button>
         </div>
       </form>
@@ -118,4 +119,32 @@
 
 @if (showDeleteModal()) {
   <app-confirm-modal (confirm)="confirmDelete()" (cancel)="cancelDelete()"></app-confirm-modal>
+}
+
+
+@if (showCategoriesModal()) {
+  <div class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="label">Treatment Categories</span>
+        <button (click)="createCategory()" class="btn-secondary">+ Add Category</button>
+        <button (click)="showCategoriesModal.set(false)" class="btn-ghost">✕ Close</button>
+      </div>
+      <div class="modal-body">
+        @if (categories().length === 0) {
+          <div class="no-categories">
+            <span class="label">No categories found</span>
+          </div>
+        } @else {
+          <ul class="category-list">
+            @for (category of categories(); track category.id) {
+              <li class="category-item">{{ category.name }}</li>
+              <button (click)="deleteCategory()" class="btn-secondary">- Delete Category</button>
+              <button (click)="editCategory()" class="btn-secondary">✎ Edit Category</button>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  </div>
 }

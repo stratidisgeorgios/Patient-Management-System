@@ -27,12 +27,14 @@ export class PatientList implements OnInit {
   editForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
     email: new FormControl('', [Validators.required, Validators.email]),
+    gender: new FormControl('', [Validators.required]),
     address: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     dateOfBirth: new FormControl('', [Validators.required])
   });
   createForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
     email: new FormControl('', [Validators.required, Validators.email]),
+    gender: new FormControl('', [Validators.required]),
     address: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     dateOfBirth: new FormControl('', [Validators.required]),
     registeredDate: new FormControl('', [Validators.required])
@@ -85,6 +87,7 @@ export class PatientList implements OnInit {
     this.editForm.patchValue({
       name: patient.name,
       email: patient.email,
+      gender: patient.gender,
       address: patient.address,
       dateOfBirth: patient.dateOfBirth
     });

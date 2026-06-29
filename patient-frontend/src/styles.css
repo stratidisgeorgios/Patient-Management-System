@@ -44,7 +44,7 @@
 
   /* Forms */
   .form-field {
-    @apply flex flex-col gap-2 border-b border-[#C7C7C7] py-5;
+    @apply relative flex flex-col gap-2 border-b border-[#C7C7C7] pt-5 pb-7;
   }
 
   .form-label {
@@ -56,7 +56,7 @@
   }
 
   .form-error {
-    @apply text-xs text-red-500 font-mono;
+    @apply absolute bottom-2 text-xs text-red-500 font-mono;
   }
 
   /* Modal */

@@ -1,16 +1,16 @@
 import { HttpClient } from "@angular/common/http";
 import { Inject, Injectable } from "@angular/core";
-import { TreatmentRequest, TreatmentResponse } from "../models/catalog.model";
+import { TreatmentRequest, TreatmentResponse } from "../models/treatment.model";
 import { Observable } from "rxjs";
 import { APP_SERVICE_CONFIG, AppConfig } from "../app-config.interface";
 
 @Injectable({
   providedIn: "root",
 })
-export class CatalogService {
+export class TreatmentService {
   constructor(@Inject(APP_SERVICE_CONFIG) private config: AppConfig, private http: HttpClient) {}
 
-  getCatalog(): Observable<TreatmentResponse[]> {
+  getTreatments(): Observable<TreatmentResponse[]> {
     return this.http.get<TreatmentResponse[]>(`${this.config.apiUrl}/api/treatments`);
   }
 
