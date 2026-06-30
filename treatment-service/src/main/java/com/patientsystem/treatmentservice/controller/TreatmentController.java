@@ -14,6 +14,7 @@ import com.patientsystem.treatmentservice.service.TreatmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/treatments")
@@ -33,7 +34,7 @@ public class TreatmentController {
 
     @GetMapping("/{treatmentId}")
     @Operation(summary = "Get a treatment by ID")
-    public ResponseEntity<TreatmentResponseDTO> getTreatmentById(@PathVariable String treatmentId) {
+    public ResponseEntity<TreatmentResponseDTO> getTreatmentById(@PathVariable UUID treatmentId) {
         return ResponseEntity.ok(treatmentService.getTreatmentById(treatmentId));
     }
 
@@ -45,13 +46,13 @@ public class TreatmentController {
 
     @PutMapping("/{treatmentId}")
     @Operation(summary = "Update an existing treatment")
-    public ResponseEntity<TreatmentResponseDTO> updateTreatment(@PathVariable String treatmentId, @RequestBody TreatmentRequestDTO request) {
+    public ResponseEntity<TreatmentResponseDTO> updateTreatment(@PathVariable UUID treatmentId, @RequestBody TreatmentRequestDTO request) {
         return ResponseEntity.ok(treatmentService.updateTreatment(treatmentId, request));
     }
 
     @DeleteMapping("/{treatmentId}")
     @Operation(summary = "Delete a treatment")
-    public ResponseEntity<Void> deleteTreatment(@PathVariable String treatmentId) {
+    public ResponseEntity<Void> deleteTreatment(@PathVariable UUID treatmentId) {
         treatmentService.deleteTreatment(treatmentId);
         return ResponseEntity.noContent().build();
     }

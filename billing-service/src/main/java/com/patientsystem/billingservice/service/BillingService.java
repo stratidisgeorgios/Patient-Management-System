@@ -64,7 +64,7 @@ public class BillingService {
         BillingAccount account = getAccount(patientId);
         List<ChargeResponseDTO> charges = chargeRepository.findAllByBillingAccountId(account.getId())
                 .stream()
-                .map(c -> new ChargeResponseDTO(c.getId(), c.getTreatmentId(), c.getTreatmentName(), c.getTreatmentCategory(), c.getPrice(), c.getTimestamp()))
+                .map(c -> new ChargeResponseDTO(c.getId().toString(), c.getTreatmentId(), c.getTreatmentName(), c.getTreatmentCategory(), c.getPrice(), c.getTimestamp()))
                 .toList();
         return new BillingResponseDTO(account.getPatientId(), account.getPatientName(), account.getPatientEmail(), account.getBalance(), charges);
     }

@@ -5,6 +5,7 @@ import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angula
 import { ConfirmModal } from "../../shared/confirm-modal/confirm-modal";
 import { NotificationService } from "../../services/notification-service";
 import { SearchService } from "../../services/search-service";
+import { Router } from "@angular/router";
 
 const PAGE_SIZE = 30;
 
@@ -44,7 +45,7 @@ export class PatientList implements OnInit {
   showEditModal = signal(false);
   showDeleteModal = signal(false);
 
-  constructor(private patientService: PatientService, private searchService: SearchService, private notificationService: NotificationService) {}
+  constructor(private patientService: PatientService, private searchService: SearchService, private notificationService: NotificationService, private router: Router) {}
 
   ngOnInit() {
     this.patientService.getAll().subscribe({
@@ -161,5 +162,9 @@ export class PatientList implements OnInit {
         this.notificationService.error("Failed to search patients: " + this.extractError(err));
       }
     });
+  }
+
+    openProfile(id:string){
+    this.router.navigate(['/app/patients', id]);
   }
 }

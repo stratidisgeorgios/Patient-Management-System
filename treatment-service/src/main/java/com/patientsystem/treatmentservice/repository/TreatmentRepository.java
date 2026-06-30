@@ -1,7 +1,8 @@
 package com.patientsystem.treatmentservice.repository;
 import com.patientsystem.treatmentservice.model.Treatment;
 import org.springframework.data.jpa.repository.JpaRepository;
-public interface TreatmentRepository extends JpaRepository<Treatment, String> {
+import java.util.UUID;
+public interface TreatmentRepository extends JpaRepository<Treatment, UUID> {
     boolean existsByName(String name);
-    boolean existsByCategory_Id(String categoryId);
+    boolean existsByCategory_Id(UUID categoryId);
 }

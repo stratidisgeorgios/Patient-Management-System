@@ -6,13 +6,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @IdClass(TimeSeriesId.class)
 public class ChargeEvent {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    private UUID id;
     private String patientId;
     private String treatmentName;
     private String category;
@@ -20,8 +21,8 @@ public class ChargeEvent {
     @Id
     private LocalDateTime timestamp;
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
     public String getPatientId() { return patientId; }
     public void setPatientId(String patientId) { this.patientId = patientId; }
     public String getTreatmentName() { return treatmentName; }

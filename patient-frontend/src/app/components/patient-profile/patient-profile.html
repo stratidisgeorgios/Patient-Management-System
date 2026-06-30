@@ -1,0 +1,42 @@
+@if (patient) {
+  <div class="profile">
+    <div class="profile-header">
+      <button (click)="goBack()" class="btn-ghost">← Back</button>
+      <span class="label">Patient Profile</span>
+    </div>
+
+    <div class="profile-section">
+      <span class="label">Personal Information</span>
+      <div class="profile-grid">
+        <div class="profile-field">
+          <span class="profile-field-label">Name</span>
+          <span class="profile-field-value">{{ patient.name }}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Email</span>
+          <span class="profile-field-value font-mono">{{ patient.email }}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Gender</span>
+          <span class="profile-field-value">{{ patient.gender }}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Date of Birth</span>
+          <span class="profile-field-value font-mono">{{ patient.dateOfBirth }}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Address</span>
+          <span class="profile-field-value">{{ patient.address }}</span>
+        </div>
+        <div class="profile-field">
+          <span class="profile-field-label">Registered</span>
+          <span class="profile-field-value font-mono">{{ patient.registeredDate }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="profile-loading">
+    <span class="label">Loading...</span>
+  </div>
+}

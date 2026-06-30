@@ -6,13 +6,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 public class Charge {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
-    private String billingAccountId;
+    private UUID id;
+    private UUID billingAccountId;
 
     private String treatmentId;
     private String treatmentName;
@@ -20,11 +21,11 @@ public class Charge {
 
     private BigDecimal price;
     private LocalDateTime timestamp;
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
-    public String getBillingAccountId() { return billingAccountId; }
-    public void setBillingAccountId(String billingAccountId) { this.billingAccountId = billingAccountId; }
+    public UUID getBillingAccountId() { return billingAccountId; }
+    public void setBillingAccountId(UUID billingAccountId) { this.billingAccountId = billingAccountId; }
 
     public String getTreatmentId() { return treatmentId; }
     public void setTreatmentId(String treatmentId) { this.treatmentId = treatmentId; }

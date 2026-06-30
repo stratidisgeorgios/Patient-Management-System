@@ -3,9 +3,10 @@ package com.patientsystem.analyticsservice.model;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 public class TimeSeriesId implements Serializable {
-    private String id;
+    private UUID id;
     private LocalDateTime timestamp;
 
     public TimeSeriesId() {}

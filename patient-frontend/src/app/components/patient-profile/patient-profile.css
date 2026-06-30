@@ -1,0 +1,31 @@
+.profile {
+  @apply flex flex-col;
+}
+
+.profile-header {
+  @apply flex items-center gap-4 border-b border-[#C7C7C7] pb-6 mb-8;
+}
+
+.profile-section {
+  @apply flex flex-col gap-6;
+}
+
+.profile-grid {
+  @apply grid grid-cols-2 gap-0 mt-4 border-t border-[#C7C7C7];
+}
+
+.profile-field {
+  @apply flex flex-col gap-1 py-5 pr-6 border-b border-[#C7C7C7];
+}
+
+.profile-field-label {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A];
+}
+
+.profile-field-value {
+  @apply text-sm text-[#141414] mt-1;
+}
+
+.profile-loading {
+  @apply flex items-center justify-center py-20;
+}
