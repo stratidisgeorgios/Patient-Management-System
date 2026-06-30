@@ -13,6 +13,7 @@ import com.patientsystem.treatmentservice.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -38,13 +39,13 @@ public class CategoryController {
 
     @PutMapping("/{categoryId}")
     @Operation(summary = "Update an existing category")
-    public ResponseEntity<Category> updateCategory(@PathVariable String categoryId, @RequestBody Category category) {
+    public ResponseEntity<Category> updateCategory(@PathVariable UUID categoryId, @RequestBody Category category) {
         return ResponseEntity.ok(categoryService.updateCategory(categoryId, category));
     }
 
     @DeleteMapping("/{categoryId}")
     @Operation(summary = "Delete a category")
-    public ResponseEntity<Void> deleteCategory(@PathVariable String categoryId) {
+    public ResponseEntity<Void> deleteCategory(@PathVariable UUID categoryId) {
         categoryService.deleteCategory(categoryId);
         return ResponseEntity.noContent().build();
     }

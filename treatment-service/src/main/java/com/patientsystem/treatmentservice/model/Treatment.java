@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.util.UUID;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 @Entity
@@ -13,15 +14,15 @@ import jakarta.persistence.ManyToOne;
 public class Treatment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    private UUID id;
     @Column(unique = true)
     private String name;
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
     private BigDecimal price;
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

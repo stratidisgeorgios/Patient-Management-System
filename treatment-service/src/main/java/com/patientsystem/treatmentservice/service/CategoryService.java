@@ -1,5 +1,6 @@
 package com.patientsystem.treatmentservice.service;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import com.patientsystem.treatmentservice.model.Category;
 import com.patientsystem.treatmentservice.repository.CategoryRepository;
@@ -25,7 +26,7 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
-    public Category updateCategory(String categoryId, Category category) {
+    public Category updateCategory(UUID categoryId, Category category) {
         if (!categoryRepository.existsById(categoryId)) {
             throw new RuntimeException("Category not found for ID: " + categoryId);
         }
@@ -33,7 +34,7 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
-    public void deleteCategory(String categoryId) {
+    public void deleteCategory(UUID categoryId) {
         if (!categoryRepository.existsById(categoryId)) {
             throw new RuntimeException("Category not found for ID: " + categoryId);
         }

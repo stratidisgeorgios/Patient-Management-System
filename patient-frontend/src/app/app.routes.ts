@@ -10,6 +10,8 @@ import { Layout } from './layout/layout';
 import { HomeLayout } from './layout/home-layout/home-layout';
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
+import { PatientProfile } from './components/patient-profile/patient-profile';
+import { TreatmentProfile } from './components/treatment-profile/treatment-profile';
 
 export const routes: Routes = [
   {
@@ -26,6 +28,8 @@ export const routes: Routes = [
     component: Layout,
     canActivate: [authGuard],
     children: [
+      { path: 'patients/:id', component: PatientProfile },
+      { path: 'treatments/:id', component: TreatmentProfile },
       { path: 'patients', component: Patients },
       { path: 'billing', component: Billing },
       { path: 'treatments', component: Treatments },

@@ -7,6 +7,7 @@ import { ConfirmModal } from "../../shared/confirm-modal/confirm-modal";
 import { CurrencyPipe } from "@angular/common";
 import { CategoryService } from "../../services/category-service";
 import { SearchService } from "../../services/search-service";
+import { Router } from "@angular/router";
 
 const PAGE_SIZE = 30;
 
@@ -57,7 +58,7 @@ export class TreatmentList implements OnInit {
   showCategoryEditModal = signal(false);
   showCategoryDeleteModal = signal(false);
 
-  constructor(private treatmentService: TreatmentService, private categoryService: CategoryService, private searchService: SearchService, private notificationService: NotificationService) {}
+  constructor(private treatmentService: TreatmentService, private categoryService: CategoryService, private searchService: SearchService, private notificationService: NotificationService, private router: Router) {}
 
   ngOnInit() {
     this.treatmentService.getTreatments().subscribe({
@@ -265,4 +266,8 @@ export class TreatmentList implements OnInit {
     });
   }
 
+
+    openProfile(id:string){
+    this.router.navigate(['/app/treatments', id]);
+  }
 }

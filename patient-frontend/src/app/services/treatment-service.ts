@@ -14,12 +14,16 @@ export class TreatmentService {
     return this.http.get<TreatmentResponse[]>(`${this.config.apiUrl}/api/treatments`);
   }
 
-  createTreatment(treatment: TreatmentRequest): Observable<void> {
-    return this.http.post<void>(`${this.config.apiUrl}/api/treatments`, treatment);
+  getById(treatmentId: string): Observable<TreatmentResponse> {
+    return this.http.get<TreatmentResponse>(`${this.config.apiUrl}/api/treatments/${treatmentId}`);
   }
 
-  updateTreatment(treatmentId: string, treatment: TreatmentRequest): Observable<void> {
-    return this.http.put<void>(`${this.config.apiUrl}/api/treatments/${treatmentId}`, treatment);
+  createTreatment(treatment: TreatmentRequest): Observable<TreatmentResponse> {
+    return this.http.post<TreatmentResponse>(`${this.config.apiUrl}/api/treatments`, treatment);
+  }
+
+  updateTreatment(treatmentId: string, treatment: TreatmentRequest): Observable<TreatmentResponse> {
+    return this.http.put<TreatmentResponse>(`${this.config.apiUrl}/api/treatments/${treatmentId}`, treatment);
   }
 
   deleteTreatment(treatmentId: string): Observable<void> {
