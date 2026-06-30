@@ -20,7 +20,7 @@ public class KafkaProducer {
 
     public void sendTreatmentEvent(Treatment treatment, String eventType) {
         TreatmentEvent treatmentEvent = TreatmentEvent.newBuilder()
-            .setTreatmentId(treatment.getId())
+            .setTreatmentId(treatment.getId().toString())
             .setName(treatment.getName())
             .setCategory(treatment.getCategory().getName())
             .setPrice(treatment.getPrice().toString())
