@@ -1,39 +1,43 @@
-@if (patient) {
+@if (patient()!) {
   <div class="profile">
     <div class="profile-header">
-      <button (click)="goBack()" class="btn-ghost">← Back</button>
-      <span class="label">Patient Profile</span>
+      <button (click)="goBack()" class="btn-secondary">← Back</button>
     </div>
 
     <div class="profile-section">
-      <span class="label">Personal Information</span>
+      <span class="label">Patient Information</span>
       <div class="profile-grid">
         <div class="profile-field">
           <span class="profile-field-label">Name</span>
-          <span class="profile-field-value">{{ patient.name }}</span>
+          <span class="profile-field-value">{{ patient()!.name }}</span>
         </div>
         <div class="profile-field">
           <span class="profile-field-label">Email</span>
-          <span class="profile-field-value font-mono">{{ patient.email }}</span>
+          <span class="profile-field-value font-mono">{{ patient()!.email }}</span>
         </div>
         <div class="profile-field">
           <span class="profile-field-label">Gender</span>
-          <span class="profile-field-value">{{ patient.gender }}</span>
+          <span class="profile-field-value">{{ patient()!.gender }}</span>
         </div>
         <div class="profile-field">
           <span class="profile-field-label">Date of Birth</span>
-          <span class="profile-field-value font-mono">{{ patient.dateOfBirth }}</span>
+          <span class="profile-field-value font-mono">{{ patient()!.dateOfBirth }}</span>
         </div>
         <div class="profile-field">
           <span class="profile-field-label">Address</span>
-          <span class="profile-field-value">{{ patient.address }}</span>
+          <span class="profile-field-value">{{ patient()!.address }}</span>
         </div>
         <div class="profile-field">
           <span class="profile-field-label">Registered</span>
-          <span class="profile-field-value font-mono">{{ patient.registeredDate }}</span>
+          <span class="profile-field-value font-mono">{{ patient()!.registeredDate }}</span>
         </div>
       </div>
     </div>
+  </div>
+} @else if (error) {
+  <div class="profile-loading">
+    <button (click)="goBack()" class="btn-secondary">← Back</button>
+    <span class="label">{{ error }}</span>
   </div>
 } @else {
   <div class="profile-loading">
