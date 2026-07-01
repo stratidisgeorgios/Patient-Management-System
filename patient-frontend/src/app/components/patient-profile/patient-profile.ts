@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, signal } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { Location } from "@angular/common";
 import { PatientService } from "../../services/patient-service";
@@ -14,7 +14,9 @@ import { PatientResponse } from "../../models/patient.model";
 export class PatientProfile implements OnInit {
 
   constructor(private route: ActivatedRoute, private location: Location, private patientService: PatientService) {}
-  patient: PatientResponse | null = null;
+  patient = signal<PatientResponse | null>(null);
+  error: string | null = null;
+
   goBack(): void {
     this.location.back();
   }
@@ -22,8 +24,9 @@ export class PatientProfile implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.patientService.getById(id).subscribe(patient => {
-        this.patient = patient;
+      this.patientService.getById(id).subscribe({
+        next: patient => { this.patient.set(patient); },
+        error: () => { this.error = 'Failed to load patient. Please go back and try again.'; }
       });
     }
   }

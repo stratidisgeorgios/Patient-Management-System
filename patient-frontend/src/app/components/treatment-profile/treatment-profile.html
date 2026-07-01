@@ -1,27 +1,31 @@
-@if (treatment) {
+@if (treatment()!) {
   <div class="profile">
     <div class="profile-header">
-      <button (click)="goBack()" class="btn-ghost">← Back</button>
-      <span class="label">Treatment Profile</span>
+      <button (click)="goBack()" class="btn-secondary">← Back</button>
     </div>
 
     <div class="profile-section">
-      <span class="label">Personal Information</span>
+      <span class="label">Treatment Information</span>
       <div class="profile-grid">
         <div class="profile-field">
           <span class="profile-field-label">Name</span>
-          <span class="profile-field-value">{{ treatment.name }}</span>
+          <span class="profile-field-value">{{ treatment()!.name }}</span>
         </div>
         <div class="profile-field">
           <span class="profile-field-label">Category</span>
-          <span class="profile-field-value">{{ treatment.category.name }}</span>
+          <span class="profile-field-value">{{ treatment()!.category.name }}</span>
         </div>
         <div class="profile-field">
           <span class="profile-field-label">Price</span>
-          <span class="profile-field-value font-mono">{{ treatment.price | currency:'CHF' }}</span>
+          <span class="profile-field-value font-mono">{{ treatment()!.price | currency:'CHF' }}</span>
         </div>
       </div>
     </div>
+  </div>
+} @else if (error) {
+  <div class="profile-loading">
+    <button (click)="goBack()" class="btn-secondary">← Back</button>
+    <span class="label">{{ error }}</span>
   </div>
 } @else {
   <div class="profile-loading">
