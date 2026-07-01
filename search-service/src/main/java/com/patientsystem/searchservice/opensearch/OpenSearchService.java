@@ -44,7 +44,7 @@ public class OpenSearchService {
                 .mappings(m -> m
                     .properties("id", p -> p.keyword(k -> k))
                     .properties("name", p -> p.searchAsYouType(s -> s))
-                    .properties("category", p -> p.keyword(k -> k))
+                    .properties("category", p -> p.searchAsYouType(s -> s))
                     .properties("price", p -> p.keyword(k -> k))
                 )
             );
@@ -123,7 +123,7 @@ public class OpenSearchService {
                     .multiMatch(m -> m
                         .query(query)
                         .type(TextQueryType.BoolPrefix)
-                        .fields("name", "name._2gram", "name._3gram", "category")
+                        .fields("name", "name._2gram", "name._3gram", "category", "category._2gram", "category._3gram")
                     )
                 )
             ), TreatmentDocument.class);
