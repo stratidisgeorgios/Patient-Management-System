@@ -114,7 +114,6 @@ export class PatientList implements OnInit, OnDestroy {
       next: () => {
         this.showCreateModal.set(false);
         this.notificationService.success("Patient created successfully!");
-        if (this.lastSearchQuery) this.searchQuery.next(this.lastSearchQuery);
       },
       error: (err) => this.notificationService.error("Failed to create patient: " + this.extractError(err))
     });
@@ -138,7 +137,6 @@ export class PatientList implements OnInit, OnDestroy {
       next: () => {
         this.showEditModal.set(false);
         this.notificationService.success('Patient updated successfully');
-        if (this.lastSearchQuery) this.searchQuery.next(this.lastSearchQuery);
       },
       error: (err) => this.notificationService.error("Failed to update patient: " + this.extractError(err))
     });
@@ -157,7 +155,6 @@ export class PatientList implements OnInit, OnDestroy {
       next: () => {
         this.showDeleteModal.set(false);
         this.notificationService.success('Patient deleted successfully');
-        if (this.lastSearchQuery) this.searchQuery.next(this.lastSearchQuery);
       },
       error: (err) => this.notificationService.error("Failed to delete patient: " + this.extractError(err))
     });
