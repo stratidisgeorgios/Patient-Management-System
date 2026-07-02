@@ -1,30 +1,23 @@
 package com.patientsystem.searchservice.service;
+
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 @Service
 public class SseEmitterService {
-    private final List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
+    private final Sinks.Many<String> sink = Sinks.many().multicast().directBestEffort();
 
-    public SseEmitter createEmitter() {
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-        emitters.add(emitter);
-        emitter.onCompletion(() -> emitters.remove(emitter));
-        emitter.onTimeout(() -> emitters.remove(emitter));
-        emitter.onError((e) -> emitters.remove(emitter));
-        return emitter;
+    public Flux<ServerSentEvent<String>> stream() {
+        return sink.asFlux()
+            .map(type -> ServerSentEvent.<String>builder()
+                .event("indexUpdated")
+                .data(type)
+                .build());
     }
 
     public void broadcast(String type) {
-        for (SseEmitter emitter : emitters) {
-            try {
-                emitter.send(SseEmitter.event().name("indexUpdated").data(type));
-            } catch (IOException e) {
-                emitters.remove(emitter);
-            }
-        }
+        sink.tryEmitNext(type);
     }
 }

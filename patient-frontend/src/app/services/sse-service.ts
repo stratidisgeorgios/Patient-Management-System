@@ -1,25 +1,26 @@
-import { Injectable, OnDestroy } from "@angular/core";
+import { Inject, Injectable, OnDestroy } from "@angular/core";
 import { Observable } from "rxjs";
 import { KeycloakService } from './keycloak.service';
 import { EventSourcePolyfill } from "event-source-polyfill";
+import { APP_SERVICE_CONFIG, AppConfig } from "../app-config.interface";
 @Injectable({
   providedIn: "root",
 })
 export class SseService implements OnDestroy {
   private eventSource: EventSourcePolyfill | null = null;
 
-  constructor(private keycloakService: KeycloakService) {}
+  constructor(private keycloakService: KeycloakService, @Inject(APP_SERVICE_CONFIG) private config: AppConfig) {}
   connect(): Observable<string> {
     return new Observable<string>(observer => {
       this.keycloakService.getValidToken().then(token => {
-        this.eventSource = new EventSourcePolyfill('/api/search/events', {
+        this.eventSource = new EventSourcePolyfill(`${this.config.apiUrl}/api/search/events`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        this.eventSource.addEventListener('indexUpdated',(event:any) => {
+        this.eventSource.addEventListener('indexUpdated', (event: any) => {
           observer.next(event.data);
         });
         this.eventSource.onerror = (error: any) => {
-          observer.error(error);
+          console.warn('SSE reconnecting...', error);
         };
       })
     })

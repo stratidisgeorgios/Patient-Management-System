@@ -2,18 +2,19 @@ package com.patientsystem.searchservice.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 import com.patientsystem.searchservice.service.SearchService;
+import com.patientsystem.searchservice.service.SseEmitterService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import com.patientsystem.searchservice.documents.PatientDocument;
 import com.patientsystem.searchservice.documents.TreatmentDocument;
 import java.util.List;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import org.springframework.http.MediaType;
-import com.patientsystem.searchservice.service.SseEmitterService;
+import reactor.core.publisher.Flux;
 
 @RestController
 @Tag(name = "Search Service Controller", description = "Controller for handling search service requests")
@@ -43,8 +44,7 @@ public class SearchServiceController {
 
     @GetMapping(value = "/search/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "SSE stream", description = "Server-sent events stream for index updates")
-    public SseEmitter streamEvents() {
-        return sseEmitterService.createEmitter();
+    public Flux<ServerSentEvent<String>> streamEvents() {
+        return sseEmitterService.stream();
     }
-
 }

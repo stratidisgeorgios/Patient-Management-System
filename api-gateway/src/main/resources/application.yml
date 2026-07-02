@@ -12,6 +12,12 @@ spring:
       server:
         webflux:
           routes:
+            - id: search-service-sse-route
+              uri: http://search-service:8080
+              predicates:
+                - Path=/api/search/events
+              metadata:
+                response-timeout: -1
             - id: patient-service-route
               uri: http://patient-service:4000
               predicates:

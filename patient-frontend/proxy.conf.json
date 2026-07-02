@@ -1,4 +1,14 @@
 {
+    "/api/search/events": {
+        "target": "http://localhost:4004",
+        "secure": false,
+        "changeOrigin": true,
+        "logLevel": "debug",
+        "headers": {
+            "Connection": "keep-alive",
+            "Cache-Control": "no-cache"
+        }
+    },
     "/api": {
         "target": "http://localhost:4004",
         "secure": false,

@@ -141,7 +141,6 @@ export class TreatmentList implements OnInit, OnDestroy {
       next: () => {
         this.showTreatmentCreateModal.set(false);
         this.notificationService.success("Treatment created successfully!");
-        if (this.lastSearchQuery) this.searchQuery.next(this.lastSearchQuery);
       },
       error: (err) => this.notificationService.error("Failed to create treatment: " + this.extractError(err))
     });
@@ -170,7 +169,6 @@ export class TreatmentList implements OnInit, OnDestroy {
       next: () => {
         this.showTreatmentEditModal.set(false);
         this.notificationService.success("Treatment updated successfully!");
-        if (this.lastSearchQuery) this.searchQuery.next(this.lastSearchQuery);
       },
       error: (err) => this.notificationService.error("Failed to update treatment: " + this.extractError(err))
     });
@@ -188,7 +186,6 @@ export class TreatmentList implements OnInit, OnDestroy {
       next: () => {
         this.showTreatmentDeleteModal.set(false);
         this.notificationService.success("Treatment deleted successfully!");
-        if (this.lastSearchQuery) this.searchQuery.next(this.lastSearchQuery);
       },
       error: (err) => this.notificationService.error("Failed to delete treatment: " + this.extractError(err))
     });
