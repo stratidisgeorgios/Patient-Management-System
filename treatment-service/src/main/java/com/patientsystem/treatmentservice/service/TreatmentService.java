@@ -1,5 +1,4 @@
 package com.patientsystem.treatmentservice.service;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import com.patientsystem.treatmentservice.dto.TreatmentRequestDTO;
@@ -21,10 +20,6 @@ public class TreatmentService {
         this.treatmentRepository = treatmentRepository;
         this.categoryRepository = categoryRepository;
         this.kafkaProducer = kafkaProducer;
-    }
-
-    public List<TreatmentResponseDTO> getAllTreatments() {
-        return treatmentRepository.findAll().stream().map(TreatmentMapper::toDTO).toList();
     }
 
     public TreatmentResponseDTO getTreatmentById(UUID treatmentId) {

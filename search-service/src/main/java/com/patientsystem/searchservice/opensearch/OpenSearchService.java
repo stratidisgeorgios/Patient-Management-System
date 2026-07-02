@@ -101,6 +101,7 @@ public class OpenSearchService {
         try {
             SearchResponse<PatientDocument> response = openSearchClient.search(SearchRequest.of(s -> s
                 .index("patients")
+                .size(10)
                 .query(q -> q
                     .multiMatch(m -> m
                         .query(query)
@@ -119,6 +120,7 @@ public class OpenSearchService {
         try {
             SearchResponse<TreatmentDocument> response = openSearchClient.search(SearchRequest.of(s -> s
                 .index("treatments")
+                .size(10)
                 .query(q -> q
                     .multiMatch(m -> m
                         .query(query)

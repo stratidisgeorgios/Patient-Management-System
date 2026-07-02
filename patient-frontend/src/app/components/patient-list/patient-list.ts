@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal } from "@angular/core";
+import { Component, OnDestroy, OnInit, signal } from "@angular/core";
 import { PatientResponse } from "../../models/patient.model";
 import { PatientService } from "../../services/patient-service";
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
@@ -6,9 +6,9 @@ import { ConfirmModal } from "../../shared/confirm-modal/confirm-modal";
 import { NotificationService } from "../../services/notification-service";
 import { SearchService } from "../../services/search-service";
 import { Router } from "@angular/router";
-
-const PAGE_SIZE = 30;
-
+import {  debounceTime, forkJoin, Subject, switchMap, takeUntil } from "rxjs";
+import { of } from "rxjs";
+import { SseService } from "../../services/sse-service";
 @Component({
   selector: "app-patient-list",
   imports: [ReactiveFormsModule, ConfirmModal],
@@ -16,15 +16,9 @@ const PAGE_SIZE = 30;
   templateUrl: "./patient-list.html",
   styleUrl: "./patient-list.css",
 })
-export class PatientList implements OnInit {
+export class PatientList implements OnInit, OnDestroy {
   patients = signal<PatientResponse[]>([]);
   selectedPatient = signal<PatientResponse | null>(null);
-  currentPage = signal(0);
-
-  pagedPatients = computed(() =>
-    this.patients().slice(this.currentPage() * PAGE_SIZE, (this.currentPage() + 1) * PAGE_SIZE)
-  );
-  totalPages = computed(() => Math.ceil(this.patients().length / PAGE_SIZE));
 
   editForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
@@ -44,18 +38,59 @@ export class PatientList implements OnInit {
   showCreateModal = signal(false);
   showEditModal = signal(false);
   showDeleteModal = signal(false);
-
-  constructor(private patientService: PatientService, private searchService: SearchService, private notificationService: NotificationService, private router: Router) {}
+  searchQuery = new Subject<string>();
+  hasSearched = signal(false);
+  isLoading = signal(false);
+  lastSearchQuery = '';
+  private destroy$ = new Subject<void>();
+  constructor(private patientService: PatientService, private searchService: SearchService, private notificationService: NotificationService, private router: Router, private sseService: SseService) {}
 
   ngOnInit() {
-    this.patientService.getAll().subscribe({
-      next: (data: any) => {
-        this.patients.set(data.sort((a: PatientResponse, b: PatientResponse) => a.name.localeCompare(b.name)));
+    this.sseService.connect().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (message) => {
+      if (message === 'patient' && this.lastSearchQuery) {
+          this.searchQuery.next(this.lastSearchQuery);
+        }
       },
       error: (err) => {
-        this.notificationService.error("Failed to load patients: " + this.extractError(err));
+        console.error("SSE connection error:", err);
       }
     });
+    this.searchQuery.pipe(
+      debounceTime(200),
+      switchMap(value => {
+        if (!value.trim()) {
+          this.hasSearched.set(false);
+          this.patients.set([]);
+          this.isLoading.set(false);
+          return of([]);
+        }
+        this.hasSearched.set(true);
+        this.isLoading.set(true);
+        this.lastSearchQuery = value;
+        return this.searchService.searchPatients(value).pipe(
+          switchMap(data => {
+            if (data.length === 0) {
+              return of([]);
+            }
+            return forkJoin(data.map(p => this.patientService.getById(p.id)));
+          })
+        );
+      }), takeUntil(this.destroy$)
+    ).subscribe({
+      next: (fullPatients) => {
+        this.patients.set(fullPatients.sort((a, b) => a.name.localeCompare(b.name)));
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.notificationService.error("Failed to search patients: " + this.extractError(err));
+        this.isLoading.set(false);
+      }
+    });
+  }
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private closeAllModals() {
@@ -76,10 +111,10 @@ export class PatientList implements OnInit {
 
   submitCreate() {
     this.patientService.create(this.createForm.value).subscribe({
-      next: (newPatient: any) => {
-        this.patients.set([...this.patients(), newPatient].sort((a: PatientResponse, b: PatientResponse) => a.name.localeCompare(b.name)));
+      next: () => {
         this.showCreateModal.set(false);
         this.notificationService.success("Patient created successfully!");
+        if (this.lastSearchQuery) this.searchQuery.next(this.lastSearchQuery);
       },
       error: (err) => this.notificationService.error("Failed to create patient: " + this.extractError(err))
     });
@@ -100,34 +135,29 @@ export class PatientList implements OnInit {
 
   submitUpdate() {
     this.patientService.update(this.selectedPatient()!.id, this.editForm.value).subscribe({
-      next: (updatedPatient: any) => {
-        const index = this.patients().findIndex((p) => p.id === updatedPatient.id);
-        if (index !== -1) {
-          const updatedPatients = [...this.patients()];
-          updatedPatients[index] = updatedPatient;
-          this.patients.set(updatedPatients);
-        }
+      next: () => {
         this.showEditModal.set(false);
         this.notificationService.success('Patient updated successfully');
+        if (this.lastSearchQuery) this.searchQuery.next(this.lastSearchQuery);
       },
       error: (err) => this.notificationService.error("Failed to update patient: " + this.extractError(err))
     });
   }
+
 
   deletePatient(patient: PatientResponse) {
     this.closeAllModals();
     this.selectedPatient.set(patient);
     this.showDeleteModal.set(true);
   }
-
+  
   submitDelete() {
     const id = this.selectedPatient()!.id;
     this.patientService.delete(id).subscribe({
       next: () => {
-        this.patients.set(this.patients().filter((p) => p.id !== id));
         this.showDeleteModal.set(false);
         this.notificationService.success('Patient deleted successfully');
-        if (this.currentPage() >= this.totalPages()) this.currentPage.set(Math.max(0, this.totalPages() - 1));
+        if (this.lastSearchQuery) this.searchQuery.next(this.lastSearchQuery);
       },
       error: (err) => this.notificationService.error("Failed to delete patient: " + this.extractError(err))
     });
@@ -144,26 +174,6 @@ export class PatientList implements OnInit {
     if (err.error && typeof err.error === 'object') return Object.values(err.error).join(', ');
     return err.message || 'An unexpected error occurred';
   }
-
-  prevPage() { if (this.currentPage() > 0) this.currentPage.update(p => p - 1); }
-  nextPage() { if (this.currentPage() < this.totalPages() - 1) this.currentPage.update(p => p + 1); }
-
-  onSearch(value: string) {
-    if(!value.trim()) {
-      this.patients.set([]);
-      return;
-    }
-    this.searchService.searchPatients(value).subscribe({
-      next: (data: any) => {
-        this.patients.set(data.sort((a: PatientResponse, b: PatientResponse) => a.name.localeCompare(b.name)));
-        this.currentPage.set(0);
-      },
-      error: (err) => {
-        this.notificationService.error("Failed to search patients: " + this.extractError(err));
-      }
-    });
-  }
-
     openProfile(id:string){
     this.router.navigate(['/app/patients', id]);
   }

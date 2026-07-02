@@ -1,6 +1,5 @@
 package com.patientsystem.patientservice.service;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -24,14 +23,6 @@ public class PatientService {
         this.patientRepository = patientRepository;
         this.billingServiceGrpcClient = billingServiceGrpcClient;
         this.kafkaProducer = kafkaProducer;
-    }
-
-    public List<PatientResponseDTO> getAllPatients() {
-        List<PatientResponseDTO> patients = patientRepository.findAll()
-                .stream()
-                .map(patient -> PatientMapper.toDTO(patient))
-                .toList();  
-        return patients;
     }
 
     public PatientResponseDTO getPatientById(UUID id) {

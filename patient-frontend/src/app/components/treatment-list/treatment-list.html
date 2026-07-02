@@ -1,12 +1,20 @@
 <div class="treatment-list">
   <div class="treatment-list-header">
     <span class="label">Treatments</span>
-    <input type="text" class="form-input treatment-search" placeholder="Search treatments..." (input)="onSearch($event.target.value)" />
+    <input type="text" class="form-input treatment-search" placeholder="Search treatments..." (input)="searchQuery.next($event.target.value)" />
     <button (click)="showCategories()" class="btn-secondary">Categories</button>
     <button (click)="createTreatment()" class="btn-primary">+ Add Treatment</button>
   </div>
 
-  @if (treatments().length === 0) {
+  @if (!hasSearched()) {
+    <div class="no-patients">
+      <span class="label">Search for treatments</span>
+    </div>
+  } @else if (isLoading()) {
+    <div class="no-patients">
+      <div class="spinner"></div>
+    </div>
+  } @else if (treatments().length === 0) {
     <div class="no-patients">
       <span class="label">No treatments found</span>
     </div>
@@ -21,7 +29,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (treatment of pagedTreatments(); track treatment.id) {
+        @for (treatment of treatments(); track treatment.id) {
           <tr class="treatment-row">
             <td class="treatment-name">{{ treatment.name }}</td>
             <td class="treatment-category">{{ treatment.category.name }}</td>
@@ -37,13 +45,6 @@
         }
       </tbody>
     </table>
-    @if (totalPages() > 1) {
-      <div class="treatment-pagination">
-        <button (click)="prevPage()" [disabled]="currentPage() === 0" class="btn-ghost">← Prev</button>
-        <span class="label">{{ currentPage() + 1 }} / {{ totalPages() }}</span>
-        <button (click)="nextPage()" [disabled]="currentPage() === totalPages() - 1" class="btn-ghost">Next →</button>
-      </div>
-    }
   }
 </div>
 

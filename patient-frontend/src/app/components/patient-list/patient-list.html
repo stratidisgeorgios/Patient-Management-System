@@ -1,10 +1,18 @@
 <div class="patient-list">
   <div class="patient-list-header">
     <span class="label">Patient Records</span>
-    <input type="text" class="form-input patient-search" placeholder="Search patients..." (input)="onSearch($event.target.value)" />
+    <input type="text" class="form-input patient-search" placeholder="Search patients..." (input)="searchQuery.next($event.target.value)" />
     <button (click)="createPatient()" class="btn-primary">+ Add Patient</button>
   </div>
-  @if (patients().length === 0) {
+  @if (!hasSearched()) {
+    <div class="no-patients">
+      <span class="label">Search for patients</span>
+    </div>
+  } @else if (isLoading()) {
+    <div class="no-patients">
+      <div class="spinner"></div>
+    </div>
+  } @else if (patients().length === 0) {
     <div class="no-patients">
       <span class="label">No patients found</span>
     </div>
@@ -21,7 +29,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (patient of pagedPatients(); track patient.id) {
+        @for (patient of patients(); track patient.id) {
           <tr class="patient-row">
             <td class="patient-name">{{ patient.name }}</td>
             <td class="patient-mono">{{ patient.email }}</td>
@@ -39,13 +47,6 @@
         }
       </tbody>
     </table>
-    @if (totalPages() > 1) {
-      <div class="patient-pagination">
-        <button (click)="prevPage()" [disabled]="currentPage() === 0" class="btn-ghost">← Prev</button>
-        <span class="label">{{ currentPage() + 1 }} / {{ totalPages() }}</span>
-        <button (click)="nextPage()" [disabled]="currentPage() === totalPages() - 1" class="btn-ghost">Next →</button>
-      </div>
-    }
   }
 </div>
 

@@ -13,7 +13,6 @@ import com.patientsystem.treatmentservice.dto.TreatmentResponseDTO;
 import com.patientsystem.treatmentservice.service.TreatmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -24,12 +23,6 @@ public class TreatmentController {
 
     public TreatmentController(TreatmentService treatmentService) {
         this.treatmentService = treatmentService;
-    }
-
-    @GetMapping
-    @Operation(summary = "Get all treatments")
-    public ResponseEntity<List<TreatmentResponseDTO>> getAllTreatments() {
-        return ResponseEntity.ok(treatmentService.getAllTreatments());
     }
 
     @GetMapping("/{treatmentId}")

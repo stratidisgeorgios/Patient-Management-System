@@ -10,10 +10,6 @@ import { APP_SERVICE_CONFIG, AppConfig } from "../app-config.interface";
 export class TreatmentService {
   constructor(@Inject(APP_SERVICE_CONFIG) private config: AppConfig, private http: HttpClient) {}
 
-  getTreatments(): Observable<TreatmentResponse[]> {
-    return this.http.get<TreatmentResponse[]>(`${this.config.apiUrl}/api/treatments`);
-  }
-
   getById(treatmentId: string): Observable<TreatmentResponse> {
     return this.http.get<TreatmentResponse>(`${this.config.apiUrl}/api/treatments/${treatmentId}`);
   }

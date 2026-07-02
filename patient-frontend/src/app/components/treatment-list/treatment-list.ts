@@ -1,4 +1,4 @@
-import { Component, computed, OnInit, signal } from "@angular/core";
+import { Component, OnDestroy, OnInit, signal } from "@angular/core";
 import { TreatmentResponse, CategoryResponse } from "../../models/treatment.model";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { TreatmentService } from "../../services/treatment-service";
@@ -8,28 +8,21 @@ import { CurrencyPipe } from "@angular/common";
 import { CategoryService } from "../../services/category-service";
 import { SearchService } from "../../services/search-service";
 import { Router } from "@angular/router";
-
-const PAGE_SIZE = 30;
-
+import { debounceTime, forkJoin, of, Subject, switchMap, takeUntil } from "rxjs";
+import { SseService } from "../../services/sse-service";
 @Component({
   selector: "app-treatment-list",
   imports: [ReactiveFormsModule, CurrencyPipe, ConfirmModal],
   templateUrl: "./treatment-list.html",
   styleUrl: "./treatment-list.css",
 })
-export class TreatmentList implements OnInit {
+export class TreatmentList implements OnInit, OnDestroy {
   treatments = signal<TreatmentResponse[]>([]);
   treatmentToEdit = signal<TreatmentResponse | null>(null);
   treatmentToDelete = signal<TreatmentResponse | null>(null);
-  currentPage = signal(0);
   categories = signal<CategoryResponse[]>([]);
   categoryToEdit = signal<CategoryResponse | null>(null);
   categoryToDelete = signal<CategoryResponse | null>(null);
-
-  pagedTreatments = computed(() =>
-    this.treatments().slice(this.currentPage() * PAGE_SIZE, (this.currentPage() + 1) * PAGE_SIZE)
-  );
-  totalPages = computed(() => Math.ceil(this.treatments().length / PAGE_SIZE));
 
   editTreatmentForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
@@ -57,18 +50,14 @@ export class TreatmentList implements OnInit {
   showCategoryCreateModal = signal(false);
   showCategoryEditModal = signal(false);
   showCategoryDeleteModal = signal(false);
-
-  constructor(private treatmentService: TreatmentService, private categoryService: CategoryService, private searchService: SearchService, private notificationService: NotificationService, private router: Router) {}
+  searchQuery = new Subject<string>();
+  hasSearched = signal(false);
+  isLoading = signal(false);
+  lastSearchQuery = '';
+  private destroy$ = new Subject<void>();
+  constructor(private treatmentService: TreatmentService, private categoryService: CategoryService, private searchService: SearchService, private notificationService: NotificationService, private router: Router, private sseService: SseService) {}
 
   ngOnInit() {
-    this.treatmentService.getTreatments().subscribe({
-      next: (data: any) => {
-        this.treatments.set(data.sort((a: TreatmentResponse, b: TreatmentResponse) => a.name.localeCompare(b.name)));
-      },
-      error: (err) => {
-        this.notificationService.error("Failed to load treatments: " + this.extractError(err));
-      }
-    });
     this.categoryService.getCategories().subscribe({
       next: (data: any) => {
         this.categories.set(data.sort((a: CategoryResponse, b: CategoryResponse) => a.name.localeCompare(b.name)));
@@ -77,6 +66,54 @@ export class TreatmentList implements OnInit {
         this.notificationService.error("Failed to load categories: " + this.extractError(err));
       }
     });
+    this.sseService.connect().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (message) => {
+        if (message === 'treatment' && this.lastSearchQuery) {
+          this.searchQuery.next(this.lastSearchQuery);
+        }
+      },
+      error: (err) => {
+        console.error("SSE connection error:", err);
+      }
+    });
+
+    this.searchQuery.pipe(
+      debounceTime(200),
+      switchMap(value => {
+        if (!value.trim()) {
+          this.hasSearched.set(false);
+          this.treatments.set([]);
+          this.isLoading.set(false);
+          return of([]);
+        }
+        this.hasSearched.set(true);
+        this.isLoading.set(true);
+        this.lastSearchQuery = value;
+          return this.searchService.searchTreatments(value).pipe(
+            switchMap(data => {
+              if (data.length === 0) {
+                return of([]);
+              }
+              return forkJoin(data.map(p => this.treatmentService.getById(p.id)));
+            })
+          );
+        }),
+        takeUntil(this.destroy$)
+      ).subscribe({
+        next: (fullTreatments) => {
+          this.treatments.set(fullTreatments.sort((a, b) => a.name.localeCompare(b.name)));
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          this.notificationService.error("Failed to search treatments: " + this.extractError(err));
+          this.isLoading.set(false);
+        }
+    });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private closeAllModals() {
@@ -102,11 +139,9 @@ export class TreatmentList implements OnInit {
   submitTreatmentCreate() {
     this.treatmentService.createTreatment(this.createTreatmentForm.value).subscribe({
       next: () => {
-        this.treatmentService.getTreatments().subscribe((data: any) => {
-          this.treatments.set(data.sort((a: TreatmentResponse, b: TreatmentResponse) => a.name.localeCompare(b.name)));
-          this.showTreatmentCreateModal.set(false);
-          this.notificationService.success("Treatment created successfully!");
-        });
+        this.showTreatmentCreateModal.set(false);
+        this.notificationService.success("Treatment created successfully!");
+        if (this.lastSearchQuery) this.searchQuery.next(this.lastSearchQuery);
       },
       error: (err) => this.notificationService.error("Failed to create treatment: " + this.extractError(err))
     });
@@ -115,12 +150,17 @@ export class TreatmentList implements OnInit {
   editTreatment(treatment: TreatmentResponse) {
     this.closeAllModals();
     this.editTreatmentForm.reset();
-    this.treatmentToEdit.set(treatment);
     this.showTreatmentEditModal.set(true);
-    this.editTreatmentForm.patchValue({
-      name: treatment.name,
-      category: treatment.category.id,
-      price: treatment.price
+    this.treatmentService.getById(treatment.id).subscribe({
+      next: (full) => {
+        this.treatmentToEdit.set(full);
+        this.editTreatmentForm.patchValue({
+          name: full.name,
+          category: full.category.id,
+          price: full.price
+        });
+      },
+      error: (err) => this.notificationService.error("Failed to load treatment: " + this.extractError(err))
     });
   }
 
@@ -128,11 +168,9 @@ export class TreatmentList implements OnInit {
     const treatmentId = this.treatmentToEdit()!.id;
     this.treatmentService.updateTreatment(treatmentId, this.editTreatmentForm.value).subscribe({
       next: () => {
-        this.treatmentService.getTreatments().subscribe((data: any) => {
-          this.treatments.set(data.sort((a: TreatmentResponse, b: TreatmentResponse) => a.name.localeCompare(b.name)));
-          this.showTreatmentEditModal.set(false);
-          this.notificationService.success("Treatment updated successfully!");
-        });
+        this.showTreatmentEditModal.set(false);
+        this.notificationService.success("Treatment updated successfully!");
+        if (this.lastSearchQuery) this.searchQuery.next(this.lastSearchQuery);
       },
       error: (err) => this.notificationService.error("Failed to update treatment: " + this.extractError(err))
     });
@@ -148,12 +186,9 @@ export class TreatmentList implements OnInit {
     const treatmentId = this.treatmentToDelete()!.id;
     this.treatmentService.deleteTreatment(treatmentId).subscribe({
       next: () => {
-        this.treatmentService.getTreatments().subscribe((data: any) => {
-          this.treatments.set(data.sort((a: TreatmentResponse, b: TreatmentResponse) => a.name.localeCompare(b.name)));
-          this.showTreatmentDeleteModal.set(false);
-          this.notificationService.success("Treatment deleted successfully!");
-          if (this.currentPage() >= this.totalPages()) this.currentPage.set(this.totalPages() - 1);
-        });
+        this.showTreatmentDeleteModal.set(false);
+        this.notificationService.success("Treatment deleted successfully!");
+        if (this.lastSearchQuery) this.searchQuery.next(this.lastSearchQuery);
       },
       error: (err) => this.notificationService.error("Failed to delete treatment: " + this.extractError(err))
     });
@@ -178,11 +213,8 @@ export class TreatmentList implements OnInit {
   submitCategoryCreate() {
     this.categoryService.createCategory(this.createCategoryForm.value).subscribe({
       next: () => {
-        this.categoryService.getCategories().subscribe((data: any) => {
-          this.categories.set(data.sort((a: CategoryResponse, b: CategoryResponse) => a.name.localeCompare(b.name)));
-          this.showCategoryCreateModal.set(false);
-          this.notificationService.success("Category created successfully!");
-        });
+        this.showCategoryCreateModal.set(false);
+        this.notificationService.success("Category created successfully!");
       },
       error: (err) => this.notificationService.error("Failed to create category: " + this.extractError(err))
     });
@@ -205,11 +237,8 @@ export class TreatmentList implements OnInit {
     const categoryId = this.categoryToEdit()!.id;
     this.categoryService.updateCategory(categoryId, this.editCategoryForm.value).subscribe({
       next: () => {
-        this.categoryService.getCategories().subscribe((data: any) => {
-          this.categories.set(data.sort((a: CategoryResponse, b: CategoryResponse) => a.name.localeCompare(b.name)));
-          this.showCategoryEditModal.set(false);
-          this.notificationService.success("Category updated successfully!");
-        });
+        this.showCategoryEditModal.set(false);
+        this.notificationService.success("Category updated successfully!");
       },
       error: (err) => this.notificationService.error("Failed to update category: " + this.extractError(err))
     });
@@ -225,11 +254,8 @@ export class TreatmentList implements OnInit {
     const categoryId = this.categoryToDelete()!.id;
     this.categoryService.deleteCategory(categoryId).subscribe({
       next: () => {
-        this.categoryService.getCategories().subscribe((data: any) => {
-          this.categories.set(data.sort((a: CategoryResponse, b: CategoryResponse) => a.name.localeCompare(b.name)));
-          this.showCategoryDeleteModal.set(false);
-          this.notificationService.success("Category deleted successfully!");
-        });
+        this.showCategoryDeleteModal.set(false);
+        this.notificationService.success("Category deleted successfully!");
       },
       error: (err) => this.notificationService.error("Failed to delete category: " + this.extractError(err))
     });
@@ -246,27 +272,6 @@ export class TreatmentList implements OnInit {
     if (err.error && typeof err.error === 'object') return Object.values(err.error).join(', ');
     return err.message || 'An unexpected error occurred';
   }
-
-  prevPage() { if (this.currentPage() > 0) this.currentPage.update(p => p - 1); }
-  nextPage() { if (this.currentPage() < this.totalPages() - 1) this.currentPage.update(p => p + 1); }
-
-  onSearch(value: string) {
-    if(!value.trim()) {
-      this.treatments.set([]);
-      return;
-    }
-    this.searchService.searchTreatments(value).subscribe({
-      next: (data: any) => {
-        this.treatments.set(data.sort((a: TreatmentResponse, b: TreatmentResponse) => a.name.localeCompare(b.name)));
-        this.currentPage.set(0);
-      },
-      error: (err) => {
-        this.notificationService.error("Failed to search treatments: " + this.extractError(err));
-      }
-    });
-  }
-
-
     openProfile(id:string){
     this.router.navigate(['/app/treatments', id]);
   }
