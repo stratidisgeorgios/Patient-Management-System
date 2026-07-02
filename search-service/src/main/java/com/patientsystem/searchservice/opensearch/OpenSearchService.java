@@ -4,6 +4,7 @@ import com.patientsystem.searchservice.documents.PatientDocument;
 import com.patientsystem.searchservice.documents.TreatmentDocument;
 import jakarta.annotation.PostConstruct;
 import org.opensearch.client.opensearch.OpenSearchClient;
+import org.opensearch.client.opensearch._types.Refresh;
 import org.opensearch.client.opensearch.core.DeleteRequest;
 import org.opensearch.client.opensearch.core.IndexRequest;
 import org.opensearch.client.opensearch.core.SearchRequest;
@@ -57,6 +58,7 @@ public class OpenSearchService {
                 .index("patients")
                 .id(doc.getId())
                 .document(doc)
+                .refresh(Refresh.WaitFor)
             ));
         } catch (IOException e) {
             throw new IOException("Failed to index patient: " + e.getMessage(), e);
@@ -68,6 +70,7 @@ public class OpenSearchService {
             openSearchClient.delete(DeleteRequest.of(d -> d
                 .index("patients")
                 .id(patientId)
+                .refresh(Refresh.WaitFor)
             ));
         } catch (IOException e) {
             throw new IOException("Failed to delete patient: " + e.getMessage(), e);
@@ -80,6 +83,7 @@ public class OpenSearchService {
                 .index("treatments")
                 .id(doc.getId())
                 .document(doc)
+                .refresh(Refresh.WaitFor)
             ));
         } catch (IOException e) {
             throw new IOException("Failed to index treatment: " + e.getMessage(), e);
@@ -91,6 +95,7 @@ public class OpenSearchService {
             openSearchClient.delete(DeleteRequest.of(d -> d
                 .index("treatments")
                 .id(treatmentId)
+                .refresh(Refresh.WaitFor)
             ));
         } catch (IOException e) {
             throw new IOException("Failed to delete treatment: " + e.getMessage(), e);
