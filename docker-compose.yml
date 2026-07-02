@@ -291,7 +291,11 @@ services:
   opensearch-init:
     image: busybox
     privileged: true
-    command: sysctl -w vm.max_map_count=262144
+    # OpenSearch runs as UID 1000 (non-root). When Docker creates the bind-mount directory it's owned by root,
+    # causing AccessDeniedException on startup. This init container fixes ownership before OpenSearch starts.
+    command: sh -c "sysctl -w vm.max_map_count=262144 && mkdir -p /opensearch-data && chown -R 1000:1000 /opensearch-data"
+    volumes:
+      - ./opensearch/data:/opensearch-data
     networks:
       - patient-network
 

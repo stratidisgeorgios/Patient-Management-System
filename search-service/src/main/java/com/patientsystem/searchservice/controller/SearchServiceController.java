@@ -11,15 +11,20 @@ import org.springframework.http.ResponseEntity;
 import com.patientsystem.searchservice.documents.PatientDocument;
 import com.patientsystem.searchservice.documents.TreatmentDocument;
 import java.util.List;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.http.MediaType;
+import com.patientsystem.searchservice.service.SseEmitterService;
 
 @RestController
 @Tag(name = "Search Service Controller", description = "Controller for handling search service requests")
 @RequestMapping("/api")
 public class SearchServiceController {
     private final SearchService searchService;
+    private final SseEmitterService sseEmitterService;
 
-    public SearchServiceController(SearchService searchService) {
+    public SearchServiceController(SearchService searchService, SseEmitterService sseEmitterService) {
         this.searchService = searchService;
+        this.sseEmitterService = sseEmitterService;
     }
 
     @GetMapping("/search/patients")
@@ -35,4 +40,11 @@ public class SearchServiceController {
         List<TreatmentDocument> results = searchService.searchTreatments(q);
         return ResponseEntity.ok(results);
     }
+
+    @GetMapping(value = "/search/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "SSE stream", description = "Server-sent events stream for index updates")
+    public SseEmitter streamEvents() {
+        return sseEmitterService.createEmitter();
+    }
+
 }

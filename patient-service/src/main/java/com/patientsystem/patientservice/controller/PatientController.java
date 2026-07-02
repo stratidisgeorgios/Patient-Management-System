@@ -1,6 +1,5 @@
 package com.patientsystem.patientservice.controller;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -29,13 +28,6 @@ public class PatientController {
 
     public PatientController(PatientService patientService) {
         this.patientService = patientService;
-    }
-
-    @GetMapping
-    @Operation(summary = "Get all patients", description = "Retrieve a list of all patients in the system.")
-    public ResponseEntity<List<PatientResponseDTO>> getPatients() {
-        List<PatientResponseDTO> patients = patientService.getAllPatients();
-        return ResponseEntity.ok(patients);
     }
 
     @GetMapping("/{id}")

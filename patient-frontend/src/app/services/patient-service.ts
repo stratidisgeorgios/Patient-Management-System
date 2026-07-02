@@ -9,9 +9,6 @@ import { PatientRequest, PatientResponse } from "../models/patient.model";
 })
 export class PatientService {
   constructor(@Inject(APP_SERVICE_CONFIG) private config: AppConfig, private http: HttpClient) {}
-  getAll(): Observable<PatientResponse[]> {
-    return this.http.get<PatientResponse[]>(`${this.config.apiUrl}/api/patients`).pipe(tap(response => console.log('Get All Patients response:', response)));
-  }
   create(patient: PatientRequest): Observable<PatientResponse> {
     return this.http.post<PatientResponse>(`${this.config.apiUrl}/api/patients/create`, patient).pipe(tap(response => console.log('Create Patient response:', response)));
   }
