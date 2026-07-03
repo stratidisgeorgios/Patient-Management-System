@@ -7,7 +7,7 @@
 }
 
 .treatment-search {
-  @apply flex-1 w-auto;
+  @apply flex-1;
 }
 
 .treatment-table {
@@ -36,14 +36,6 @@
 
 .treatment-actions {
   @apply flex gap-4 justify-center;
-}
-
-.action-edit {
-  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#1351AA] hover:text-[#141414] transition-colors duration-300;
-}
-
-.action-delete {
-  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] hover:text-[#141414] transition-colors duration-300;
 }
 
 .treatment-pagination {

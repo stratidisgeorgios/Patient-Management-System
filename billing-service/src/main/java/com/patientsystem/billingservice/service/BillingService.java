@@ -1,5 +1,13 @@
 package com.patientsystem.billingservice.service;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import com.patientsystem.billingservice.model.BillingAccount;
 import com.patientsystem.billingservice.repository.BillingAccountRepository;
@@ -10,9 +18,13 @@ import com.patientsystem.billingservice.dto.ChargeResponseDTO;
 import com.patientsystem.billingservice.grpc.BillingServiceGrpcClient;
 import com.patientsystem.billingservice.kafka.KafkaProducer;
 import com.patientsystem.treatment.grpc.TreatmentResponse;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 @Service
 public class BillingService {
@@ -87,5 +99,26 @@ public class BillingService {
         List<Charge> charges = chargeRepository.findAllByBillingAccountId(billingAccount.getId());
         chargeRepository.deleteAll(charges);
         billingAccountRepository.delete(billingAccount);
+    }
+
+    public byte[] generateInvoice(String patientId) {
+        BillingResponseDTO billingInfo = getBillingInfo(patientId);
+        try {
+            InputStream template = getClass().getResourceAsStream("/templates/invoice.jrxml");
+            JasperReport jasperReport = JasperCompileManager.compileReport(template);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("PATIENT_NAME", billingInfo.getPatientName());
+            params.put("PATIENT_EMAIL", billingInfo.getPatientEmail());
+            params.put("PATIENT_ID", billingInfo.getPatientId());
+            params.put("TOTAL_BALANCE", billingInfo.getBalance());
+            params.put("INVOICE_DATE", LocalDate.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
+
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(billingInfo.getCharges());
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
+            return JasperExportManager.exportReportToPdf(jasperPrint);
+        } catch (JRException e) {
+            throw new RuntimeException("Failed to generate invoice", e);
+        }
     }
 }

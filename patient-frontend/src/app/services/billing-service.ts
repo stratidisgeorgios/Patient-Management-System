@@ -21,4 +21,7 @@ export class BillingService {
   removeCharge(patientId: string, chargeId: string): Observable<void> {
     return this.http.delete<void>(`${this.config.apiUrl}/api/billing/${patientId}/charge/${chargeId}`);
   }
+  getInvoice(patientId: string): Observable<Blob> {
+    return this.http.get(`${this.config.apiUrl}/api/billing/${patientId}/invoice`, { responseType: 'blob' });
+  }
 }

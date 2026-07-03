@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  * { border-radius: 0 !important; }
+  * { border-radius: 0; }
 
   body {
     background-color: #E3E2DE;
@@ -40,15 +40,19 @@
 
   /* Buttons */
   .btn-primary {
-    @apply bg-[#1351AA] text-[#E3E2DE] text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 hover:bg-[#141414] transition-colors duration-300 inline-block disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply relative bg-[#1351AA] text-[#E3E2DE] text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-[3px] shadow-[0_1px_2px_rgba(20,20,20,0.12)] hover:bg-[#141414] hover:shadow-[0_2px_8px_rgba(20,20,20,0.18)] active:scale-[0.98] transition-all duration-200 inline-block disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 disabled:shadow-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1351AA];
   }
 
   .btn-secondary {
-    @apply bg-[#141414] text-[#E3E2DE] text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 hover:bg-[#1351AA] transition-colors duration-300 inline-block;
+    @apply bg-[#141414] text-[#E3E2DE] text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-[3px] shadow-[0_1px_2px_rgba(20,20,20,0.12)] hover:bg-[#1351AA] hover:shadow-[0_2px_8px_rgba(20,20,20,0.18)] active:scale-[0.98] transition-all duration-200 inline-block disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1351AA];
   }
 
   .btn-outline {
-    @apply border border-[#C7C7C7] text-[#141414] text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 hover:border-[#141414] transition-colors duration-300;
+    @apply border border-[#C7C7C7] text-[#141414] text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-[3px] hover:border-[#141414] hover:bg-[#141414]/[0.03] active:scale-[0.98] transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1351AA];
+  }
+
+  .btn-outline-danger {
+    @apply border border-[#C7C7C7] text-[#7A7A7A] text-xs font-bold uppercase tracking-[0.2em] px-8 py-4 rounded-[3px] hover:border-[#141414] hover:bg-[#141414] hover:text-[#E3E2DE] active:scale-[0.98] transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1351AA];
   }
 
   .btn-ghost {
@@ -76,13 +80,30 @@
     @apply appearance-none cursor-pointer;
   }
 
+  /* Search */
+  .search-box {
+    @apply flex items-center gap-3 border border-[#C7C7C7] rounded-[3px] bg-[#141414]/[0.02] px-4 py-3 transition-colors duration-200 focus-within:border-[#1351AA] focus-within:bg-transparent focus-within:shadow-[0_1px_4px_rgba(19,81,170,0.12)];
+  }
+
+  .search-box-icon {
+    @apply w-4 h-4 shrink-0 text-[#7A7A7A] transition-colors duration-200;
+  }
+
+  .search-box:focus-within .search-box-icon {
+    @apply text-[#1351AA];
+  }
+
+  .search-box-input {
+    @apply flex-1 w-full bg-transparent text-sm text-[#141414] placeholder:text-[#7A7A7A] focus:outline-none;
+  }
+
   /* Modal */
   .modal-overlay {
     @apply fixed inset-0 bg-[#141414]/60 flex items-center justify-center z-50;
   }
 
   .modal-card {
-    @apply bg-[#E3E2DE] w-full max-w-lg border border-[#C7C7C7];
+    @apply bg-[#E3E2DE] w-full max-w-lg border border-[#C7C7C7] rounded-[4px] shadow-[0_8px_24px_rgba(20,20,20,0.16)];
   }
 
   .modal-header {
@@ -95,5 +116,16 @@
 
   .modal-actions {
     @apply flex gap-4 pt-8;
+  }
+
+  /* Row actions */
+  .action-view,
+  .action-edit {
+    @apply text-xs font-bold uppercase tracking-[0.2em] text-[#1351AA] px-2 py-1 rounded-[2px] hover:bg-[#1351AA]/10 hover:text-[#141414] transition-all duration-200 inline-block;
+  }
+
+  .action-delete,
+  .action-remove {
+    @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] px-2 py-1 rounded-[2px] hover:bg-[#141414]/5 hover:text-[#141414] transition-all duration-200 inline-block;
   }
 }

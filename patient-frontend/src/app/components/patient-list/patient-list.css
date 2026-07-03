@@ -7,7 +7,7 @@
 }
 
 .patient-search {
-  @apply flex-1 w-auto;
+  @apply flex-1;
 }
 
 .patient-table {
@@ -38,15 +38,6 @@
 .patient-actions {
   @apply flex gap-4 justify-center;
 }
-
-.action-edit {
-  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#1351AA] hover:text-[#141414] transition-colors duration-300;
-}
-
-.action-delete {
-  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] hover:text-[#141414] transition-colors duration-300;
-}
-
 
 .patient-pagination {
   @apply flex items-center justify-center gap-8 py-6 border-t border-[#C7C7C7];

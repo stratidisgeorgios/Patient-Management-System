@@ -6,8 +6,12 @@
   @apply flex items-center gap-4 border-b border-[#C7C7C7] pb-6 mb-8;
 }
 
+.profile-header-actions {
+  @apply flex items-center gap-4 ml-auto;
+}
+
 .profile-section {
-  @apply flex flex-col gap-6;
+  @apply flex flex-col gap-6 border border-[#C7C7C7] rounded-[4px] bg-[#141414]/[0.012] shadow-[0_1px_3px_rgba(20,20,20,0.05)] p-8;
 }
 
 .profile-grid {

@@ -1,7 +1,13 @@
 <div class="treatment-list">
   <div class="treatment-list-header">
     <span class="label">Treatments</span>
-    <input type="text" class="form-input treatment-search" placeholder="Search treatments..." (input)="searchQuery.next($event.target.value)" />
+    <div class="search-box treatment-search">
+      <svg class="search-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" class="search-box-input" placeholder="Search treatments..." (input)="searchQuery.next($event.target.value)" />
+    </div>
     <button (click)="showCategories()" class="btn-secondary">Categories</button>
     <button (click)="createTreatment()" class="btn-primary">+ Add Treatment</button>
   </div>
@@ -36,8 +42,6 @@
             <td class="font-mono">{{ treatment.price | currency }}</td>
             <td>
               <div class="treatment-actions">
-                <button (click)="editTreatment(treatment)" class="action-edit">Edit</button>
-                <button (click)="deleteTreatment(treatment)" class="action-delete">Delete</button>
                 <button (click)="openProfile(treatment.id)" class="action-view">View</button>
               </div>
             </td>

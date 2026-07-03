@@ -6,8 +6,12 @@
   @apply flex items-center gap-4 border-b border-[#C7C7C7] pb-6;
 }
 
+.profile-header-actions {
+  @apply flex items-center gap-4 ml-auto;
+}
+
 .profile-section {
-  @apply flex flex-col gap-6;
+  @apply flex flex-col gap-6 border border-[#C7C7C7] rounded-[4px] bg-[#141414]/[0.012] shadow-[0_1px_3px_rgba(20,20,20,0.05)] p-8;
 }
 
 .profile-grid {
@@ -54,16 +58,20 @@
   @apply relative;
 }
 
-.charge-search-input {
-  @apply w-full bg-transparent py-3 text-sm text-[#141414] placeholder:text-[#C7C7C7] border-b border-[#C7C7C7] focus:outline-none focus:border-[#1351AA] transition-colors duration-300;
-}
-
 .treatment-dropdown {
-  @apply absolute top-full left-0 right-0 bg-[#E3E2DE] border border-t-0 border-[#C7C7C7] z-10 max-h-56 overflow-y-auto;
+  @apply absolute top-full left-0 right-0 mt-1 bg-[#E3E2DE] border border-[#C7C7C7] rounded-[3px] shadow-[0_4px_16px_rgba(20,20,20,0.12)] z-10 max-h-56 overflow-y-auto;
 }
 
 .treatment-option {
-  @apply flex items-center justify-between px-4 py-3 border-b border-[#C7C7C7] cursor-pointer hover:bg-[#1351AA]/5 transition-colors duration-300;
+  @apply flex items-center justify-between px-4 py-3 border-b border-[#C7C7C7] cursor-pointer hover:bg-[#1351AA]/5 transition-colors duration-300 last:border-b-0;
+}
+
+.treatment-option:first-child {
+  @apply rounded-t-[3px];
+}
+
+.treatment-option:last-child {
+  @apply rounded-b-[3px];
 }
 
 .treatment-option-name {
@@ -94,10 +102,6 @@
 
 .charge-row {
   @apply hover:bg-[#1351AA]/5 transition-colors duration-300;
-}
-
-.action-remove {
-  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] hover:text-[#141414] transition-colors duration-300;
 }
 
 .no-charges {

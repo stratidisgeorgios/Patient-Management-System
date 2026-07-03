@@ -1,34 +1,53 @@
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, signal, ViewChild } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { CurrencyPipe, Location, DatePipe } from "@angular/common";
 import { PatientService } from "../../services/patient-service";
 import { PatientResponse } from "../../models/patient.model";
 import { BillingService } from "../../services/billing-service";
 import { BillingResponse } from "../../models/billing.model";
-import { ReactiveFormsModule } from "@angular/forms";
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Subject, of } from "rxjs";
 import { SearchService } from "../../services/search-service";
 import { NotificationService } from "../../services/notification-service";
 import { debounceTime, switchMap, takeUntil } from "rxjs/operators";
 import { TreatmentSearchResponse } from "../../models/search.model";
+import { ConfirmModal } from "../../shared/confirm-modal/confirm-modal";
 
 @Component({
   selector: "app-patient-profile",
-  imports: [ReactiveFormsModule,CurrencyPipe,DatePipe],
+  imports: [ReactiveFormsModule, CurrencyPipe, DatePipe, ConfirmModal],
   templateUrl: "./patient-profile.html",
   styleUrl: "./patient-profile.css",
 })
-
 export class PatientProfile implements OnInit, OnDestroy {
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private location: Location,
+    private patientService: PatientService,
+    private billingService: BillingService,
+    private searchService: SearchService,
+    private notificationService: NotificationService
+  ) {}
 
-  constructor(private route: ActivatedRoute, private location: Location, private patientService: PatientService, private billingService: BillingService, private searchService: SearchService, private notificationService: NotificationService) {}
   patient = signal<PatientResponse | null>(null);
   error: string | null = null;
   billingInfo = signal<BillingResponse | null>(null);
   searchQuery = new Subject<string>();
   treatments = signal<TreatmentSearchResponse[]>([]);
+  showEditModal = signal(false);
+  showDeleteModal = signal(false);
   private destroy$ = new Subject<void>();
+
   @ViewChild('searchContainer') searchContainer!: ElementRef;
+
+  editForm = new FormGroup({
+    name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
+    email: new FormControl('', [Validators.required, Validators.email]),
+    gender: new FormControl('', [Validators.required]),
+    address: new FormControl('', [Validators.required, Validators.maxLength(200)]),
+    dateOfBirth: new FormControl('', [Validators.required])
+  });
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
@@ -74,15 +93,54 @@ export class PatientProfile implements OnInit, OnDestroy {
     });
   }
 
+  openEdit(): void {
+    const p = this.patient();
+    if (!p) return;
+    this.editForm.patchValue({
+      name: p.name,
+      email: p.email,
+      gender: p.gender,
+      address: p.address,
+      dateOfBirth: p.dateOfBirth
+    });
+    this.showEditModal.set(true);
+  }
+
+  submitUpdate(): void {
+    const id = this.patient()!.id;
+    this.patientService.update(id, this.editForm.value as any).subscribe({
+      next: (updated) => {
+        this.patient.set(updated);
+        this.showEditModal.set(false);
+        this.notificationService.success('Patient updated successfully');
+      },
+      error: (err) => this.notificationService.error('Failed to update patient: ' + this.extractError(err))
+    });
+  }
+
+  openDelete(): void {
+    this.showDeleteModal.set(true);
+  }
+
+  submitDelete(): void {
+    const id = this.patient()!.id;
+    this.patientService.delete(id).subscribe({
+      next: () => {
+        this.notificationService.success('Patient deleted successfully');
+        this.router.navigate(['/app/patients']);
+      },
+      error: (err) => this.notificationService.error('Failed to delete patient: ' + this.extractError(err))
+    });
+  }
+
+  cancelDelete(): void {
+    this.showDeleteModal.set(false);
+  }
+
   chargePatient(treatmentId: string): void {
     this.treatments.set([]);
     const patientId = this.patient()!.id;
-    const treatment = this.treatments().find(t => t.id === treatmentId);
-    if (!treatment) {
-      this.notificationService.error('Treatment not found.');
-      return;
-    }
-    const chargeRequest = { treatmentId: treatment.id};
+    const chargeRequest = { treatmentId };
     this.billingService.addCharge(patientId, chargeRequest).subscribe({
       next: () => {
         this.notificationService.success('Charge added successfully.');
@@ -96,6 +154,7 @@ export class PatientProfile implements OnInit, OnDestroy {
       }
     });
   }
+
   removeCharge(chargeId: string): void {
     const patientId = this.patient()!.id;
     this.billingService.removeCharge(patientId, chargeId).subscribe({
@@ -112,8 +171,34 @@ export class PatientProfile implements OnInit, OnDestroy {
     });
   }
 
+  private extractError(err: any): string {
+    if (err.error?.message) return err.error.message;
+    if (typeof err.error === 'string') return err.error;
+    if (err.error && typeof err.error === 'object') return Object.values(err.error).join(', ');
+    return err.message || 'An unexpected error occurred';
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  generateInvoice(): void {
+    const patientId = this.patient()!.id;
+    this.billingService.getInvoice(patientId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `invoice_${patientId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        this.notificationService.error('Failed to generate invoice: ' + err.message);
+      }
+    });
   }
 }
