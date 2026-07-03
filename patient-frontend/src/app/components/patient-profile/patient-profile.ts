@@ -183,7 +183,7 @@ export class PatientProfile implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  generateInvoice(): void {
+  downloadInvoice(): void {
     const patientId = this.patient()!.id;
     this.billingService.getInvoice(patientId).subscribe({
       next: (blob) => {
