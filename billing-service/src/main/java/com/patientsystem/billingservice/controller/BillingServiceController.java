@@ -1,4 +1,6 @@
 package com.patientsystem.billingservice.controller;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,5 +44,15 @@ public class BillingServiceController {
     public ResponseEntity<Void> removeCharge(@PathVariable String patientId, @PathVariable UUID chargeId) {
         billingService.removeCharge(patientId, chargeId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{patientId}/invoice")
+    @Operation(summary = "Generate a PDF invoice for a patient", description = "Generate and download a PDF invoice for a specific patient containing all their charges and total balance.")
+    public ResponseEntity<byte[]> getInvoice(@PathVariable String patientId) {
+        byte[] pdf = billingService.generateInvoice(patientId);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"invoice-" + patientId + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 }

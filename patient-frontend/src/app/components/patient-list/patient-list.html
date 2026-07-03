@@ -1,7 +1,13 @@
 <div class="patient-list">
   <div class="patient-list-header">
     <span class="label">Patient Records</span>
-    <input type="text" class="form-input patient-search" placeholder="Search patients..." (input)="searchQuery.next($event.target.value)" />
+    <div class="search-box patient-search">
+      <svg class="search-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" class="search-box-input" placeholder="Search patients..." (input)="searchQuery.next($event.target.value)" />
+    </div>
     <button (click)="createPatient()" class="btn-primary">+ Add Patient</button>
   </div>
   @if (!hasSearched()) {
@@ -38,8 +44,6 @@
             <td class="patient-mono">{{ patient.registeredDate }}</td>
             <td>
               <div class="patient-actions">
-                <button (click)="updatePatient(patient)" class="action-edit">Edit</button>
-                <button (click)="deletePatient(patient)" class="action-delete">Delete</button>
                 <button (click)="openProfile(patient.id)" class="action-view">View</button>
               </div>
             </td>
