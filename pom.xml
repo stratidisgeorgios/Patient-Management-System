@@ -14,7 +14,6 @@
         <module>billing-service</module>
         <module>analytics-service</module>
         <module>api-gateway</module>
-        <module>auth-service</module>
         <module>treatment-service</module>
         <module>integration-tests</module>
         <module>infrastructure</module>

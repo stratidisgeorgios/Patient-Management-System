@@ -68,6 +68,7 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       BILLING_SERVICE_ADDRESS: billing-service
       BILLING_SERVICE_GRPC_PORT: 9001
+      GRPC_SERVER_PORT: 9003
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     # ports:
     #   - "4000:4000" # documentation
@@ -110,6 +111,8 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       TREATMENT_SERVICE_ADDRESS: treatment-service
       TREATMENT_SERVICE_GRPC_PORT: 9002
+      PATIENT_SERVICE_ADDRESS: patient-service
+      PATIENT_SERVICE_GRPC_PORT: 9003
     # ports:
     #   - "4001:4001" # documentation
     #   - "9001:9001" # documentation (gRPC)
