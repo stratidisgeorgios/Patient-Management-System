@@ -1,14 +1,23 @@
 package com.patientsystem.billingservice.service;
-import java.io.InputStream;
+import java.awt.Color;
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import com.patientsystem.billingservice.model.BillingAccount;
 import com.patientsystem.billingservice.repository.BillingAccountRepository;
 import com.patientsystem.billingservice.repository.ChargeRepository;
@@ -18,16 +27,6 @@ import com.patientsystem.billingservice.dto.ChargeResponseDTO;
 import com.patientsystem.billingservice.grpc.BillingServiceGrpcClient;
 import com.patientsystem.billingservice.kafka.KafkaProducer;
 import com.patientsystem.treatment.grpc.TreatmentResponse;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.engine.export.JRPdfExporter;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import java.io.ByteArrayOutputStream;
 
 @Service
 public class BillingService {
@@ -106,56 +105,139 @@ public class BillingService {
 
     public byte[] generateInvoice(String patientId) {
         BillingResponseDTO billingInfo = getBillingInfo(patientId);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        Document document = new Document(PageSize.A4, 40, 40, 40, 40);
         try {
-            InputStream template = getClass().getResourceAsStream("/templates/invoice.jrxml");
-            JasperReport jasperReport = JasperCompileManager.compileReport(template);
+            PdfWriter.getInstance(document, baos);
+            document.open();
 
-            Map<String, Object> params = new HashMap<>();
-            params.put("PATIENT_NAME", billingInfo.getPatientName());
-            params.put("PATIENT_EMAIL", billingInfo.getPatientEmail());
-            params.put("PATIENT_ID", billingInfo.getPatientId());
-            params.put("TOTAL_BALANCE", String.format("$%,.2f", billingInfo.getBalance()));
-            params.put("INVOICE_DATE", LocalDate.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
+            Color dark    = new Color(0x14, 0x14, 0x14);
+            Color muted   = new Color(0x7A, 0x7A, 0x7A);
+            Color rowLine = new Color(0xEE, 0xEE, 0xEE);
+            Color divLine = new Color(0xC7, 0xC7, 0xC7);
 
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
-            List<InvoiceRow> rows = billingInfo.getCharges().stream()
-                    .map(c -> new InvoiceRow(
-                            c.getTreatmentName(),
-                            c.getTreatmentCategory(),
-                            c.getTimestamp() != null ? c.getTimestamp().format(dateFormatter) : "",
-                            String.format("$%,.2f", c.getPrice())
-                    ))
-                    .toList();
+            Font fClinic    = new Font(Font.HELVETICA, 18, Font.BOLD,   dark);
+            Font fInvoice   = new Font(Font.HELVETICA, 22, Font.BOLD,   dark);
+            Font fSubtitle  = new Font(Font.HELVETICA,  9, Font.NORMAL, muted);
+            Font fLabel     = new Font(Font.HELVETICA,  7, Font.BOLD,   muted);
+            Font fName      = new Font(Font.HELVETICA, 13, Font.BOLD,   dark);
+            Font fInfo      = new Font(Font.HELVETICA,  9, Font.NORMAL, muted);
+            Font fThHead    = new Font(Font.HELVETICA,  8, Font.BOLD,   Color.WHITE);
+            Font fTdDark    = new Font(Font.HELVETICA,  8, Font.NORMAL, dark);
+            Font fTdMuted   = new Font(Font.HELVETICA,  8, Font.NORMAL, muted);
+            Font fTotal     = new Font(Font.HELVETICA, 11, Font.BOLD,   dark);
 
-            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(rows);
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            JRPdfExporter exporter = new JRPdfExporter();
-            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
-            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(baos));
-            exporter.exportReport();
-            return baos.toByteArray();
-        } catch (JRException e) {
+            // ── Header ──────────────────────────────────────────────────────────
+            PdfPTable header = new PdfPTable(2);
+            header.setWidthPercentage(100);
+            header.setSpacingAfter(4);
+
+            PdfPCell clinicCell = new PdfPCell();
+            clinicCell.setBorder(Rectangle.NO_BORDER);
+            clinicCell.setPaddingBottom(6);
+            clinicCell.addElement(new Paragraph("Patient System", fClinic));
+            clinicCell.addElement(new Paragraph("Medical Patient Management System", fSubtitle));
+            header.addCell(clinicCell);
+
+            PdfPCell invCell = new PdfPCell();
+            invCell.setBorder(Rectangle.NO_BORDER);
+            invCell.setPaddingBottom(6);
+            Paragraph invTitle = new Paragraph("INVOICE", fInvoice);
+            invTitle.setAlignment(Element.ALIGN_RIGHT);
+            invCell.addElement(invTitle);
+            Paragraph invDate = new Paragraph("Date: " + LocalDate.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")), fSubtitle);
+            invDate.setAlignment(Element.ALIGN_RIGHT);
+            invCell.addElement(invDate);
+            header.addCell(invCell);
+
+            document.add(header);
+
+            // ── Divider ──────────────────────────────────────────────────────────
+            PdfPTable divider = new PdfPTable(1);
+            divider.setWidthPercentage(100);
+            divider.setSpacingAfter(12);
+            PdfPCell divCell = new PdfPCell(new Phrase(" "));
+            divCell.setBorder(Rectangle.BOTTOM);
+            divCell.setBorderColorBottom(divLine);
+            divCell.setBorderWidthBottom(0.5f);
+            divider.addCell(divCell);
+            document.add(divider);
+
+            // ── Bill To ──────────────────────────────────────────────────────────
+            Paragraph billTo = new Paragraph("BILL TO", fLabel);
+            billTo.setSpacingAfter(4);
+            document.add(billTo);
+            document.add(new Paragraph(billingInfo.getPatientName(), fName));
+            document.add(new Paragraph(billingInfo.getPatientEmail(), fInfo));
+            document.add(new Paragraph("Patient ID: " + billingInfo.getPatientId(), fInfo));
+
+            // ── Charges table ─────────────────────────────────────────────────────
+            PdfPTable table = new PdfPTable(4);
+            table.setWidthPercentage(100);
+            table.setWidths(new float[]{3.2f, 2.4f, 2.2f, 1.8f});
+            table.setSpacingBefore(16);
+
+            int[] aligns = {Element.ALIGN_LEFT, Element.ALIGN_LEFT, Element.ALIGN_LEFT, Element.ALIGN_RIGHT};
+            for (int i = 0; i < 4; i++) {
+                String[] hdrs = {"Treatment", "Category", "Date", "Amount"};
+                PdfPCell c = new PdfPCell(new Phrase(hdrs[i], fThHead));
+                c.setBackgroundColor(dark);
+                c.setBorder(Rectangle.NO_BORDER);
+                c.setPadding(7);
+                c.setHorizontalAlignment(aligns[i]);
+                table.addCell(c);
+            }
+
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MMM dd, yyyy");
+            for (ChargeResponseDTO charge : billingInfo.getCharges()) {
+                String[] vals = {
+                    charge.getTreatmentName(),
+                    charge.getTreatmentCategory(),
+                    charge.getTimestamp() != null ? charge.getTimestamp().format(fmt) : "",
+                    String.format("$%,.2f", charge.getPrice())
+                };
+                Font[] fonts = {fTdDark, fTdMuted, fTdMuted, fTdDark};
+                for (int i = 0; i < 4; i++) {
+                    PdfPCell c = new PdfPCell(new Phrase(vals[i], fonts[i]));
+                    c.setBorder(Rectangle.BOTTOM);
+                    c.setBorderColorBottom(rowLine);
+                    c.setBorderWidthBottom(0.5f);
+                    c.setPadding(7);
+                    c.setHorizontalAlignment(aligns[i]);
+                    table.addCell(c);
+                }
+            }
+            document.add(table);
+
+            // ── Total ─────────────────────────────────────────────────────────────
+            PdfPTable totalTable = new PdfPTable(2);
+            totalTable.setWidthPercentage(100);
+            totalTable.setWidths(new float[]{4, 2});
+            totalTable.setSpacingBefore(0);
+
+            PdfPCell totalLabel = new PdfPCell(new Phrase("Total Balance:", fTotal));
+            totalLabel.setBorder(Rectangle.TOP);
+            totalLabel.setBorderColorTop(dark);
+            totalLabel.setBorderWidthTop(1f);
+            totalLabel.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            totalLabel.setPadding(8);
+            totalTable.addCell(totalLabel);
+
+            PdfPCell totalValue = new PdfPCell(new Phrase(String.format("$%,.2f", billingInfo.getBalance()), fTotal));
+            totalValue.setBorder(Rectangle.TOP);
+            totalValue.setBorderColorTop(dark);
+            totalValue.setBorderWidthTop(1f);
+            totalValue.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            totalValue.setPadding(8);
+            totalTable.addCell(totalValue);
+
+            document.add(totalTable);
+
+        } catch (Exception e) {
             throw new RuntimeException("Failed to generate invoice", e);
+        } finally {
+            document.close();
         }
-    }
-
-    public static class InvoiceRow {
-        private final String treatmentName;
-        private final String treatmentCategory;
-        private final String date;
-        private final String amount;
-
-        public InvoiceRow(String treatmentName, String treatmentCategory, String date, String amount) {
-            this.treatmentName = treatmentName;
-            this.treatmentCategory = treatmentCategory;
-            this.date = date;
-            this.amount = amount;
-        }
-
-        public String getTreatmentName() { return treatmentName; }
-        public String getTreatmentCategory() { return treatmentCategory; }
-        public String getDate() { return date; }
-        public String getAmount() { return amount; }
+        return baos.toByteArray();
     }
 }
