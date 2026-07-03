@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
-        log.warn("Runtime exception: {}", ex.getMessage());
+        log.warn("Runtime exception: {}", ex.getMessage(), ex);
         return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
     }
 }

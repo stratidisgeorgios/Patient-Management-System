@@ -38,6 +38,7 @@
       </div>
     </div>
 
+    @if (billingInfo()) {
     <div class="profile-section">
       <div class="billing-header">
         <span class="label">Billing</span>
@@ -104,6 +105,8 @@
         </table>
       }
     </div>
+    }
+
   </div>
 @if (showEditModal()) {
   <div class="modal-overlay">
