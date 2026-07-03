@@ -20,11 +20,14 @@ import com.patientsystem.billingservice.kafka.KafkaProducer;
 import com.patientsystem.treatment.grpc.TreatmentResponse;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import java.io.ByteArrayOutputStream;
 
 @Service
 public class BillingService {
@@ -126,7 +129,12 @@ public class BillingService {
 
             JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(rows);
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
-            return JasperExportManager.exportReportToPdf(jasperPrint);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            JRPdfExporter exporter = new JRPdfExporter();
+            exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+            exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(baos));
+            exporter.exportReport();
+            return baos.toByteArray();
         } catch (JRException e) {
             throw new RuntimeException("Failed to generate invoice", e);
         }
