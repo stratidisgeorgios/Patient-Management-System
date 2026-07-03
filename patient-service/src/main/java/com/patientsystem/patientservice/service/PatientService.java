@@ -55,6 +55,7 @@ public class PatientService {
     }
 
     public void deletePatient(UUID id){
+        billingServiceGrpcClient.deleteBillingAccount(id.toString());
         Patient patient = patientRepository.findById(id)
             .orElseThrow(() -> new IdNotFoundException("Patient with ID " + id + " not found."));
         patientRepository.deleteById(id);

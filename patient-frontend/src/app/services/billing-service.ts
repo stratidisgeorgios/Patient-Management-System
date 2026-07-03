@@ -17,4 +17,8 @@ export class BillingService {
   addCharge(patientId: string, charge: ChargeRequest): Observable<void> {
     return this.http.post<void>(`${this.config.apiUrl}/api/billing/${patientId}/charge`, charge);
   }
+
+  removeCharge(patientId: string, chargeId: string): Observable<void> {
+    return this.http.delete<void>(`${this.config.apiUrl}/api/billing/${patientId}/charge/${chargeId}`);
+  }
 }

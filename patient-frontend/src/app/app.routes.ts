@@ -3,7 +3,6 @@ import { Home } from './pages/home/home';
 import { Login } from './pages/login/login';
 import { About } from './pages/about/about';
 import { Patients } from './pages/patients/patients';
-import { Billing } from './pages/billing/billing';
 import { Treatments } from './pages/treatments/treatments';
 import { Analytics } from './pages/analytics/analytics';
 import { Layout } from './layout/layout';
@@ -31,7 +30,6 @@ export const routes: Routes = [
       { path: 'patients/:id', component: PatientProfile },
       { path: 'treatments/:id', component: TreatmentProfile },
       { path: 'patients', component: Patients },
-      { path: 'billing', component: Billing },
       { path: 'treatments', component: Treatments },
       { path: 'analytics', component: Analytics }
     ]

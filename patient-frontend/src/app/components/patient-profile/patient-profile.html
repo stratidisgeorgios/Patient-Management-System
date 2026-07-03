@@ -33,6 +33,66 @@
         </div>
       </div>
     </div>
+
+    <div class="profile-section">
+      <div class="billing-header">
+        <span class="label">Billing</span>
+        <div class="billing-balance">
+          <span class="billing-balance-label">Total Balance</span>
+          <span class="billing-balance-value">{{ billingInfo()!.balance | currency }}</span>
+        </div>
+      </div>
+
+      <div class="charge-search" #searchContainer>
+        <input
+          type="text"
+          placeholder="Search treatments to add a charge..."
+          (input)="searchQuery.next($any($event.target).value)"
+          (focus)="searchQuery.next($any($event.target).value)"
+          class="charge-search-input"
+        />
+        @if (treatments().length > 0) {
+          <div class="treatment-dropdown">
+            @for (treatment of treatments(); track treatment.id) {
+              <div class="treatment-option" (click)="chargePatient(treatment.id)">
+                <div>
+                  <div class="treatment-option-name">{{ treatment.name }}</div>
+                  <div class="treatment-option-category">{{ treatment.category }}</div>
+                </div>
+                <span class="font-mono text-sm text-[#141414]">{{ treatment.price | currency }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (billingInfo()!.charges.length === 0) {
+        <p class="no-charges">No charges on record.</p>
+      } @else {
+        <table class="charge-table">
+          <thead>
+            <tr>
+              <th>Treatment</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (charge of billingInfo()!.charges; track charge.id) {
+              <tr class="charge-row">
+                <td class="charge-name">{{ charge.treatmentName }}</td>
+                <td>{{ charge.treatmentCategory }}</td>
+                <td class="font-mono">{{ charge.price | currency }}</td>
+                <td class="font-mono">{{ charge.timestamp | date:'mediumDate' }}</td>
+                <td><button (click)="removeCharge(charge.id)" class="action-remove">Remove</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
   </div>
 } @else if (error) {
   <div class="profile-loading">
