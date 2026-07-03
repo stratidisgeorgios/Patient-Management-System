@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import com.patientsystem.billingservice.model.BillingAccount;
@@ -24,7 +22,7 @@ import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.data.JRMapCollectionDataSource;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 @Service
 public class BillingService {
@@ -115,18 +113,16 @@ public class BillingService {
             params.put("INVOICE_DATE", LocalDate.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
 
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
-            List<Map<String, ?>> rows = billingInfo.getCharges().stream()
-                    .map(c -> {
-                        Map<String, Object> row = new HashMap<>();
-                        row.put("treatmentName", c.getTreatmentName());
-                        row.put("treatmentCategory", c.getTreatmentCategory());
-                        row.put("date", c.getTimestamp() != null ? c.getTimestamp().format(dateFormatter) : "");
-                        row.put("amount", String.format("$%,.2f", c.getPrice()));
-                        return (Map<String, ?>) row;
-                    })
+            List<InvoiceRow> rows = billingInfo.getCharges().stream()
+                    .map(c -> new InvoiceRow(
+                            c.getTreatmentName(),
+                            c.getTreatmentCategory(),
+                            c.getTimestamp() != null ? c.getTimestamp().format(dateFormatter) : "",
+                            String.format("$%,.2f", c.getPrice())
+                    ))
                     .toList();
 
-            JRMapCollectionDataSource dataSource = new JRMapCollectionDataSource(rows);
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(rows);
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
             return JasperExportManager.exportReportToPdf(jasperPrint);
         } catch (JRException e) {
@@ -134,4 +130,22 @@ public class BillingService {
         }
     }
 
+    public static class InvoiceRow {
+        private final String treatmentName;
+        private final String treatmentCategory;
+        private final String date;
+        private final String amount;
+
+        public InvoiceRow(String treatmentName, String treatmentCategory, String date, String amount) {
+            this.treatmentName = treatmentName;
+            this.treatmentCategory = treatmentCategory;
+            this.date = date;
+            this.amount = amount;
+        }
+
+        public String getTreatmentName() { return treatmentName; }
+        public String getTreatmentCategory() { return treatmentCategory; }
+        public String getDate() { return date; }
+        public String getAmount() { return amount; }
+    }
 }
