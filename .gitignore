@@ -75,3 +75,6 @@ patient-frontend/dist/
 
 ### Project specific ###
 FUTURE.md
+
+### Claude ###
+.claude/
