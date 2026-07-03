@@ -24,7 +24,7 @@ import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.data.JRMapCollectionDataSource;
 
 @Service
 public class BillingService {
@@ -111,14 +111,27 @@ public class BillingService {
             params.put("PATIENT_NAME", billingInfo.getPatientName());
             params.put("PATIENT_EMAIL", billingInfo.getPatientEmail());
             params.put("PATIENT_ID", billingInfo.getPatientId());
-            params.put("TOTAL_BALANCE", billingInfo.getBalance());
+            params.put("TOTAL_BALANCE", String.format("$%,.2f", billingInfo.getBalance()));
             params.put("INVOICE_DATE", LocalDate.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
 
-            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(billingInfo.getCharges());
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
+            List<Map<String, Object>> rows = billingInfo.getCharges().stream()
+                    .map(c -> {
+                        Map<String, Object> row = new HashMap<>();
+                        row.put("treatmentName", c.getTreatmentName());
+                        row.put("treatmentCategory", c.getTreatmentCategory());
+                        row.put("date", c.getTimestamp() != null ? c.getTimestamp().format(dateFormatter) : "");
+                        row.put("amount", String.format("$%,.2f", c.getPrice()));
+                        return row;
+                    })
+                    .toList();
+
+            JRMapCollectionDataSource dataSource = new JRMapCollectionDataSource(rows);
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
             return JasperExportManager.exportReportToPdf(jasperPrint);
         } catch (JRException e) {
             throw new RuntimeException("Failed to generate invoice", e);
         }
     }
+
 }
