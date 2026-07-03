@@ -115,14 +115,14 @@ public class BillingService {
             params.put("INVOICE_DATE", LocalDate.now().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
 
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
-            List<Map<String, Object>> rows = billingInfo.getCharges().stream()
+            List<Map<String, ?>> rows = billingInfo.getCharges().stream()
                     .map(c -> {
                         Map<String, Object> row = new HashMap<>();
                         row.put("treatmentName", c.getTreatmentName());
                         row.put("treatmentCategory", c.getTreatmentCategory());
                         row.put("date", c.getTimestamp() != null ? c.getTimestamp().format(dateFormatter) : "");
                         row.put("amount", String.format("$%,.2f", c.getPrice()));
-                        return row;
+                        return (Map<String, ?>) row;
                     })
                     .toList();
 
