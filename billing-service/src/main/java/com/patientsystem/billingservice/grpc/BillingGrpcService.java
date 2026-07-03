@@ -29,4 +29,14 @@ public class BillingGrpcService extends BillingServiceGrpc.BillingServiceImplBas
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void deleteBillingAccount(BillingRequest billingRequest, StreamObserver<BillingResponse> responseObserver) {
+        billingService.deleteAccount(billingRequest.getPatientId());
+        BillingResponse response = BillingResponse.newBuilder()
+                .setStatus("Billing account deleted for patient: " + billingRequest.getPatientId())
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
 }

@@ -4,11 +4,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@Table(name = "charge", indexes = {
+    @Index(columnList = "billing_account_id")
+})
 public class Charge {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

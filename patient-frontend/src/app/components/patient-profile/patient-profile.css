@@ -1,9 +1,9 @@
 .profile {
-  @apply flex flex-col;
+  @apply flex flex-col gap-12;
 }
 
 .profile-header {
-  @apply flex items-center gap-4 border-b border-[#C7C7C7] pb-6 mb-8;
+  @apply flex items-center gap-4 border-b border-[#C7C7C7] pb-6;
 }
 
 .profile-section {
@@ -27,5 +27,79 @@
 }
 
 .profile-loading {
-  @apply flex items-center justify-center py-20;
+  @apply flex items-center justify-center gap-4 py-20;
+}
+
+/* Billing */
+
+.billing-header {
+  @apply flex items-center justify-between border-b border-[#C7C7C7] pb-6;
+}
+
+.billing-balance {
+  @apply flex flex-col items-end gap-1;
+}
+
+.billing-balance-label {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A];
+}
+
+.billing-balance-value {
+  @apply text-xl font-bold font-mono text-[#141414];
+}
+
+/* Treatment search */
+
+.charge-search {
+  @apply relative;
+}
+
+.charge-search-input {
+  @apply w-full bg-transparent py-3 text-sm text-[#141414] placeholder:text-[#C7C7C7] border-b border-[#C7C7C7] focus:outline-none focus:border-[#1351AA] transition-colors duration-300;
+}
+
+.treatment-dropdown {
+  @apply absolute top-full left-0 right-0 bg-[#E3E2DE] border border-t-0 border-[#C7C7C7] z-10 max-h-56 overflow-y-auto;
+}
+
+.treatment-option {
+  @apply flex items-center justify-between px-4 py-3 border-b border-[#C7C7C7] cursor-pointer hover:bg-[#1351AA]/5 transition-colors duration-300;
+}
+
+.treatment-option-name {
+  @apply text-sm font-semibold text-[#141414];
+}
+
+.treatment-option-category {
+  @apply text-xs uppercase tracking-[0.1em] text-[#7A7A7A] mt-0.5;
+}
+
+/* Charges table */
+
+.charge-table {
+  @apply w-full border-collapse;
+}
+
+.charge-table th {
+  @apply py-4 pr-6 text-left text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] border-b border-[#C7C7C7];
+}
+
+.charge-table td {
+  @apply py-5 pr-6 text-sm text-[#444343] border-b border-[#C7C7C7];
+}
+
+.charge-name {
+  @apply font-semibold text-[#141414];
+}
+
+.charge-row {
+  @apply hover:bg-[#1351AA]/5 transition-colors duration-300;
+}
+
+.action-remove {
+  @apply text-xs font-bold uppercase tracking-[0.2em] text-[#7A7A7A] hover:text-[#141414] transition-colors duration-300;
+}
+
+.no-charges {
+  @apply text-sm text-[#7A7A7A] py-8 text-center border-t border-[#C7C7C7];
 }

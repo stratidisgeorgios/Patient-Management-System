@@ -12,6 +12,7 @@ import com.patientsystem.billingservice.kafka.KafkaProducer;
 import com.patientsystem.treatment.grpc.TreatmentResponse;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class BillingService {
@@ -67,5 +68,24 @@ public class BillingService {
                 .map(c -> new ChargeResponseDTO(c.getId().toString(), c.getTreatmentId(), c.getTreatmentName(), c.getTreatmentCategory(), c.getPrice(), c.getTimestamp()))
                 .toList();
         return new BillingResponseDTO(account.getPatientId(), account.getPatientName(), account.getPatientEmail(), account.getBalance(), charges);
+    }
+
+    public void removeCharge(String patientId, UUID chargeId) {
+        BillingAccount billingAccount = getAccount(patientId);
+        Charge charge = chargeRepository.findById(chargeId)
+                .orElseThrow(() -> new RuntimeException("Charge not found for ID: " + chargeId));
+        if (!charge.getBillingAccountId().equals(billingAccount.getId())) {
+            throw new RuntimeException("Charge does not belong to the specified billing account");
+        }
+        billingAccount.setBalance(billingAccount.getBalance().subtract(charge.getPrice()));
+        billingAccountRepository.save(billingAccount);
+        chargeRepository.delete(charge);
+    }
+
+    public void deleteAccount(String patientId) {
+        BillingAccount billingAccount = getAccount(patientId);
+        List<Charge> charges = chargeRepository.findAllByBillingAccountId(billingAccount.getId());
+        chargeRepository.deleteAll(charges);
+        billingAccountRepository.delete(billingAccount);
     }
 }

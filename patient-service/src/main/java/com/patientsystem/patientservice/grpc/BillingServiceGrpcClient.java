@@ -28,4 +28,10 @@ public class BillingServiceGrpcClient {
         BillingResponse response = billingServiceBlockingStub.createBillingAccount(request);
         return response;
     }
+
+    public BillingResponse deleteBillingAccount(String patientId){
+        BillingRequest request = BillingRequest.newBuilder().setPatientId(patientId).build();
+        BillingResponse response = billingServiceBlockingStub.deleteBillingAccount(request);
+        return response;
+    }
 }

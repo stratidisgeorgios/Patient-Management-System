@@ -8,7 +8,7 @@ import { CurrencyPipe } from "@angular/common";
 import { CategoryService } from "../../services/category-service";
 import { SearchService } from "../../services/search-service";
 import { Router } from "@angular/router";
-import { catchError, debounceTime, forkJoin, map, of, Subject, switchMap, takeUntil } from "rxjs";
+import { debounceTime, forkJoin, of, Subject, switchMap, takeUntil } from "rxjs";
 import { SseService } from "../../services/sse-service";
 @Component({
   selector: "app-treatment-list",
@@ -94,9 +94,7 @@ export class TreatmentList implements OnInit, OnDestroy {
               if (data.length === 0) {
                 return of([]);
               }
-              return forkJoin(data.map(p =>
-                this.treatmentService.getById(p.id).pipe(catchError(() => of(null)))
-              )).pipe(map(results => results.filter(p => p !== null)));
+              return forkJoin(data.map(p => this.treatmentService.getById(p.id)));
             })
           );
         }),

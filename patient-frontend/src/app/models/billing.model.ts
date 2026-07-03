@@ -1,12 +1,12 @@
 export interface ChargeRequest {
   treatmentId: string;
-  price: number;
 }
 
 export interface ChargeResponse {
   id: string;
+  treatmentId: string;
   treatmentName: string;
-  category: string;
+  treatmentCategory: string;
   price: number;
   timestamp: string;
 }

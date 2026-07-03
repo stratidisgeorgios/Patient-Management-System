@@ -6,7 +6,7 @@ import { ConfirmModal } from "../../shared/confirm-modal/confirm-modal";
 import { NotificationService } from "../../services/notification-service";
 import { SearchService } from "../../services/search-service";
 import { Router } from "@angular/router";
-import { catchError, debounceTime, forkJoin, map, of, Subject, switchMap, takeUntil } from "rxjs";
+import { debounceTime, forkJoin, of, Subject, switchMap, takeUntil } from "rxjs";
 import { SseService } from "../../services/sse-service";
 @Component({
   selector: "app-patient-list",
@@ -72,9 +72,7 @@ export class PatientList implements OnInit, OnDestroy {
             if (data.length === 0) {
               return of([]);
             }
-            return forkJoin(data.map(p =>
-              this.patientService.getById(p.id).pipe(catchError(() => of(null)))
-            )).pipe(map(results => results.filter(p => p !== null)));
+            return forkJoin(data.map(p => this.patientService.getById(p.id)));
           })
         );
       }), takeUntil(this.destroy$)
