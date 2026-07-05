@@ -15,11 +15,13 @@ export class TreatmentService {
   }
 
   createTreatment(treatment: TreatmentRequest): Observable<TreatmentResponse> {
-    return this.http.post<TreatmentResponse>(`${this.config.apiUrl}/api/treatments`, treatment);
+    const body = { ...treatment, price: String(treatment.price) };
+    return this.http.post<TreatmentResponse>(`${this.config.apiUrl}/api/treatments`, body);
   }
 
   updateTreatment(treatmentId: string, treatment: TreatmentRequest): Observable<TreatmentResponse> {
-    return this.http.put<TreatmentResponse>(`${this.config.apiUrl}/api/treatments/${treatmentId}`, treatment);
+    const body = { ...treatment, price: String(treatment.price) };
+    return this.http.put<TreatmentResponse>(`${this.config.apiUrl}/api/treatments/${treatmentId}`, body);
   }
 
   deleteTreatment(treatmentId: string): Observable<void> {

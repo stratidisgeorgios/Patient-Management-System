@@ -16,6 +16,7 @@ import com.patientsystem.billingservice.repository.ChargeRepository;
 import com.patientsystem.billingservice.model.Charge;
 import com.patientsystem.billingservice.dto.BillingResponseDTO;
 import com.patientsystem.billingservice.dto.ChargeResponseDTO;
+import com.patientsystem.billingservice.mapper.BillingMapper;
 import com.patientsystem.billingservice.grpc.BillingServiceGrpcClient;
 import com.patientsystem.billingservice.grpc.PatientServiceGrpcClient;
 import com.patientsystem.billingservice.kafka.KafkaProducer;
@@ -73,11 +74,8 @@ public class BillingService {
 
     public BillingResponseDTO getBillingInfo(String patientId) {
         BillingAccount account = getAccount(patientId);
-        List<ChargeResponseDTO> charges = chargeRepository.findAllByBillingAccountId(account.getId())
-                .stream()
-                .map(c -> new ChargeResponseDTO(c.getId().toString(), c.getTreatmentId(), c.getTreatmentName(), c.getTreatmentCategory(), c.getPrice(), c.getTimestamp()))
-                .toList();
-        return new BillingResponseDTO(account.getPatientId(), account.getPatientName(), account.getPatientEmail(), account.getBalance(), charges);
+        List<Charge> charges = chargeRepository.findAllByBillingAccountId(account.getId());
+        return BillingMapper.toDTO(account, charges);
     }
 
     public void removeCharge(String patientId, UUID chargeId) {
@@ -90,6 +88,12 @@ public class BillingService {
         billingAccount.setBalance(billingAccount.getBalance().subtract(charge.getPrice()));
         billingAccountRepository.save(billingAccount);
         chargeRepository.delete(charge);
+    }
+    public BillingAccount updateAccount(String patientId, String name, String email) {
+        BillingAccount billingAccount = getAccount(patientId);
+        billingAccount.setPatientName(name);
+        billingAccount.setPatientEmail(email);
+        return billingAccountRepository.save(billingAccount);
     }
 
     public void deleteAccount(String patientId) {
@@ -113,8 +117,8 @@ public class BillingService {
                 rows.append("<tr>")
                     .append("<td>").append(xml(charge.getTreatmentName())).append("</td>")
                     .append("<td class=\"muted\">").append(xml(charge.getTreatmentCategory())).append("</td>")
-                    .append("<td class=\"muted\">").append(charge.getTimestamp() != null ? charge.getTimestamp().format(fmt) : "").append("</td>")
-                    .append("<td class=\"right\">").append(String.format("$%,.2f", charge.getPrice())).append("</td>")
+                    .append("<td class=\"muted\">").append((charge.getTimestamp() != null && !charge.getTimestamp().isEmpty()) ? LocalDateTime.parse(charge.getTimestamp()).format(fmt) : "").append("</td>")
+                    .append("<td class=\"right\">").append(String.format("$%,.2f", new BigDecimal(charge.getPrice()))).append("</td>")
                     .append("</tr>");
             }
 
@@ -124,14 +128,14 @@ public class BillingService {
                     LocalDate.parse(patient.getRegisteredDate(), dateFmt).format(fmt);
 
             String html = template
-                    .replace("{{PATIENT_NAME}}", xml(billingInfo.getPatientName()))
-                    .replace("{{PATIENT_EMAIL}}", xml(billingInfo.getPatientEmail()))
+                    .replace("{{PATIENT_NAME}}", xml(patient.getName()))
+                    .replace("{{PATIENT_EMAIL}}", xml(patient.getEmail()))
                     .replace("{{PATIENT_GENDER}}", xml(patient.getGender()))
                     .replace("{{PATIENT_DOB}}", xml(dob))
                     .replace("{{PATIENT_REGISTERED}}", xml(registered))
                     .replace("{{PATIENT_ADDRESS}}", xml(patient.getAddress()))
                     .replace("{{INVOICE_DATE}}", LocalDate.now().format(fmt))
-                    .replace("{{TOTAL_BALANCE}}", String.format("$%,.2f", billingInfo.getBalance()))
+                    .replace("{{TOTAL_BALANCE}}", String.format("$%,.2f", new BigDecimal(billingInfo.getBalance())))
                     .replace("{{CHARGES_ROWS}}", rows.toString());
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();

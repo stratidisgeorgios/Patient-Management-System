@@ -1,12 +1,10 @@
 package com.patientsystem.treatmentservice.dto;
 
-import java.math.BigDecimal;
-
 public class TreatmentResponseDTO {
     private String id;
     private String name;
     private CategoryDTO category;
-    private BigDecimal price;
+    private String price;
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -17,8 +15,8 @@ public class TreatmentResponseDTO {
     public CategoryDTO getCategory() { return category; }
     public void setCategory(CategoryDTO category) { this.category = category; }
 
-    public BigDecimal getPrice() { return price; }
-    public void setPrice(BigDecimal price) { this.price = price; }
+    public String getPrice() { return price; }
+    public void setPrice(String price) { this.price = price; }
 
     public static class CategoryDTO {
         private String id;

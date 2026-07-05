@@ -7,7 +7,7 @@ export interface ChargeResponse {
   treatmentId: string;
   treatmentName: string;
   treatmentCategory: string;
-  price: number;
+  price: string;
   timestamp: string;
 }
 
@@ -15,6 +15,6 @@ export interface BillingResponse {
   patientId: string;
   patientName: string;
   patientEmail: string;
-  balance: number;
+  balance: string;
   charges: ChargeResponse[];
 }

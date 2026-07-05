@@ -11,5 +11,5 @@ export interface TreatmentSearchResponse {
     id: string;
     name: string;
     category: string;
-    price: number;
+    price: string;
 }

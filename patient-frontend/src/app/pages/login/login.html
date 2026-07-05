@@ -1,10 +1,60 @@
 <section class="login-section">
   <div class="login-card">
-    <p class="section-index">003 — Sign In</p>
-    <h2 class="login-hero">Welcome<br/>Back</h2>
-    <p class="login-subtitle">Sign in with your organisation account</p>
-    <div class="login-submit">
-      <button (click)="keycloakService.login()" class="btn-primary w-full text-center">Sign In</button>
-    </div>
+    <p class="section-index">003 — {{ mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Sign Up' : 'Confirm Email' }}</p>
+
+    <h2 class="login-hero">
+      {{ mode === 'signin' ? 'Welcome Back' : mode === 'signup' ? 'Get Started' : 'Check Your Email' }}
+    </h2>
+
+    <p class="login-subtitle">
+      {{ mode === 'signin' ? 'Sign in with your organisation account' :
+         mode === 'signup' ? 'Create your organisation account' :
+         'Enter the confirmation code sent to ' + email }}
+    </p>
+
+    <!-- Sign In Form -->
+    @if (mode === 'signin') {
+      <div class="login-form">
+        <input class="login-input" type="email" placeholder="Email" [(ngModel)]="email" />
+        <input class="login-input" type="password" placeholder="Password" [(ngModel)]="password" />
+      </div>
+      <div class="login-submit">
+        <button class="btn-primary w-full text-center" (click)="signIn()" [disabled]="loading">
+          {{ loading ? 'Signing in...' : 'Sign In' }}
+        </button>
+        <p class="login-switch">Don't have an account? <span (click)="switchMode('signup')">Sign Up</span></p>
+      </div>
+    }
+
+    <!-- Sign Up Form -->
+    @if (mode === 'signup') {
+      <div class="login-form">
+        <input class="login-input" type="email" placeholder="Email" [(ngModel)]="email" />
+        <input class="login-input" type="password" placeholder="Password" [(ngModel)]="password" />
+      </div>
+      <div class="login-submit">
+        <button class="btn-primary w-full text-center" (click)="signUp()" [disabled]="loading">
+          {{ loading ? 'Creating account...' : 'Sign Up' }}
+        </button>
+        <p class="login-switch">Already have an account? <span (click)="switchMode('signin')">Sign In</span></p>
+      </div>
+    }
+
+    <!-- Confirm Email Form -->
+    @if (mode === 'confirm') {
+      <div class="login-form">
+        <input class="login-input" type="text" placeholder="Confirmation code" [(ngModel)]="confirmationCode" />
+      </div>
+      <div class="login-submit">
+        <button class="btn-primary w-full text-center" (click)="confirmSignUp()" [disabled]="loading">
+          {{ loading ? 'Confirming...' : 'Confirm' }}
+        </button>
+        <p class="login-switch">Wrong email? <span (click)="switchMode('signup')">Go back</span></p>
+      </div>
+    }
+
+    @if (error) {
+      <p class="login-error">{{ error }}</p>
+    }
   </div>
 </section>

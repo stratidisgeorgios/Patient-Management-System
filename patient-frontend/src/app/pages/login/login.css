@@ -14,6 +14,22 @@
   @apply flex flex-col gap-0;
 }
 
+.login-input {
+  @apply w-full border-t border-[#C7C7C7] py-4 text-sm outline-none bg-transparent placeholder-[#8a8a8a];
+}
+
 .login-submit {
-  @apply border-t border-[#C7C7C7] pt-8;
+  @apply border-t border-[#C7C7C7] pt-8 flex flex-col gap-4;
+}
+
+.login-switch {
+  @apply text-sm text-[#8a8a8a] text-center;
+}
+
+.login-switch span {
+  @apply text-[#141414] font-semibold cursor-pointer underline;
+}
+
+.login-error {
+  @apply text-red-500 text-sm mt-4;
 }

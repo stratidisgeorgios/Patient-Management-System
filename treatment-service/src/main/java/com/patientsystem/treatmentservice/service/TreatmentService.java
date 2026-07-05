@@ -1,4 +1,5 @@
 package com.patientsystem.treatmentservice.service;
+import java.math.BigDecimal;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import com.patientsystem.treatmentservice.dto.TreatmentRequestDTO;
@@ -36,7 +37,7 @@ public class TreatmentService {
         Treatment treatment = new Treatment();
         treatment.setName(request.getName());
         treatment.setCategory(category);
-        treatment.setPrice(request.getPrice());
+        treatment.setPrice(new BigDecimal(request.getPrice()));
         Treatment savedTreatment = treatmentRepository.save(treatment);
         kafkaProducer.sendTreatmentEvent(savedTreatment, "TreatmentCreated");
         return TreatmentMapper.toDTO(savedTreatment);
@@ -49,7 +50,7 @@ public class TreatmentService {
                 .orElseThrow(() -> new RuntimeException("Category not found for ID: " + request.getCategory()));
         treatment.setName(request.getName());
         treatment.setCategory(category);
-        treatment.setPrice(request.getPrice());
+        treatment.setPrice(new BigDecimal(request.getPrice()));
         Treatment savedTreatment = treatmentRepository.save(treatment);
         kafkaProducer.sendTreatmentEvent(savedTreatment, "TreatmentUpdated");
         return TreatmentMapper.toDTO(savedTreatment);

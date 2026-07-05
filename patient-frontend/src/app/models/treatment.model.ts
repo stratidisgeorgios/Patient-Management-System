@@ -1,7 +1,7 @@
 export interface TreatmentRequest {
   name: string;
   category: string;
-  price: number;
+  price: string;
 }
 
 export interface CategoryRequest {
@@ -19,5 +19,5 @@ export interface TreatmentResponse {
   id: string;
   name: string;
   category: CategoryResponse;
-  price: number;
+  price: string;
 }

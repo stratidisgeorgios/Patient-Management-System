@@ -39,4 +39,16 @@ public class BillingGrpcService extends BillingServiceGrpc.BillingServiceImplBas
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void updateBillingAccount(BillingRequest billingRequest, StreamObserver<BillingResponse> responseObserver) {
+        BillingAccount billingAccount = billingService.updateAccount(billingRequest.getPatientId(), billingRequest.getName(), billingRequest.getEmail());
+
+        BillingResponse response = BillingResponse.newBuilder()
+                .setAccountId(billingAccount.getId().toString())
+                .setStatus("Billing account updated for patient: " + billingRequest.getPatientId())
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
 }

@@ -31,8 +31,9 @@ public class AnalyticsService {
         return patientEventRepository.getAverageAge();
     }
     @Cacheable("annual-revenue")
-    public BigDecimal getAnnualRevenue(int year) {
-        return chargeEventRepository.getAnnualRevenue(year);
+    public String getAnnualRevenue(int year) {
+        BigDecimal result = chargeEventRepository.getAnnualRevenue(year);
+        return result != null ? result.toString() : "0";
     }
     @Cacheable("revenue-per-category")
     public List<Object[]> getRevenuePerCategory() {

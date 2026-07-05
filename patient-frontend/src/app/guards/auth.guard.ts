@@ -1,10 +1,10 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
-import { KeycloakService } from '../services/keycloak.service';
+import { CognitoService } from '../services/cognito-service';
 
 export const authGuard: CanActivateFn = () => {
-  const keycloakService = inject(KeycloakService);
-  if (keycloakService.authenticated()) {
+  const cognitoService = inject(CognitoService);
+  if (cognitoService.authenticated()) {
     return true;
   }
   return inject(Router).createUrlTree(['/']);
