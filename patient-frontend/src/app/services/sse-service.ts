@@ -1,18 +1,18 @@
 import { Inject, Injectable, OnDestroy } from "@angular/core";
 import { Observable } from "rxjs";
-import { KeycloakService } from './keycloak.service';
 import { EventSourcePolyfill } from "event-source-polyfill";
 import { APP_SERVICE_CONFIG, AppConfig } from "../app-config.interface";
+import { CognitoService } from "./cognito-service";
 @Injectable({
   providedIn: "root",
 })
 export class SseService implements OnDestroy {
   private eventSource: EventSourcePolyfill | null = null;
 
-  constructor(private keycloakService: KeycloakService, @Inject(APP_SERVICE_CONFIG) private config: AppConfig) {}
+  constructor(private cognitoService: CognitoService, @Inject(APP_SERVICE_CONFIG) private config: AppConfig) {}
   connect(): Observable<string> {
     return new Observable<string>(observer => {
-      this.keycloakService.getValidToken().then(token => {
+      this.cognitoService.getValidToken().then(token => {
         this.eventSource = new EventSourcePolyfill(`${this.config.apiUrl}/api/search/events`, {
           headers: { Authorization: `Bearer ${token}` }
         });

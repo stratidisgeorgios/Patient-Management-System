@@ -206,6 +206,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${ANALYTICS_DB_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_DATA_REDIS_HOST: redis
+      GRPC_SERVER_PORT: 9004
     # ports:
     #   - "4002:4002" # documentation
     networks:
@@ -216,6 +217,61 @@ services:
       kafka:
         condition: service_started
       redis:
+        condition: service_started
+
+  organization-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin_user
+      POSTGRES_PASSWORD: ${ORGANIZATION_DB_PASSWORD}
+      POSTGRES_DB: organization_db
+    ports:
+      - "5437:5432"
+    networks:
+      - patient-network
+    volumes:
+      - ./organization-service/postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin_user -d organization_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  organization-service:
+    build:
+      context: .
+      dockerfile: organization-service/Dockerfile
+    image: organization-service:latest
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://organization-db:5432/organization_db
+      SPRING_DATASOURCE_USERNAME: admin_user
+      SPRING_DATASOURCE_PASSWORD: ${ORGANIZATION_DB_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      PATIENT_SERVICE_ADDRESS: patient-service
+      PATIENT_SERVICE_GRPC_PORT: 9003
+      BILLING_SERVICE_ADDRESS: billing-service
+      BILLING_SERVICE_GRPC_PORT: 9001
+      TREATMENT_SERVICE_ADDRESS: treatment-service
+      TREATMENT_SERVICE_GRPC_PORT: 9002
+      ANALYTICS_SERVICE_ADDRESS: analytics-service
+      ANALYTICS_SERVICE_GRPC_PORT: 9004
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: eu-west-1
+    # ports:
+    #   - "4005:4005" # documentation
+    networks:
+      - patient-network
+    depends_on:
+      organization-db:
+        condition: service_healthy
+      patient-service:
+        condition: service_started
+      billing-service:
+        condition: service_started
+      treatment-service:
+        condition: service_started
+      analytics-service:
         condition: service_started
 
   # auth-service: (replaced by Keycloak — kept for reference, custom auth-service is in /auth-service)
@@ -236,45 +292,6 @@ services:
   #   auth-db:
   #     condition: service_healthy
 
-  keycloak-db:
-    image: postgres:latest
-    environment:
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
-      POSTGRES_DB: keycloak_db
-    networks:
-      - patient-network
-    volumes:
-      - ./keycloak/postgres-data:/var/lib/postgresql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:latest
-    command: start-dev
-    environment:
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak_db
-      KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      KC_HOSTNAME: https://api.patientsystem.me
-      KC_HOSTNAME_ADMIN: https://api.patientsystem.me
-      KC_HTTP_PORT: 8080
-      KC_HTTP_ENABLED: true
-      KC_PROXY_HEADERS: xforwarded
-    ports:
-      - "8080:8080"
-    networks:
-      - patient-network
-    depends_on:
-      keycloak-db:
-        condition: service_healthy
-
   api-gateway:
     build:
       context: .
@@ -289,7 +306,7 @@ services:
     depends_on:
       - patient-service
       - billing-service
-      - keycloak
+      - organization-service
 
   opensearch-init:
     image: busybox
@@ -371,7 +388,6 @@ services:
       - /etc/ssl/cloudflare:/etc/ssl/cloudflare:ro
     depends_on:
       - api-gateway
-      - keycloak
     networks:
       - patient-network
 

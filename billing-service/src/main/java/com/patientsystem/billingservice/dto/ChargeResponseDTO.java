@@ -1,17 +1,14 @@
 package com.patientsystem.billingservice.dto;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 public class ChargeResponseDTO {
     private String id;
     private String treatmentId;
     private String treatmentName;
     private String treatmentCategory;
-    private BigDecimal price;
-    private LocalDateTime timestamp;
+    private String price;
+    private String timestamp;
 
-    public ChargeResponseDTO(String id, String treatmentId, String treatmentName, String treatmentCategory, BigDecimal price, LocalDateTime timestamp) {
+    public ChargeResponseDTO(String id, String treatmentId, String treatmentName, String treatmentCategory, String price, String timestamp) {
         this.id = id;
         this.treatmentId = treatmentId;
         this.treatmentName = treatmentName;
@@ -24,6 +21,6 @@ public class ChargeResponseDTO {
     public String getTreatmentId() { return treatmentId; }
     public String getTreatmentName() { return treatmentName; }
     public String getTreatmentCategory() { return treatmentCategory; }
-    public BigDecimal getPrice() { return price; }
-    public LocalDateTime getTimestamp() { return timestamp; }
+    public String getPrice() { return price; }
+    public String getTimestamp() { return timestamp; }
 }

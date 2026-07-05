@@ -34,4 +34,10 @@ public class BillingServiceGrpcClient {
         BillingResponse response = billingServiceBlockingStub.deleteBillingAccount(request);
         return response;
     }
+
+    public BillingResponse updateBillingAccount(String patientId, String name, String email){
+        BillingRequest request = BillingRequest.newBuilder().setPatientId(patientId).setName(name).setEmail(email).build();
+        BillingResponse response = billingServiceBlockingStub.updateBillingAccount(request);
+        return response;
+    }
 }

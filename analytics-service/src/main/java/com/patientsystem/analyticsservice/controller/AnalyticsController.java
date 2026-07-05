@@ -42,7 +42,7 @@ public class AnalyticsController {
 
     @GetMapping("/annual-revenue/{year}")
     @Operation(summary = "Get annual revenue", description = "Retrieve the total revenue generated in a specific year.")
-    public ResponseEntity<BigDecimal> getAnnualRevenue(@PathVariable int year) {
+    public ResponseEntity<String> getAnnualRevenue(@PathVariable int year) {
         return ResponseEntity.ok(analyticsService.getAnnualRevenue(year));
     }
 

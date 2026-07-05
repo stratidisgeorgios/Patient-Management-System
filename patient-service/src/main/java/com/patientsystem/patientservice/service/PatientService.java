@@ -48,10 +48,13 @@ public class PatientService {
         }
         existingPatient.setName(patientRequestDTO.getName() != null ? patientRequestDTO.getName() : existingPatient.getName());
         existingPatient.setEmail(patientRequestDTO.getEmail() != null ? patientRequestDTO.getEmail() : existingPatient.getEmail());
+        existingPatient.setGender(patientRequestDTO.getGender() != null ? com.patientsystem.patientservice.model.Gender.valueOf(patientRequestDTO.getGender()) : existingPatient.getGender());
         existingPatient.setAddress(patientRequestDTO.getAddress() != null ? patientRequestDTO.getAddress() : existingPatient.getAddress());
         existingPatient.setDateOfBirth(patientRequestDTO.getDateOfBirth() != null ? java.time.LocalDate.parse(patientRequestDTO.getDateOfBirth()) : existingPatient.getDateOfBirth());
-        kafkaProducer.sendEvent(existingPatient, "PatientUpdated");
-        return PatientMapper.toDTO(patientRepository.save(existingPatient));
+        Patient saved = patientRepository.save(existingPatient);
+        billingServiceGrpcClient.updateBillingAccount(saved.getId().toString(), saved.getName(), saved.getEmail());
+        kafkaProducer.sendEvent(saved, "PatientUpdated");
+        return PatientMapper.toDTO(saved);
     }
 
     public void deletePatient(UUID id){

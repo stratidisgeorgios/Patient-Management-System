@@ -15,8 +15,8 @@
         <module>analytics-service</module>
         <module>api-gateway</module>
         <module>treatment-service</module>
+        <module>organization-service</module>
         <module>integration-tests</module>
-        <module>infrastructure</module>
     </modules>
 
 </project>

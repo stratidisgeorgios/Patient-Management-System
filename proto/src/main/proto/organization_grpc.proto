@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.patientsystem.organization.grpc";
+
+service SchemaProvisionService {
+    rpc ProvisionSchema (ProvisionSchemaRequest) returns (ProvisionSchemaResponse);
+}
+
+message ProvisionSchemaRequest {
+    string tenant_id = 1;
+}
+
+message ProvisionSchemaResponse {
+    string status = 1;
+}

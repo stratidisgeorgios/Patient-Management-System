@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { RouterLink } from "@angular/router";
-import { KeycloakService } from "../../services/keycloak.service";
+import { CognitoService } from "../../services/cognito-service";
 
 @Component({
   selector: "app-header",
@@ -10,5 +10,5 @@ import { KeycloakService } from "../../services/keycloak.service";
   styleUrl: "./header.css",
 })
 export class Header {
-  constructor(public keycloakService: KeycloakService) {}
+  constructor(public cognitoService: CognitoService) {}
 }

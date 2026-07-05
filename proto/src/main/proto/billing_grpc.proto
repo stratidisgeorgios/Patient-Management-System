@@ -6,6 +6,7 @@ option java_package = "com.patientsystem.billing.grpc";
 service BillingService {
   rpc CreateBillingAccount (BillingRequest) returns (BillingResponse);
   rpc DeleteBillingAccount (BillingRequest) returns (BillingResponse);
+  rpc UpdateBillingAccount (BillingRequest) returns (BillingResponse);
 }
 message BillingRequest {
   string patient_id = 1;
