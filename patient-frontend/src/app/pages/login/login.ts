@@ -2,6 +2,7 @@ import { Component } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { Router } from "@angular/router";
 import { CognitoService } from "../../services/cognito-service";
+import { NotificationService } from "../../services/notification-service";
 
 type Mode = 'signin' | 'signup' | 'confirm';
 
@@ -17,46 +18,45 @@ export class Login {
   email = '';
   password = '';
   confirmationCode = '';
-  error = '';
   loading = false;
 
-  constructor(private cognitoService: CognitoService, private router: Router) {}
+  constructor(
+    private cognitoService: CognitoService,
+    private router: Router,
+    private notificationService: NotificationService
+  ) {}
 
   async signIn(): Promise<void> {
-    this.error = '';
     this.loading = true;
     try {
       await this.cognitoService.signIn(this.email, this.password);
       this.router.navigate(['/app/patients']);
     } catch (e: any) {
-      this.error = e.message ?? 'Sign in failed';
+      this.notificationService.error(e.message ?? 'Sign in failed');
     } finally {
       this.loading = false;
     }
   }
 
   async signUp(): Promise<void> {
-    this.error = '';
     this.loading = true;
     try {
       await this.cognitoService.signUp(this.email, this.password);
       this.mode = 'confirm';
     } catch (e: any) {
-      console.log('SignUp error:', e);
-      this.error = e.message ?? 'Sign up failed';
+      this.notificationService.error(e.message ?? 'Sign up failed');
     } finally {
       this.loading = false;
     }
   }
 
   async confirmSignUp(): Promise<void> {
-    this.error = '';
     this.loading = true;
     try {
       await this.cognitoService.confirmSignUp(this.email, this.confirmationCode);
       this.mode = 'signin';
     } catch (e: any) {
-      this.error = e.message ?? 'Confirmation failed';
+      this.notificationService.error(e.message ?? 'Confirmation failed');
     } finally {
       this.loading = false;
     }
@@ -64,6 +64,5 @@ export class Login {
 
   switchMode(mode: Mode): void {
     this.mode = mode;
-    this.error = '';
   }
 }

@@ -1,0 +1,33 @@
+<section class="create-org-section">
+  <div class="create-org-card">
+    <p class="section-index">004 — Setup</p>
+    <h2 class="create-org-hero">Create Your<br/>Organisation</h2>
+    <p class="create-org-subtitle">Fill in the details below to set up your organisation.</p>
+
+    <form [formGroup]="editForm" (ngSubmit)="createOrganization()" class="create-org-form">
+      <div class="form-field">
+        <label class="form-label">Organisation Name</label>
+        <input formControlName="name" type="text" placeholder="e.g. City Medical Centre" class="form-input" />
+        @if (editForm.get('name')?.touched && editForm.get('name')?.errors?.['required']) {
+          <span class="form-error">Name is required</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label class="form-label">Admin Email</label>
+        <input formControlName="adminEmail" type="email" placeholder="admin@example.com" class="form-input" />
+        @if (editForm.get('adminEmail')?.touched && editForm.get('adminEmail')?.errors?.['required']) {
+          <span class="form-error">Email is required</span>
+        }
+      </div>
+
+      <div class="create-org-submit">
+        <button type="submit" class="btn-primary w-full text-center" [disabled]="editForm.invalid || isLoading()">
+          {{ isLoading() ? 'Creating...' : 'Create Organisation' }}
+        </button>
+      </div>
+
+
+    </form>
+  </div>
+</section>

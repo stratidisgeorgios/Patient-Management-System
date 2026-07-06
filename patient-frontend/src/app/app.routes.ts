@@ -11,7 +11,8 @@ import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
 import { PatientProfile } from './components/patient-profile/patient-profile';
 import { TreatmentProfile } from './components/treatment-profile/treatment-profile';
-
+import { orgGuard } from './guards/org.guard';
+import { CreateOrganization } from './pages/create-organization/create-organization';
 export const routes: Routes = [
   {
     path: '',
@@ -27,11 +28,12 @@ export const routes: Routes = [
     component: Layout,
     canActivate: [authGuard],
     children: [
-      { path: 'patients/:id', component: PatientProfile },
-      { path: 'treatments/:id', component: TreatmentProfile },
-      { path: 'patients', component: Patients },
-      { path: 'treatments', component: Treatments },
-      { path: 'analytics', component: Analytics }
+      { path: 'create-organization', component: CreateOrganization },
+      { path: 'patients/:id', component: PatientProfile, canActivate: [orgGuard] },
+      { path: 'treatments/:id', component: TreatmentProfile, canActivate: [orgGuard] },
+      { path: 'patients', component: Patients, canActivate: [orgGuard] },
+      { path: 'treatments', component: Treatments, canActivate: [orgGuard] },
+      { path: 'analytics', component: Analytics, canActivate: [orgGuard] }
     ]
   }
 ];
