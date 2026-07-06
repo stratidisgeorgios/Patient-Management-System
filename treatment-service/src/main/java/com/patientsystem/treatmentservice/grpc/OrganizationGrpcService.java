@@ -23,7 +23,7 @@ public class OrganizationGrpcService extends SchemaProvisionServiceGrpc.SchemaPr
     public void provisionSchema(ProvisionSchemaRequest request, StreamObserver<ProvisionSchemaResponse> responseObserver) {
         try {
             String tenantId = request.getTenantId();
-            dataSource.getConnection().createStatement().execute("CREATE SCHEMA IF NOT EXISTS " + tenantId);
+            dataSource.getConnection().createStatement().execute("CREATE SCHEMA IF NOT EXISTS \"" + tenantId + "\"");
             Flyway.configure()
                     .dataSource(dataSource)
                     .schemas(tenantId)
