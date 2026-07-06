@@ -1,0 +1,19 @@
+.create-org-section {
+  @apply flex items-center justify-center min-h-[80vh] px-8;
+}
+
+.create-org-card {
+  @apply w-full max-w-md;
+}
+
+.create-org-hero {
+  @apply text-5xl font-black leading-[0.9] tracking-[-0.03em] text-[#141414] uppercase mb-12;
+}
+
+.create-org-form {
+  @apply flex flex-col gap-6;
+}
+
+.create-org-submit {
+  @apply border-t border-[#C7C7C7] pt-8;
+}
