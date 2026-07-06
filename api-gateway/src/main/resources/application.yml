@@ -46,7 +46,7 @@ spring:
             - id: organization-service-route
               uri: http://organization-service:4005
               predicates:
-                - Path=/api/organizations/**
+                - Path=/api/organizations,/api/organizations/**
             - id: api-docs-patient-route
               uri: http://patient-service:4000
               predicates:
