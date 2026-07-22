@@ -31,3 +31,22 @@ output "client_id" {
 output "jwks_uri" {
   value = module.cognito.jwks_uri
 }
+
+module "ec2" {
+  source        = "../../modules/ec2"
+  instance_type = "t3.large"
+  public_key    = var.public_key
+  environment   = var.environment
+  tags = {
+    Environment = var.environment
+    Project     = "patient-system"
+  }
+}
+
+output "ec2_public_ip" {
+  value = module.ec2.public_ip
+}
+
+output "ec2_instance_id" {
+  value = module.ec2.instance_id
+}
