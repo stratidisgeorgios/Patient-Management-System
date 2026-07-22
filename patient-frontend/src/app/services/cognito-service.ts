@@ -21,7 +21,8 @@ export class CognitoService {
 
   async init(): Promise<void> {
     try {
-      const session = await fetchAuthSession();
+      const session = await fetchAuthSession({ forceRefresh: true });
+      console.log('init payload:', session.tokens?.idToken?.payload);
       this.authenticated.set(!!session.tokens?.idToken);
       this.hasOrganization.set(!!session.tokens?.idToken?.payload['custom:organizationId']);
     } catch {

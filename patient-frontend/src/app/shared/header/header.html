@@ -5,7 +5,7 @@
     <a routerLink="/about" class="nav-link">About</a>
     @if (cognitoService.authenticated()) {
       <a routerLink="/app/patients" class="nav-link">Patients</a>
-      <button (click)="cognitoService.signOut()" class="btn-secondary">Logout</button>
+      <button (click)="logout()" class="btn-secondary">Logout</button>
     } @else {
       <a routerLink="/login" class="btn-primary">Login</a>
     }

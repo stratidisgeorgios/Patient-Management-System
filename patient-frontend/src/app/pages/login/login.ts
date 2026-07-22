@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { Router } from "@angular/router";
 import { CognitoService } from "../../services/cognito-service";
@@ -18,7 +18,7 @@ export class Login {
   email = '';
   password = '';
   confirmationCode = '';
-  loading = false;
+  loading = signal(false);
 
   constructor(
     private cognitoService: CognitoService,
@@ -27,38 +27,38 @@ export class Login {
   ) {}
 
   async signIn(): Promise<void> {
-    this.loading = true;
+    this.loading.set(true);
     try {
       await this.cognitoService.signIn(this.email, this.password);
       this.router.navigate(['/app/patients']);
     } catch (e: any) {
       this.notificationService.error(e.message ?? 'Sign in failed');
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
   async signUp(): Promise<void> {
-    this.loading = true;
+    this.loading.set(true);
     try {
       await this.cognitoService.signUp(this.email, this.password);
       this.mode = 'confirm';
     } catch (e: any) {
       this.notificationService.error(e.message ?? 'Sign up failed');
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
   async confirmSignUp(): Promise<void> {
-    this.loading = true;
+    this.loading.set(true);
     try {
       await this.cognitoService.confirmSignUp(this.email, this.confirmationCode);
       this.mode = 'signin';
     } catch (e: any) {
       this.notificationService.error(e.message ?? 'Confirmation failed');
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
