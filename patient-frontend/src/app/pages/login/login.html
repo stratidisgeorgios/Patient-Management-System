@@ -19,8 +19,8 @@
         <input class="login-input" type="password" placeholder="Password" [(ngModel)]="password" />
       </div>
       <div class="login-submit">
-        <button class="btn-primary w-full text-center" (click)="signIn()" [disabled]="loading">
-          {{ loading ? 'Signing in...' : 'Sign In' }}
+        <button class="btn-primary w-full text-center" (click)="signIn()" [disabled]="loading()">
+          {{ loading() ? 'Signing in...' : 'Sign In' }}
         </button>
         <p class="login-switch">Don't have an account? <span (click)="switchMode('signup')">Sign Up</span></p>
       </div>
@@ -33,8 +33,8 @@
         <input class="login-input" type="password" placeholder="Password" [(ngModel)]="password" />
       </div>
       <div class="login-submit">
-        <button class="btn-primary w-full text-center" (click)="signUp()" [disabled]="loading">
-          {{ loading ? 'Creating account...' : 'Sign Up' }}
+        <button class="btn-primary w-full text-center" (click)="signUp()" [disabled]="loading()">
+          {{ loading() ? 'Creating account...' : 'Sign Up' }}
         </button>
         <p class="login-switch">Already have an account? <span (click)="switchMode('signin')">Sign In</span></p>
       </div>
@@ -46,8 +46,8 @@
         <input class="login-input" type="text" placeholder="Confirmation code" [(ngModel)]="confirmationCode" />
       </div>
       <div class="login-submit">
-        <button class="btn-primary w-full text-center" (click)="confirmSignUp()" [disabled]="loading">
-          {{ loading ? 'Confirming...' : 'Confirm' }}
+        <button class="btn-primary w-full text-center" (click)="confirmSignUp()" [disabled]="loading()">
+          {{ loading() ? 'Confirming...' : 'Confirm' }}
         </button>
         <p class="login-switch">Wrong email? <span (click)="switchMode('signup')">Go back</span></p>
       </div>

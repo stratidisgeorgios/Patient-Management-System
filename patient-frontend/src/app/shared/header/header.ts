@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { RouterLink } from "@angular/router";
+import { Router, RouterLink } from "@angular/router";
 import { CognitoService } from "../../services/cognito-service";
 
 @Component({
@@ -10,5 +10,10 @@ import { CognitoService } from "../../services/cognito-service";
   styleUrl: "./header.css",
 })
 export class Header {
-  constructor(public cognitoService: CognitoService) {}
+  constructor(public cognitoService: CognitoService, private router: Router) {}
+
+  async logout(): Promise<void> {
+    await this.cognitoService.signOut();
+    this.router.navigate(['/login']);
+  }
 }
