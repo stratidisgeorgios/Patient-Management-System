@@ -24,6 +24,7 @@ public class KafkaProducer {
             .setName(treatment.getName())
             .setCategory(treatment.getCategory().getName())
             .setPrice(treatment.getPrice().toString())
+            .setOrganizationId(treatment.getOrganizationId().toString())
             .setEventType(eventType)
             .build();
         try {

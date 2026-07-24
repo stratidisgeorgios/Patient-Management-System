@@ -27,6 +27,7 @@ public class KafkaConsumer {
             entity.setEmail(proto.getEmail());
             entity.setDateOfBirth(proto.getDateOfBirth());
             entity.setGender(proto.getGender());
+            entity.setOrganizationId(proto.getOrganizationId());
             searchService.indexPatient(entity, proto.getEventType());
             log.info("Consumed patient event: " + proto.getEventType() + " for patient: " + proto.getPatientId());
         } catch (Exception e) {
@@ -43,6 +44,7 @@ public class KafkaConsumer {
             entity.setName(proto.getName());
             entity.setCategory(proto.getCategory());
             entity.setPrice(proto.getPrice());
+            entity.setOrganizationId(proto.getOrganizationId());
             searchService.indexTreatment(entity, proto.getEventType());
             log.info("Consumed treatment event: " + proto.getName() + " id: " + proto.getTreatmentId());
         } catch (Exception e) {

@@ -31,6 +31,7 @@ public class KafkaProducer {
                 .setDateOfBirth(patient.getDateOfBirth().toString())
                 .setEventType(eventType)
                 .setTimestamp(LocalDateTime.now().toString())
+                .setOrganizationId(patient.getOrganizationId().toString())
                 .build();
         try {
             kafkaTemplate.send("patient-events", patientEvent.toByteArray());

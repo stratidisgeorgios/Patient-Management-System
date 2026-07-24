@@ -5,6 +5,7 @@ public class PatientDocument {
     private String email;
     private String dateOfBirth;
     private String gender;
+    private String organizationId;
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -16,4 +17,6 @@ public class PatientDocument {
     public void setDateOfBirth(String dateOfBirth) { this.dateOfBirth = dateOfBirth; }
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
+    public String getOrganizationId() { return organizationId; }
+    public void setOrganizationId(String organizationId) { this.organizationId = organizationId; }
 }

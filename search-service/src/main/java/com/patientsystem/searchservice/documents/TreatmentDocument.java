@@ -4,6 +4,7 @@ public class TreatmentDocument {
     private String name;
     private String category;
     private String price;
+    private String organizationId;
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -13,4 +14,6 @@ public class TreatmentDocument {
     public void setCategory(String category) { this.category = category; }
     public String getPrice() { return price; }
     public void setPrice(String price) { this.price = price; }
+    public String getOrganizationId() { return organizationId; }
+    public void setOrganizationId(String organizationId) { this.organizationId = organizationId; }
 }

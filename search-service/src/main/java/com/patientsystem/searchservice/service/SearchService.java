@@ -21,7 +21,7 @@ public class SearchService {
             if (eventType.equals("PatientCreated") || eventType.equals("PatientUpdated")) {
                 openSearchService.indexPatient(patientDocument);
             } else if (eventType.equals("PatientDeleted")) {
-                openSearchService.deletePatient(patientDocument.getId());
+                openSearchService.deletePatient(patientDocument.getId(), patientDocument.getOrganizationId());
             }
             sseEmitterService.broadcast("patient");
         } catch (Exception e) {
@@ -34,7 +34,7 @@ public class SearchService {
             if (eventType.equals("TreatmentCreated") || eventType.equals("TreatmentUpdated")) {
                 openSearchService.indexTreatment(treatmentDocument);
             } else if (eventType.equals("TreatmentDeleted")) {
-                openSearchService.deleteTreatment(treatmentDocument.getId());
+                openSearchService.deleteTreatment(treatmentDocument.getId(), treatmentDocument.getOrganizationId());
             }
             sseEmitterService.broadcast("treatment");
         } catch (Exception e) {
@@ -42,17 +42,17 @@ public class SearchService {
         }
     }
 
-    public List<PatientDocument> searchPatients(String query) {
+    public List<PatientDocument> searchPatients(String query, String organizationId) {
         try {
-            return openSearchService.searchPatients(query);
+            return openSearchService.searchPatients(query, organizationId);
         } catch (Exception e) {
             throw new RuntimeException("Failed to search patients: " + e.getMessage(), e);
         }
     }
 
-    public List<TreatmentDocument> searchTreatments(String query) {
+    public List<TreatmentDocument> searchTreatments(String query, String organizationId) {
         try {
-            return openSearchService.searchTreatments(query);
+            return openSearchService.searchTreatments(query, organizationId);
         } catch (Exception e) {
             throw new RuntimeException("Failed to search treatments: " + e.getMessage(), e);
         }

@@ -25,11 +25,11 @@ public class OpenSearchService {
         this.openSearchClient = openSearchClient;
     }
 
-    @PostConstruct
-    public void createIndices() throws IOException {
-        if (!openSearchClient.indices().exists(b -> b.index("patients")).value()) {
+    private void ensurePatientIndexExists(String organizationId) throws IOException {
+        String index = "patients-" + organizationId;
+        if (!openSearchClient.indices().exists(b -> b.index(index)).value()) {
             openSearchClient.indices().create(b -> b
-                .index("patients")
+                .index(index)
                 .mappings(m -> m
                     .properties("id", p -> p.keyword(k -> k))
                     .properties("name", p -> p.searchAsYouType(s -> s))
@@ -39,9 +39,13 @@ public class OpenSearchService {
                 )
             );
         }
-        if (!openSearchClient.indices().exists(b -> b.index("treatments")).value()) {
+    }
+
+    private void ensureTreatmentIndexExists(String organizationId) throws IOException {
+        String index = "treatments-" + organizationId;
+        if (!openSearchClient.indices().exists(b -> b.index(index)).value()) {
             openSearchClient.indices().create(b -> b
-                .index("treatments")
+                .index(index)
                 .mappings(m -> m
                     .properties("id", p -> p.keyword(k -> k))
                     .properties("name", p -> p.searchAsYouType(s -> s))
@@ -54,8 +58,10 @@ public class OpenSearchService {
 
     public void indexPatient(PatientDocument doc) throws IOException {
         try {
+            String index = "patients-" + doc.getOrganizationId();
+            ensurePatientIndexExists(doc.getOrganizationId());
             openSearchClient.index(IndexRequest.of(i -> i
-                .index("patients")
+                .index(index)
                 .id(doc.getId())
                 .document(doc)
                 .refresh(Refresh.WaitFor)
@@ -65,10 +71,11 @@ public class OpenSearchService {
         }
     }
 
-    public void deletePatient(String patientId) throws IOException {
+    public void deletePatient(String patientId, String organizationId) throws IOException {
         try {
+            String index = "patients-" + organizationId;
             openSearchClient.delete(DeleteRequest.of(d -> d
-                .index("patients")
+                .index(index)
                 .id(patientId)
                 .refresh(Refresh.WaitFor)
             ));
@@ -79,8 +86,10 @@ public class OpenSearchService {
 
     public void indexTreatment(TreatmentDocument doc) throws IOException {
         try {
+            String index = "treatments-" + doc.getOrganizationId();
+            ensureTreatmentIndexExists(doc.getOrganizationId());
             openSearchClient.index(IndexRequest.of(i -> i
-                .index("treatments")
+                .index(index)
                 .id(doc.getId())
                 .document(doc)
                 .refresh(Refresh.WaitFor)
@@ -90,10 +99,11 @@ public class OpenSearchService {
         }
     }
 
-    public void deleteTreatment(String treatmentId) throws IOException {
+    public void deleteTreatment(String treatmentId, String organizationId) throws IOException {
         try {
+            String index = "treatments-" + organizationId;
             openSearchClient.delete(DeleteRequest.of(d -> d
-                .index("treatments")
+                .index(index)
                 .id(treatmentId)
                 .refresh(Refresh.WaitFor)
             ));
@@ -102,10 +112,12 @@ public class OpenSearchService {
         }
     }
 
-    public List<PatientDocument> searchPatients(String query) throws IOException {
+    public List<PatientDocument> searchPatients(String query, String organizationId) throws IOException {
         try {
+            String index = "patients-" + organizationId;
+            ensurePatientIndexExists(organizationId);
             SearchResponse<PatientDocument> response = openSearchClient.search(SearchRequest.of(s -> s
-                .index("patients")
+                .index(index)
                 .size(10)
                 .query(q -> q
                     .multiMatch(m -> m
@@ -121,10 +133,12 @@ public class OpenSearchService {
         }
     }
 
-    public List<TreatmentDocument> searchTreatments(String query) throws IOException {
+    public List<TreatmentDocument> searchTreatments(String query, String organizationId) throws IOException {
         try {
+            String index = "treatments-" + organizationId;
+            ensureTreatmentIndexExists(organizationId);
             SearchResponse<TreatmentDocument> response = openSearchClient.search(SearchRequest.of(s -> s
-                .index("treatments")
+                .index(index)
                 .size(10)
                 .query(q -> q
                     .multiMatch(m -> m

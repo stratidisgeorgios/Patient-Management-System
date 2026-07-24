@@ -12,5 +12,6 @@ message PatientEvent{
     string timestamp=5;
     string date_of_birth = 6;
     string gender = 7;
+    string organization_id = 8;
 }
 
