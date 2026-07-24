@@ -22,7 +22,7 @@ public class KafkaProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void sendEvent(Patient patient, String eventType) {
+    public void sendEvent(Patient patient, String eventType, String organizationId) {
         PatientEvent patientEvent = PatientEvent.newBuilder()
                 .setPatientId(patient.getId().toString())
                 .setName(patient.getName())
@@ -31,7 +31,7 @@ public class KafkaProducer {
                 .setDateOfBirth(patient.getDateOfBirth().toString())
                 .setEventType(eventType)
                 .setTimestamp(LocalDateTime.now().toString())
-                .setOrganizationId(patient.getOrganizationId().toString())
+                .setOrganizationId(organizationId)
                 .build();
         try {
             kafkaTemplate.send("patient-events", patientEvent.toByteArray());
