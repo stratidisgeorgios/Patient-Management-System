@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.patientsystem.treatmentservice.dto.TreatmentRequestDTO;
@@ -33,20 +34,27 @@ public class TreatmentController {
 
     @PostMapping
     @Operation(summary = "Create a new treatment")
-    public ResponseEntity<TreatmentResponseDTO> createTreatment(@RequestBody TreatmentRequestDTO request) {
-        return ResponseEntity.status(201).body(treatmentService.createTreatment(request));
+    public ResponseEntity<TreatmentResponseDTO> createTreatment(
+            @RequestBody TreatmentRequestDTO request,
+            @RequestHeader("X-Organization-Id") String organizationId) {
+        return ResponseEntity.status(201).body(treatmentService.createTreatment(request, organizationId));
     }
 
     @PutMapping("/{treatmentId}")
     @Operation(summary = "Update an existing treatment")
-    public ResponseEntity<TreatmentResponseDTO> updateTreatment(@PathVariable UUID treatmentId, @RequestBody TreatmentRequestDTO request) {
-        return ResponseEntity.ok(treatmentService.updateTreatment(treatmentId, request));
+    public ResponseEntity<TreatmentResponseDTO> updateTreatment(
+            @PathVariable UUID treatmentId,
+            @RequestBody TreatmentRequestDTO request,
+            @RequestHeader("X-Organization-Id") String organizationId) {
+        return ResponseEntity.ok(treatmentService.updateTreatment(treatmentId, request, organizationId));
     }
 
     @DeleteMapping("/{treatmentId}")
     @Operation(summary = "Delete a treatment")
-    public ResponseEntity<Void> deleteTreatment(@PathVariable UUID treatmentId) {
-        treatmentService.deleteTreatment(treatmentId);
+    public ResponseEntity<Void> deleteTreatment(
+            @PathVariable UUID treatmentId,
+            @RequestHeader("X-Organization-Id") String organizationId) {
+        treatmentService.deleteTreatment(treatmentId, organizationId);
         return ResponseEntity.noContent().build();
     }
 }

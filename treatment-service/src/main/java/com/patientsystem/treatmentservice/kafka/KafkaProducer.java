@@ -18,13 +18,13 @@ public class KafkaProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void sendTreatmentEvent(Treatment treatment, String eventType) {
+    public void sendTreatmentEvent(Treatment treatment, String eventType, String organizationId) {
         TreatmentEvent treatmentEvent = TreatmentEvent.newBuilder()
             .setTreatmentId(treatment.getId().toString())
             .setName(treatment.getName())
             .setCategory(treatment.getCategory().getName())
             .setPrice(treatment.getPrice().toString())
-            .setOrganizationId(treatment.getOrganizationId().toString())
+            .setOrganizationId(organizationId)
             .setEventType(eventType)
             .build();
         try {

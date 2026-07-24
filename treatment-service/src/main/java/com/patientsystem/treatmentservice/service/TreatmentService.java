@@ -28,7 +28,7 @@ public class TreatmentService {
                 .orElseThrow(() -> new RuntimeException("Treatment not found for ID: " + treatmentId)));
     }
 
-    public TreatmentResponseDTO createTreatment(TreatmentRequestDTO request) {
+    public TreatmentResponseDTO createTreatment(TreatmentRequestDTO request, String organizationId) {
         if (treatmentRepository.existsByName(request.getName())) {
             throw new RuntimeException("Treatment with name " + request.getName() + " already exists.");
         }
@@ -39,11 +39,11 @@ public class TreatmentService {
         treatment.setCategory(category);
         treatment.setPrice(new BigDecimal(request.getPrice()));
         Treatment savedTreatment = treatmentRepository.save(treatment);
-        kafkaProducer.sendTreatmentEvent(savedTreatment, "TreatmentCreated");
+        kafkaProducer.sendTreatmentEvent(savedTreatment, "TreatmentCreated", organizationId);
         return TreatmentMapper.toDTO(savedTreatment);
     }
 
-    public TreatmentResponseDTO updateTreatment(UUID treatmentId, TreatmentRequestDTO request) {
+    public TreatmentResponseDTO updateTreatment(UUID treatmentId, TreatmentRequestDTO request, String organizationId) {
         Treatment treatment = treatmentRepository.findById(treatmentId)
                 .orElseThrow(() -> new RuntimeException("Treatment not found for ID: " + treatmentId));
         Category category = categoryRepository.findById(UUID.fromString(request.getCategory()))
@@ -52,14 +52,14 @@ public class TreatmentService {
         treatment.setCategory(category);
         treatment.setPrice(new BigDecimal(request.getPrice()));
         Treatment savedTreatment = treatmentRepository.save(treatment);
-        kafkaProducer.sendTreatmentEvent(savedTreatment, "TreatmentUpdated");
+        kafkaProducer.sendTreatmentEvent(savedTreatment, "TreatmentUpdated", organizationId);
         return TreatmentMapper.toDTO(savedTreatment);
     }
 
-    public void deleteTreatment(UUID treatmentId) {
+    public void deleteTreatment(UUID treatmentId, String organizationId) {
         Treatment treatment = treatmentRepository.findById(treatmentId)
                 .orElseThrow(() -> new RuntimeException("Treatment not found for ID: " + treatmentId));
         treatmentRepository.deleteById(treatmentId);
-        kafkaProducer.sendTreatmentEvent(treatment, "TreatmentDeleted");
+        kafkaProducer.sendTreatmentEvent(treatment, "TreatmentDeleted", organizationId);
     }
 }
