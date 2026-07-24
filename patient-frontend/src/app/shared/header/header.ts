@@ -13,7 +13,10 @@ export class Header {
   constructor(public cognitoService: CognitoService, private router: Router) {}
 
   async logout(): Promise<void> {
-    await this.cognitoService.signOut();
-    this.router.navigate(['/login']);
+    try {
+      await this.cognitoService.signOut();
+    } finally {
+      this.router.navigate(['/login']);
+    }
   }
 }

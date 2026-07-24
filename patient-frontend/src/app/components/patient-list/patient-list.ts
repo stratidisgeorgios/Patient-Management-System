@@ -1,12 +1,13 @@
 import { Component, OnDestroy, OnInit, signal } from "@angular/core";
 import { PatientResponse } from "../../models/patient.model";
+import { PatientSearchResponse } from "../../models/search.model";
 import { PatientService } from "../../services/patient-service";
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ConfirmModal } from "../../shared/confirm-modal/confirm-modal";
 import { NotificationService } from "../../services/notification-service";
 import { SearchService } from "../../services/search-service";
 import { Router } from "@angular/router";
-import { debounceTime, forkJoin, of, Subject, switchMap, takeUntil } from "rxjs";
+import { debounceTime, of, Subject, switchMap, takeUntil } from "rxjs";
 import { SseService } from "../../services/sse-service";
 @Component({
   selector: "app-patient-list",
@@ -16,7 +17,7 @@ import { SseService } from "../../services/sse-service";
   styleUrl: "./patient-list.css",
 })
 export class PatientList implements OnInit, OnDestroy {
-  patients = signal<PatientResponse[]>([]);
+  patients = signal<PatientSearchResponse[]>([]);
   selectedPatient = signal<PatientResponse | null>(null);
 
   editForm: FormGroup = new FormGroup({
@@ -58,7 +59,7 @@ export class PatientList implements OnInit, OnDestroy {
     this.searchQuery.pipe(
       debounceTime(200),
       switchMap(value => {
-        if (!value.trim()) {
+        if (!value.trim() || value.trim().length < 2) {
           this.hasSearched.set(false);
           this.patients.set([]);
           this.isLoading.set(false);
@@ -67,14 +68,7 @@ export class PatientList implements OnInit, OnDestroy {
         this.hasSearched.set(true);
         this.isLoading.set(true);
         this.lastSearchQuery = value;
-        return this.searchService.searchPatients(value).pipe(
-          switchMap(data => {
-            if (data.length === 0) {
-              return of([]);
-            }
-            return forkJoin(data.map(p => this.patientService.getById(p.id)));
-          })
-        );
+        return this.searchService.searchPatients(value);
       }), takeUntil(this.destroy$)
     ).subscribe({
       next: (fullPatients) => {
@@ -118,16 +112,21 @@ export class PatientList implements OnInit, OnDestroy {
     });
   }
 
-  updatePatient(patient: PatientResponse) {
+  updatePatient(patient: PatientSearchResponse) {
     this.closeAllModals();
-    this.selectedPatient.set(patient);
-    this.showEditModal.set(true);
-    this.editForm.patchValue({
-      name: patient.name,
-      email: patient.email,
-      gender: patient.gender,
-      address: patient.address,
-      dateOfBirth: patient.dateOfBirth
+    this.patientService.getById(patient.id).subscribe({
+      next: (fullPatient) => {
+        this.selectedPatient.set(fullPatient);
+        this.showEditModal.set(true);
+        this.editForm.patchValue({
+          name: fullPatient.name,
+          email: fullPatient.email,
+          gender: fullPatient.gender,
+          address: fullPatient.address,
+          dateOfBirth: fullPatient.dateOfBirth
+        });
+      },
+      error: (err) => this.notificationService.error("Failed to load patient: " + this.extractError(err))
     });
   }
 
@@ -142,12 +141,12 @@ export class PatientList implements OnInit, OnDestroy {
   }
 
 
-  deletePatient(patient: PatientResponse) {
+  deletePatient(patient: PatientSearchResponse) {
     this.closeAllModals();
-    this.selectedPatient.set(patient);
+    this.selectedPatient.set(patient as unknown as PatientResponse);
     this.showDeleteModal.set(true);
   }
-  
+
   submitDelete() {
     const id = this.selectedPatient()!.id;
     this.patientService.delete(id).subscribe({

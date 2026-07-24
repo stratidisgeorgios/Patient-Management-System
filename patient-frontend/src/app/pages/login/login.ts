@@ -4,7 +4,7 @@ import { Router } from "@angular/router";
 import { CognitoService } from "../../services/cognito-service";
 import { NotificationService } from "../../services/notification-service";
 
-type Mode = 'signin' | 'signup' | 'confirm';
+type Mode = 'signin' | 'signup' | 'confirm' | 'forgot-password' | 'confirm-forgot-password';
 
 @Component({
   selector: "app-login",
@@ -17,6 +17,7 @@ export class Login {
   mode: Mode = 'signin';
   email = '';
   password = '';
+  newPassword = '';
   confirmationCode = '';
   loading = signal(false);
 
@@ -65,4 +66,31 @@ export class Login {
   switchMode(mode: Mode): void {
     this.mode = mode;
   }
+
+  async forgotPassword(): Promise<void> {
+    this.loading.set(true);
+    try{
+      await this.cognitoService.forgotPassword(this.email);
+      this.notificationService.success('Password reset email sent. Please check your inbox.');
+      this.mode = 'confirm-forgot-password';
+    } catch (e: any) {
+      this.notificationService.error(e.message ?? 'Password reset failed');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async confirmResetPassword(): Promise<void> {
+    this.loading.set(true);
+    try {
+      await this.cognitoService.confirmForgotPassword(this.email, this.confirmationCode, this.newPassword);
+      this.notificationService.success('Password has been reset successfully. You can now sign in with your new password.');
+      this.mode = 'signin';
+    } catch (e: any) {
+      this.notificationService.error(e.message ?? 'Password reset confirmation failed');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
 }

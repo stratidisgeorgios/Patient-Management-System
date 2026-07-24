@@ -1,12 +1,20 @@
 import { Injectable, signal } from "@angular/core";
 import { Amplify } from "aws-amplify";
-import { signIn, signUp, confirmSignUp, signOut, fetchAuthSession } from "@aws-amplify/auth";
+import { signIn, signUp, confirmSignUp, signOut, fetchAuthSession, resetPassword, confirmResetPassword, signInWithRedirect } from "@aws-amplify/auth";
 
 Amplify.configure({
   Auth: {
     Cognito: {
       userPoolId: 'eu-west-1_Sb4mcDano',
       userPoolClientId: '1lnss15djptnbbaanrvgagvt9q',
+      loginWith: {
+        oauth: {
+          domain: 'patient-system.auth.eu-west-1.amazoncognito.com',
+          scopes: ['email', 'openid', 'profile'],
+          redirectSignIn: ['https://patientsystem.me/login'],
+          redirectSignOut: ['https://patientsystem.me/login'],
+          responseType: 'code'
+      }
     }
   }
 });
@@ -21,8 +29,7 @@ export class CognitoService {
 
   async init(): Promise<void> {
     try {
-      const session = await fetchAuthSession({ forceRefresh: true });
-      console.log('init payload:', session.tokens?.idToken?.payload);
+      const session = await fetchAuthSession();
       this.authenticated.set(!!session.tokens?.idToken);
       this.hasOrganization.set(!!session.tokens?.idToken?.payload['custom:organizationId']);
     } catch {
@@ -75,4 +82,16 @@ export class CognitoService {
       return undefined;
     }
   }
+
+  async forgotPassword(email: string): Promise<void> {
+    await resetPassword({ username: email });
+  }
+
+  async confirmForgotPassword(email: string, code: string, newPassword: string): Promise<void> {
+    await confirmResetPassword({ username: email, confirmationCode: code, newPassword });
+  }
+
+  async signInWithGoogle(): Promise<void> {
+    await signInWithRedirect({ provider: 'Google' });
+
 }

@@ -28,9 +28,8 @@
         <tr>
           <th>Name</th>
           <th>Email</th>
-          <th>Address</th>
           <th>Date of Birth</th>
-          <th>Registered</th>
+          <th>Gender</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -39,9 +38,8 @@
           <tr class="patient-row">
             <td class="patient-name">{{ patient.name }}</td>
             <td class="patient-mono">{{ patient.email }}</td>
-            <td>{{ patient.address }}</td>
             <td class="patient-mono">{{ patient.dateOfBirth }}</td>
-            <td class="patient-mono">{{ patient.registeredDate }}</td>
+            <td>{{ patient.gender }}</td>
             <td>
               <div class="patient-actions">
                 <button (click)="openProfile(patient.id)" class="action-view">View</button>

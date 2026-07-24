@@ -1,15 +1,17 @@
 <section class="login-section">
   <div class="login-card">
-    <p class="section-index">003 — {{ mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Sign Up' : 'Confirm Email' }}</p>
+    <p class="section-index">003 — {{ mode === 'signin' ? 'Sign In' : mode === 'signup' ? 'Sign Up' : mode === 'forgot-password' || mode === 'confirm-forgot-password' ? 'Reset Password' : 'Confirm Email' }}</p>
 
     <h2 class="login-hero">
-      {{ mode === 'signin' ? 'Welcome Back' : mode === 'signup' ? 'Get Started' : 'Check Your Email' }}
+      {{ mode === 'signin' ? 'Welcome Back' : mode === 'signup' ? 'Get Started' : mode === 'forgot-password' ? 'Forgot Password' : mode === 'confirm-forgot-password' ? 'New Password' : 'Check Your Email' }}
     </h2>
 
     <p class="login-subtitle">
       {{ mode === 'signin' ? 'Sign in with your organisation account' :
          mode === 'signup' ? 'Create your organisation account' :
-         'Enter the confirmation code sent to ' + email }}
+         mode === 'forgot-password' ? 'Enter your email to reset your password' :
+         mode === 'confirm-forgot-password' ? 'Enter your new password' :
+        'Enter the confirmation code sent to your email'}}
     </p>
 
     <!-- Sign In Form -->
@@ -23,6 +25,40 @@
           {{ loading() ? 'Signing in...' : 'Sign In' }}
         </button>
         <p class="login-switch">Don't have an account? <span (click)="switchMode('signup')">Sign Up</span></p>
+      </div>
+      <div class="login-forgot">
+        <p class="login-switch">Forgot your password? <span (click)="switchMode('forgot-password')">Reset Password</span></p>
+      </div>
+      <div class="login-google">
+        <button class="btn-google w-full text-center" (click)="signInWithGoogle()" [disabled]="loading()">
+          {{ loading() ? 'Redirecting...' : 'Sign In with Google' }}
+        </button>
+      </div>
+    }
+    <!-- Forgot Password Form -->
+    @if (mode === 'forgot-password') {
+      <div class="login-form">
+        <input class="login-input" type="email" placeholder="Email" [(ngModel)]="email" />
+      </div>
+      <div class="login-submit">
+        <button class="btn-primary w-full text-center" (click)="forgotPassword()" [disabled]="loading()">
+          {{ loading() ? 'Sending reset email...' : 'Send Reset Email' }}
+        </button>
+        <p class="login-switch">Remembered your password? <span (click)="switchMode('signin')">Sign In</span></p>
+      </div>
+    }
+
+    <!-- Confirm Forgot Password Form -->
+    @if (mode === 'confirm-forgot-password') {
+      <div class="login-form">
+        <input class="login-input" type="text" placeholder="Confirmation code" [(ngModel)]="confirmationCode" />
+        <input class="login-input" type="password" placeholder="New Password" [(ngModel)]="newPassword" />
+      </div>
+      <div class="login-submit">
+        <button class="btn-primary w-full text-center" (click)="confirmResetPassword()" [disabled]="loading()">
+          {{ loading() ? 'Resetting password...' : 'Reset Password' }}
+        </button>
+        <p class="login-switch">Remembered your password? <span (click)="switchMode('signin')">Sign In</span></p>
       </div>
     }
 
