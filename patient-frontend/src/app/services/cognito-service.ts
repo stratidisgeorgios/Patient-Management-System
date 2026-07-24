@@ -14,6 +14,7 @@ Amplify.configure({
           redirectSignIn: ['https://patientsystem.me/login'],
           redirectSignOut: ['https://patientsystem.me/login'],
           responseType: 'code'
+        }
       }
     }
   }
@@ -93,5 +94,5 @@ export class CognitoService {
 
   async signInWithGoogle(): Promise<void> {
     await signInWithRedirect({ provider: 'Google' });
-
+  }
 }

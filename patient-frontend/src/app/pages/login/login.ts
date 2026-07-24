@@ -93,4 +93,14 @@ export class Login {
     }
   }
 
+  async signInWithGoogle(): Promise<void> {
+    this.loading.set(true);
+    try {
+      await this.cognitoService.signInWithGoogle();
+    } catch (e: any) {
+      this.notificationService.error(e.message ?? 'Google sign in failed');
+      this.loading.set(false);
+    }
+  }
+
 }
