@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, signal } from "@angular/core";
-import { PatientResponse } from "../../models/patient.model";
+import { ImportJobStatus, PatientResponse } from "../../models/patient.model";
 import { PatientSearchResponse } from "../../models/search.model";
 import { PatientService } from "../../services/patient-service";
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
@@ -9,6 +9,7 @@ import { SearchService } from "../../services/search-service";
 import { Router } from "@angular/router";
 import { debounceTime, of, Subject, switchMap, takeUntil } from "rxjs";
 import { SseService } from "../../services/sse-service";
+
 @Component({
   selector: "app-patient-list",
   imports: [ReactiveFormsModule, ConfirmModal],
@@ -35,6 +36,7 @@ export class PatientList implements OnInit, OnDestroy {
     dateOfBirth: new FormControl('', [Validators.required]),
     registeredDate: new FormControl('', [Validators.required])
   });
+
   showCreateModal = signal(false);
   showEditModal = signal(false);
   showDeleteModal = signal(false);
@@ -43,18 +45,42 @@ export class PatientList implements OnInit, OnDestroy {
   isLoading = signal(false);
   lastSearchQuery = '';
   private destroy$ = new Subject<void>();
-  constructor(private patientService: PatientService, private searchService: SearchService, private notificationService: NotificationService, private router: Router, private sseService: SseService) {}
+
+  showImportModal = signal(false);
+  importStep = signal<'upload' | 'mapping' | 'status'>('upload');
+  importMapping: Record<string, string> = {};
+  importS3Key = '';
+  importTotalRows = 0;
+  importJobId = '';
+  importJobStatus = signal<ImportJobStatus | null>(null);
+  isUploading = signal(false);
+  private isPolling = false;
+
+  readonly knownFields = [
+    { value: 'name', label: 'Name' },
+    { value: 'email', label: 'Email' },
+    { value: 'gender', label: 'Gender' },
+    { value: 'address', label: 'Address' },
+    { value: 'dateOfBirth', label: 'Date of Birth' },
+    { value: 'registeredDate', label: 'Registered Date' },
+  ];
+
+  constructor(
+    private patientService: PatientService,
+    private searchService: SearchService,
+    private notificationService: NotificationService,
+    private router: Router,
+    private sseService: SseService
+  ) {}
 
   ngOnInit() {
     this.sseService.connect().pipe(takeUntil(this.destroy$)).subscribe({
       next: (message) => {
-      if (message === 'patient' && this.lastSearchQuery) {
+        if (message === 'patient' && this.lastSearchQuery) {
           this.searchQuery.next(this.lastSearchQuery);
         }
       },
-      error: (err) => {
-        console.error("SSE connection error:", err);
-      }
+      error: (err) => console.error("SSE connection error:", err)
     });
     this.searchQuery.pipe(
       debounceTime(200),
@@ -69,7 +95,8 @@ export class PatientList implements OnInit, OnDestroy {
         this.isLoading.set(true);
         this.lastSearchQuery = value;
         return this.searchService.searchPatients(value);
-      }), takeUntil(this.destroy$)
+      }),
+      takeUntil(this.destroy$)
     ).subscribe({
       next: (fullPatients) => {
         this.patients.set(fullPatients.sort((a, b) => a.name.localeCompare(b.name)));
@@ -81,7 +108,9 @@ export class PatientList implements OnInit, OnDestroy {
       }
     });
   }
+
   ngOnDestroy() {
+    this.isPolling = false;
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -97,9 +126,7 @@ export class PatientList implements OnInit, OnDestroy {
     this.closeAllModals();
     this.showCreateModal.set(true);
     this.createForm.reset();
-    this.createForm.patchValue({
-      registeredDate: new Date().toISOString().split('T')[0]
-    });
+    this.createForm.patchValue({ registeredDate: new Date().toISOString().split('T')[0] });
   }
 
   submitCreate() {
@@ -140,7 +167,6 @@ export class PatientList implements OnInit, OnDestroy {
     });
   }
 
-
   deletePatient(patient: PatientSearchResponse) {
     this.closeAllModals();
     this.selectedPatient.set(patient as unknown as PatientResponse);
@@ -163,13 +189,101 @@ export class PatientList implements OnInit, OnDestroy {
     this.selectedPatient.set(null);
   }
 
+  openProfile(id: string) {
+    this.router.navigate(['/app/patients', id]);
+  }
+
+  openImport() {
+    this.showImportModal.set(true);
+    this.importStep.set('upload');
+    this.importS3Key = '';
+    this.importMapping = {};
+    this.importTotalRows = 0;
+    this.importJobId = '';
+    this.importJobStatus.set(null);
+    this.isUploading.set(false);
+    this.isPolling = false;
+  }
+
+  closeImportModal() {
+    this.isPolling = false;
+    this.showImportModal.set(false);
+  }
+
+  onFileSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.isUploading.set(true);
+    this.patientService.uploadFile(file).subscribe({
+      next: (response) => {
+        this.importS3Key = response.s3Key;
+        this.importMapping = { ...response.mapping };
+        this.importTotalRows = response.totalRows;
+        this.isUploading.set(false);
+        this.importStep.set('mapping');
+      },
+      error: (err) => {
+        this.isUploading.set(false);
+        this.notificationService.error("Failed to upload file: " + this.extractError(err));
+      }
+    });
+  }
+
+  updateMapping(csvColumn: string, field: string) {
+    this.importMapping = { ...this.importMapping, [csvColumn]: field };
+  }
+
+  isKnownField(field: string): boolean {
+    return this.knownFields.some(f => f.value === field);
+  }
+
+  mappingEntries(): { csvColumn: string; field: string }[] {
+    return Object.entries(this.importMapping).map(([csvColumn, field]) => ({ csvColumn, field }));
+  }
+
+  confirmMapping() {
+    this.patientService.startImport(this.importS3Key, this.importMapping, this.importTotalRows).subscribe({
+      next: (response) => {
+        this.importJobId = response.importJobId;
+        this.importStep.set('status');
+        this.startPolling();
+      },
+      error: (err) => this.notificationService.error("Failed to start import: " + this.extractError(err))
+    });
+  }
+
+  private startPolling() {
+    this.isPolling = true;
+    const poll = () => {
+      if (!this.isPolling) return;
+      this.patientService.getImportJobStatus(this.importJobId).subscribe({
+        next: (status) => {
+          this.importJobStatus.set(status);
+          if (status.status !== 'COMPLETED' && status.status !== 'FAILED') {
+            setTimeout(poll, 2000);
+          } else {
+            this.isPolling = false;
+          }
+        },
+        error: (err) => {
+          this.notificationService.error("Failed to get import status: " + this.extractError(err));
+          this.isPolling = false;
+        }
+      });
+    };
+    poll();
+  }
+
+  getProgressPercent(): number {
+    const status = this.importJobStatus();
+    if (!status || status.totalRows === 0) return 0;
+    return Math.min(100, Math.round((status.importedRows / status.totalRows) * 100));
+  }
+
   private extractError(err: any): string {
     if (err.error?.message) return err.error.message;
     if (typeof err.error === 'string') return err.error;
     if (err.error && typeof err.error === 'object') return Object.values(err.error).join(', ');
     return err.message || 'An unexpected error occurred';
-  }
-    openProfile(id:string){
-    this.router.navigate(['/app/patients', id]);
   }
 }

@@ -3,6 +3,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -11,6 +12,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import com.patientsystem.patientservice.converter.JsonMapConverter;
+import java.util.Map;
 
 
 
@@ -37,6 +40,10 @@ public class Patient {
 
     @NotNull
     private LocalDate registeredDate;
+
+    @Convert(converter = JsonMapConverter.class)
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Object> customFields;
 
     public UUID getId() {
         return id;
@@ -92,5 +99,13 @@ public class Patient {
 
     public void setRegisteredDate(LocalDate registeredDate) {
         this.registeredDate = registeredDate;
+    }
+
+    public Map<String, Object> getCustomFields() {
+        return customFields;
+    }
+
+    public void setCustomFields(Map<String, Object> customFields) {
+        this.customFields = customFields;
     }
 }

@@ -1,0 +1,32 @@
+package com.patientsystem.patientservice.service;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import java.io.InputStream;
+
+@Service
+public class S3Service {
+    private final S3Client s3Client;
+    private final String bucket;
+
+    public S3Service(S3Client s3Client, @Value("${aws.s3.bucket}") String bucket) {
+        this.s3Client = s3Client;
+        this.bucket = bucket;
+    }
+
+    public void upload(String key, byte[] bytes) {
+        s3Client.putObject(
+            PutObjectRequest.builder().bucket(bucket).key(key).build(),
+            RequestBody.fromBytes(bytes)
+        );
+    }
+
+    public InputStream download(String key) {
+        return s3Client.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build());
+    }
+}

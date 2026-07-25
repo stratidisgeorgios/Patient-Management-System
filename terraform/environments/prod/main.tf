@@ -50,3 +50,29 @@ output "ec2_public_ip" {
 output "ec2_instance_id" {
   value = module.ec2.instance_id
 }
+
+module "s3" {
+  source      = "../../modules/s3"
+  bucket_name = "patient-system-s3-storage-jjfd3rf"
+  tags = {
+    Environment = var.environment
+    Project     = "patient-system"
+  }
+}
+
+output "s3_bucket_name" {
+  value = module.s3.bucket_name
+}
+
+module "sqs_import" {
+  source     = "../../modules/sqs"
+  queue_name = "patient-system-import-queue"
+  tags = {
+    Environment = var.environment
+    Project     = "patient-system"
+  }
+}
+
+output "import_queue_url" {
+  value = module.sqs_import.queue_url
+}

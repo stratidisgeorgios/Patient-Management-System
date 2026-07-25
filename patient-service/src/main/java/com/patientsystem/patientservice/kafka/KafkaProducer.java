@@ -11,11 +11,11 @@ import com.patientsystem.patientservice.model.Patient;
 
 import com.patientsystem.patient.kafka.PatientEvent;
 
+
 @Service
 public class KafkaProducer {
 
     private static final Logger log = LoggerFactory.getLogger(KafkaProducer.class);
-
     private final KafkaTemplate<String, byte[]> kafkaTemplate;
 
     public KafkaProducer(KafkaTemplate<String, byte[]> kafkaTemplate) {
@@ -39,5 +39,4 @@ public class KafkaProducer {
             log.error("Failed to send patient event: " + e.getMessage());
         }
     }
-    
 }

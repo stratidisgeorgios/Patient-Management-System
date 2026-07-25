@@ -47,7 +47,7 @@ resource "aws_instance" "main" {
   vpc_security_group_ids = [aws_security_group.main.id]
 
   root_block_device {
-    volume_size = 30
+    volume_size = 40
     volume_type = "gp3"
   }
 

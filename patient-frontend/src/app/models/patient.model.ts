@@ -16,3 +16,21 @@ export interface PatientResponse {
   registeredDate: string;
   gender: string;
 }
+
+export interface ImportUploadResponse {
+  s3Key: string;
+  mapping: Record<string, string>;
+  totalRows: number;
+}
+
+export interface ImportStartResponse {
+  importJobId: string;
+}
+
+export interface ImportJobStatus {
+  status: string;
+  importedRows: number;
+  totalRows: number;
+  failedRows: number;
+  errors: { row: number; reason: string }[];
+}

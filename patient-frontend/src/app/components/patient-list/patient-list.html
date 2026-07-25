@@ -8,6 +8,7 @@
       </svg>
       <input type="text" class="search-box-input" placeholder="Search patients..." (input)="searchQuery.next($event.target.value)" />
     </div>
+    <button (click)="openImport()" class="btn-secondary">Import CSV</button>
     <button (click)="createPatient()" class="btn-primary">+ Add Patient</button>
   </div>
   @if (!hasSearched()) {
