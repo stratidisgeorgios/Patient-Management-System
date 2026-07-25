@@ -1,7 +1,8 @@
 package com.patientsystem.patientservice.model;
 
-import com.patientsystem.patientservice.converter.JsonListConverter;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,7 @@ public class ImportJob {
     private LocalDateTime completedAt;
     private int totalRows;
 
-    @Convert(converter = JsonListConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private List<Map<String, Object>> errors = new ArrayList<>();
 
