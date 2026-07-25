@@ -229,7 +229,8 @@ export class PatientList implements OnInit, OnDestroy {
     });
   }
 
-  updateMapping(csvColumn: string, field: string) {
+  updateMapping(csvColumn: string, event: Event) {
+    const field = (event.target as HTMLSelectElement).value;
     this.importMapping = { ...this.importMapping, [csvColumn]: field };
   }
 

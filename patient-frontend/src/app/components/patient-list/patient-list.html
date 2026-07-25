@@ -187,3 +187,111 @@
 @if (showDeleteModal()) {
   <app-confirm-modal (confirm)="submitDelete()" (cancel)="cancelDelete()"></app-confirm-modal>
 }
+
+@if (showImportModal()) {
+  <div class="modal-overlay">
+    <div class="modal-card import-modal">
+      <div class="modal-header">
+        <span class="label">Import Patients from CSV</span>
+        <button (click)="closeImportModal()" class="btn-ghost">✕ Close</button>
+      </div>
+
+      @if (importStep() === 'upload') {
+        <div class="modal-body">
+          @if (isUploading()) {
+            <div class="import-uploading">
+              <div class="spinner"></div>
+              <span class="label">Uploading...</span>
+            </div>
+          } @else {
+            <label class="import-upload-area">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="import-upload-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/>
+              </svg>
+              <span class="import-upload-label">Click to select a CSV file</span>
+              <span class="import-upload-hint">.csv files only</span>
+              <input type="file" accept=".csv" (change)="onFileSelected($event)" class="import-file-input" />
+            </label>
+          }
+        </div>
+      }
+
+      @if (importStep() === 'mapping') {
+        <div class="modal-body">
+          <p class="import-row-count">{{ importTotalRows }} rows detected — review column mapping below</p>
+          <div class="mapping-table-wrap">
+            <table class="mapping-table">
+              <thead>
+                <tr>
+                  <th>CSV Column</th>
+                  <th>Maps To</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (entry of mappingEntries(); track entry.csvColumn) {
+                  <tr>
+                    <td class="mapping-csv-col">{{ entry.csvColumn }}</td>
+                    <td>
+                      <select class="mapping-select" (change)="updateMapping(entry.csvColumn, $event)">
+                        @for (field of knownFields; track field.value) {
+                          <option [value]="field.value" [selected]="entry.field === field.value">{{ field.label }}</option>
+                        }
+                        <option [value]="entry.csvColumn" [selected]="!isKnownField(entry.field)">Custom Field</option>
+                      </select>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <div class="modal-actions">
+            <button (click)="confirmMapping()" class="btn-primary flex-1 text-center">Start Import</button>
+            <button (click)="closeImportModal()" class="btn-secondary flex-1 text-center">Cancel</button>
+          </div>
+        </div>
+      }
+
+      @if (importStep() === 'status') {
+        <div class="modal-body">
+          @if (importJobStatus() === null) {
+            <div class="import-uploading">
+              <div class="spinner"></div>
+              <span class="label">Starting...</span>
+            </div>
+          } @else if (importJobStatus()!.status === 'PENDING' || importJobStatus()!.status === 'PROCESSING') {
+            <p class="import-row-count">Importing {{ importJobStatus()!.importedRows }} / {{ importJobStatus()!.totalRows }} rows…</p>
+            <div class="import-progress-track">
+              <div class="import-progress-fill" [style.width.%]="getProgressPercent()"></div>
+            </div>
+          } @else if (importJobStatus()!.status === 'COMPLETED') {
+            <div class="import-summary import-summary--success">
+              <span class="import-summary-icon">✓</span>
+              <p class="import-summary-title">Import complete</p>
+              <p class="import-summary-stat">{{ importJobStatus()!.importedRows }} rows imported successfully</p>
+              @if (importJobStatus()!.failedRows > 0) {
+                <p class="import-summary-stat import-summary-stat--warn">{{ importJobStatus()!.failedRows }} rows failed</p>
+                <div class="import-error-list">
+                  @for (error of importJobStatus()!.errors; track $index) {
+                    <div class="import-error-item">Row {{ error.row }}: {{ error.reason }}</div>
+                  }
+                </div>
+              }
+            </div>
+            <div class="modal-actions">
+              <button (click)="closeImportModal()" class="btn-primary flex-1 text-center">Done</button>
+            </div>
+          } @else if (importJobStatus()!.status === 'FAILED') {
+            <div class="import-summary import-summary--failed">
+              <span class="import-summary-icon">✕</span>
+              <p class="import-summary-title">Import failed</p>
+              <p class="import-summary-stat">The import could not be completed. Please check your CSV and try again.</p>
+            </div>
+            <div class="modal-actions">
+              <button (click)="closeImportModal()" class="btn-secondary flex-1 text-center">Close</button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

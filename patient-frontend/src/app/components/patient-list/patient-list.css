@@ -42,3 +42,100 @@
 .patient-pagination {
   @apply flex items-center justify-center gap-8 py-6 border-t border-[#C7C7C7];
 }
+
+/* Import modal */
+.import-modal {
+  @apply max-w-2xl;
+}
+
+.import-uploading {
+  @apply flex flex-col items-center gap-4 py-12;
+}
+
+.import-upload-area {
+  @apply flex flex-col items-center justify-center gap-3 border-2 border-dashed border-[#C7C7C7] rounded-[4px] py-14 px-8 cursor-pointer transition-colors duration-200 hover:border-[#1351AA] hover:bg-[#1351AA]/[0.02];
+}
+
+.import-upload-icon {
+  @apply w-10 h-10 text-[#7A7A7A];
+}
+
+.import-upload-label {
+  @apply text-sm font-semibold text-[#141414];
+}
+
+.import-upload-hint {
+  @apply text-xs text-[#7A7A7A];
+}
+
+.import-file-input {
+  @apply hidden;
+}
+
+.import-row-count {
+  @apply text-sm text-[#7A7A7A] mb-4;
+}
+
+.mapping-table-wrap {
+  @apply max-h-72 overflow-y-auto border border-[#C7C7C7] rounded-[3px];
+}
+
+.mapping-table {
+  @apply w-full border-collapse;
+}
+
+.mapping-table th {
+  @apply py-3 px-4 text-left text-xs font-bold uppercase tracking-[0.15em] text-[#7A7A7A] bg-[#141414]/[0.03] border-b border-[#C7C7C7] sticky top-0;
+}
+
+.mapping-table td {
+  @apply py-2 px-4 border-b border-[#C7C7C7] last:border-b-0 text-sm;
+}
+
+.mapping-csv-col {
+  @apply font-mono text-[#444343] w-1/2;
+}
+
+.mapping-select {
+  @apply w-full bg-transparent text-sm text-[#141414] focus:outline-none cursor-pointer py-1;
+}
+
+.import-progress-track {
+  @apply w-full h-2 bg-[#C7C7C7] rounded-full overflow-hidden mt-2 mb-6;
+}
+
+.import-progress-fill {
+  @apply h-full bg-[#1351AA] transition-[width] duration-500 rounded-full;
+}
+
+.import-summary {
+  @apply flex flex-col items-center gap-3 py-8 text-center;
+}
+
+.import-summary--success .import-summary-icon {
+  @apply text-3xl text-green-600;
+}
+
+.import-summary--failed .import-summary-icon {
+  @apply text-3xl text-red-500;
+}
+
+.import-summary-title {
+  @apply text-base font-semibold text-[#141414];
+}
+
+.import-summary-stat {
+  @apply text-sm text-[#7A7A7A];
+}
+
+.import-summary-stat--warn {
+  @apply text-orange-500;
+}
+
+.import-error-list {
+  @apply w-full max-h-36 overflow-y-auto border border-[#C7C7C7] rounded-[3px] text-left mt-2;
+}
+
+.import-error-item {
+  @apply px-4 py-2 text-xs font-mono text-red-600 border-b border-[#C7C7C7] last:border-b-0;
+}
