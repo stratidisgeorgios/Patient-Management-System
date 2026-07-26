@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.patientsystem.patientservice.model.Patient;
 
 import com.patientsystem.patient.kafka.PatientEvent;
+import com.patientsystem.import_.kafka.ImportEvent;
 
 
 @Service
@@ -22,7 +23,7 @@ public class KafkaProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void sendEvent(Patient patient, String eventType, String organizationId) {
+    public void sendEvent(Patient patient, String eventType, String organizationId, String jobId) {
         PatientEvent patientEvent = PatientEvent.newBuilder()
                 .setPatientId(patient.getId().toString())
                 .setName(patient.getName())
@@ -32,11 +33,24 @@ public class KafkaProducer {
                 .setEventType(eventType)
                 .setTimestamp(LocalDateTime.now().toString())
                 .setOrganizationId(organizationId)
+                .setJobId(jobId != null ? jobId : "")
                 .build();
         try {
             kafkaTemplate.send("patient-events", patientEvent.toByteArray());
         } catch (Exception e) {
             log.error("Failed to send patient event: " + e.getMessage());
+        }
+    }
+
+    public void sendImportCompleted(String jobId, String organizationId) {
+        ImportEvent event = ImportEvent.newBuilder()
+                .setJobId(jobId)
+                .setOrganizationId(organizationId)
+                .build();
+        try {
+            kafkaTemplate.send("import-events", event.toByteArray());
+        } catch (Exception e) {
+            log.error("Failed to send ImportCompleted event: " + e.getMessage());
         }
     }
 }

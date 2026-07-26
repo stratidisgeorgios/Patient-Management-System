@@ -16,17 +16,23 @@ public class SearchService {
         this.sseEmitterService = sseEmitterService;
     }
 
-    public void indexPatient(PatientDocument patientDocument, String eventType) {
+    public void indexPatient(PatientDocument patientDocument, String eventType, String jobId) {
         try {
             if (eventType.equals("PatientCreated") || eventType.equals("PatientUpdated")) {
                 openSearchService.indexPatient(patientDocument);
             } else if (eventType.equals("PatientDeleted")) {
                 openSearchService.deletePatient(patientDocument.getId(), patientDocument.getOrganizationId());
             }
-            sseEmitterService.broadcast("patient");
+            if (jobId == null || jobId.isEmpty()) {
+                sseEmitterService.broadcast("patient");
+            }
         } catch (Exception e) {
             throw new RuntimeException("Failed to index patient: " + e.getMessage(), e);
         }
+    }
+
+    public void broadcastImportComplete() {
+        sseEmitterService.broadcast("patient");
     }
 
     public void indexTreatment(TreatmentDocument treatmentDocument, String eventType) {

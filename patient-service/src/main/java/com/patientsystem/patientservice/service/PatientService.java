@@ -37,7 +37,7 @@ public class PatientService {
         }
         Patient patient = patientRepository.save(PatientMapper.toModel(patientRequestDTO));
         billingServiceGrpcClient.createBillingAccount(patient.getId().toString(),patient.getName(),patient.getEmail());
-        kafkaProducer.sendEvent(patient, "PatientCreated", organizationId);
+        kafkaProducer.sendEvent(patient, "PatientCreated", organizationId, "");
         return PatientMapper.toDTO(patient);
     }
 
@@ -53,7 +53,7 @@ public class PatientService {
         existingPatient.setDateOfBirth(patientRequestDTO.getDateOfBirth() != null ? java.time.LocalDate.parse(patientRequestDTO.getDateOfBirth()) : existingPatient.getDateOfBirth());
         Patient saved = patientRepository.save(existingPatient);
         billingServiceGrpcClient.updateBillingAccount(saved.getId().toString(), saved.getName(), saved.getEmail());
-        kafkaProducer.sendEvent(saved, "PatientUpdated", organizationId);
+        kafkaProducer.sendEvent(saved, "PatientUpdated", organizationId, "");
         return PatientMapper.toDTO(saved);
     }
 
@@ -62,6 +62,6 @@ public class PatientService {
         Patient patient = patientRepository.findById(id)
             .orElseThrow(() -> new IdNotFoundException("Patient with ID " + id + " not found."));
         patientRepository.deleteById(id);
-        kafkaProducer.sendEvent(patient, "PatientDeleted", organizationId);
+        kafkaProducer.sendEvent(patient, "PatientDeleted", organizationId, "");
     }
 }

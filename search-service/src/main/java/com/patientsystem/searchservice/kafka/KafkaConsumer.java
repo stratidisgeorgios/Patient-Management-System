@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import com.patientsystem.patient.kafka.PatientEvent;
+import com.patientsystem.import_.kafka.ImportEvent;
 import com.patientsystem.treatment.kafka.TreatmentEvent;
 import com.patientsystem.searchservice.documents.PatientDocument;
 import com.patientsystem.searchservice.documents.TreatmentDocument;
@@ -28,10 +29,21 @@ public class KafkaConsumer {
             entity.setDateOfBirth(proto.getDateOfBirth());
             entity.setGender(proto.getGender());
             entity.setOrganizationId(proto.getOrganizationId());
-            searchService.indexPatient(entity, proto.getEventType());
+            searchService.indexPatient(entity, proto.getEventType(), proto.getJobId());
             log.info("Consumed patient event: " + proto.getEventType() + " for patient: " + proto.getPatientId());
         } catch (Exception e) {
             log.error("Failed to consume patient event: " + e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "import-events", groupId = "search-service")
+    public void consumeImportEvent(byte[] event) {
+        try {
+            ImportEvent proto = ImportEvent.parseFrom(event);
+            searchService.broadcastImportComplete();
+            log.info("Import completed for job: " + proto.getJobId());
+        } catch (Exception e) {
+            log.error("Failed to consume import event: " + e.getMessage());
         }
     }
 

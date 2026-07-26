@@ -67,7 +67,7 @@ public class ImportService {
                 try {
                     chunk.add(mapRow(record, message.getMapping()));
                     if (chunk.size() == CHUNK_SIZE) {
-                        imported += saveChunk(chunk, message.getOrganizationId());
+                        imported += saveChunk(chunk, message.getOrganizationId(), message.getJobId());
                         chunk.clear();
                         job.setImportedRows(imported);
                         importJobRepository.save(job);
@@ -77,7 +77,7 @@ public class ImportService {
                 }
             }
 
-            if (!chunk.isEmpty()) imported += saveChunk(chunk, message.getOrganizationId());
+            if (!chunk.isEmpty()) imported += saveChunk(chunk, message.getOrganizationId(), message.getJobId());
 
         } catch (Exception e) {
             log.error("Import failed for job {}: {}", message.getJobId(), e.getMessage());
@@ -92,11 +92,12 @@ public class ImportService {
         job.setStatus("COMPLETED");
         job.setCompletedAt(LocalDateTime.now());
         importJobRepository.save(job);
+        kafkaProducer.sendImportCompleted(message.getJobId(), message.getOrganizationId());
     }
 
-    private int saveChunk(List<Patient> chunk, String organizationId) {
+    private int saveChunk(List<Patient> chunk, String organizationId, String jobId) {
         List<Patient> saved = patientRepository.saveAll(chunk);
-        saved.forEach(p -> kafkaProducer.sendEvent(p, "PatientCreated", organizationId));
+        saved.forEach(p -> kafkaProducer.sendEvent(p, "PatientCreated", organizationId, jobId));
         return saved.size();
     }
 

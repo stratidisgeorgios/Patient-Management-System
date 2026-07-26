@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option java_package = "com.patientsystem.import_.kafka";
+option java_multiple_files = true;
+
+message ImportEvent {
+    string job_id = 1;
+    string organization_id = 2;
+}

@@ -13,5 +13,6 @@ message PatientEvent{
     string date_of_birth = 6;
     string gender = 7;
     string organization_id = 8;
+    string job_id = 9;
 }
 

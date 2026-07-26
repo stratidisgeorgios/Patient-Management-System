@@ -8,26 +8,40 @@ import { CognitoService } from "./cognito-service";
 })
 export class SseService implements OnDestroy {
   private eventSource: EventSourcePolyfill | null = null;
+  private closed = false;
 
   constructor(private cognitoService: CognitoService, @Inject(APP_SERVICE_CONFIG) private config: AppConfig) {}
+
   connect(): Observable<string> {
     return new Observable<string>(observer => {
-      this.cognitoService.getValidToken().then(token => {
-        this.eventSource = new EventSourcePolyfill(`${this.config.apiUrl}/api/search/events`, {
-          headers: { Authorization: `Bearer ${token}` }
+      this.closed = false;
+      const open = () => {
+        if (this.closed) return;
+        this.cognitoService.getValidToken().then(token => {
+          if (this.closed) return;
+          if (this.eventSource) this.eventSource.close();
+          this.eventSource = new EventSourcePolyfill(`${this.config.apiUrl}/api/search/events`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          this.eventSource.addEventListener('indexUpdated', (event: any) => {
+            observer.next(event.data);
+          });
+          this.eventSource.onerror = () => {
+            this.eventSource?.close();
+            setTimeout(open, 5000);
+          };
         });
-        this.eventSource.addEventListener('indexUpdated', (event: any) => {
-          observer.next(event.data);
-        });
-        this.eventSource.onerror = (error: any) => {
-          console.warn('SSE reconnecting...', error);
-        };
-      })
-    })
+      };
+      open();
+      return () => {
+        this.closed = true;
+        this.eventSource?.close();
+      };
+    });
   }
+
   ngOnDestroy(): void {
-    if (this.eventSource) {
-      this.eventSource.close();
-    }
+    this.closed = true;
+    this.eventSource?.close();
   }
 }

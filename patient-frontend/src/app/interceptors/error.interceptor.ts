@@ -1,16 +1,18 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
+import { Router } from '@angular/router';
 import { NotificationService } from '../services/notification-service';
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     const notificationService = inject(NotificationService);
+    const router = inject(Router);
     return next(req).pipe(
         catchError((error:HttpErrorResponse) => {
             switch (error.status) {
                 case 400:
                     break;
                 case 401:
-                    notificationService.error('Unauthorized access. Please log in.');
+                    router.navigate(['/login']);
                     break;
                 case 403:
                     notificationService.error('Forbidden access. You do not have permission to perform this action.');
