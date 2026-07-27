@@ -1,6 +1,5 @@
 package com.patientsystem.billingservice.grpc;
 
-
 import com.patientsystem.billingservice.service.BillingService;
 import com.patientsystem.billingservice.model.BillingAccount;
 import com.patientsystem.billing.grpc.BillingServiceGrpc;
@@ -19,36 +18,33 @@ public class BillingGrpcService extends BillingServiceGrpc.BillingServiceImplBas
     }
 
     @Override
-    public void createBillingAccount(BillingRequest billingRequest, StreamObserver<BillingResponse> responseObserver) {
-        BillingAccount billingAccount = billingService.createAccount(billingRequest.getPatientId(), billingRequest.getName(), billingRequest.getEmail());
-
-        BillingResponse response = BillingResponse.newBuilder()
-                .setAccountId(billingAccount.getId().toString())
-                .setStatus("Billing account created for patient: " + billingRequest.getPatientId())
-                .build();
-        responseObserver.onNext(response);
+    public void createBillingAccount(BillingRequest request, StreamObserver<BillingResponse> responseObserver) {
+        BillingAccount account = billingService.createAccount(
+                request.getPatientId(), request.getName(), request.getEmail(), request.getOrganizationId());
+        responseObserver.onNext(BillingResponse.newBuilder()
+                .setAccountId(account.getId().toString())
+                .setStatus("Billing account created for patient: " + request.getPatientId())
+                .build());
         responseObserver.onCompleted();
     }
 
     @Override
-    public void deleteBillingAccount(BillingRequest billingRequest, StreamObserver<BillingResponse> responseObserver) {
-        billingService.deleteAccount(billingRequest.getPatientId());
-        BillingResponse response = BillingResponse.newBuilder()
-                .setStatus("Billing account deleted for patient: " + billingRequest.getPatientId())
-                .build();
-        responseObserver.onNext(response);
+    public void deleteBillingAccount(BillingRequest request, StreamObserver<BillingResponse> responseObserver) {
+        billingService.deleteAccount(request.getPatientId(), request.getOrganizationId());
+        responseObserver.onNext(BillingResponse.newBuilder()
+                .setStatus("Billing account deleted for patient: " + request.getPatientId())
+                .build());
         responseObserver.onCompleted();
     }
 
     @Override
-    public void updateBillingAccount(BillingRequest billingRequest, StreamObserver<BillingResponse> responseObserver) {
-        BillingAccount billingAccount = billingService.updateAccount(billingRequest.getPatientId(), billingRequest.getName(), billingRequest.getEmail());
-
-        BillingResponse response = BillingResponse.newBuilder()
-                .setAccountId(billingAccount.getId().toString())
-                .setStatus("Billing account updated for patient: " + billingRequest.getPatientId())
-                .build();
-        responseObserver.onNext(response);
+    public void updateBillingAccount(BillingRequest request, StreamObserver<BillingResponse> responseObserver) {
+        BillingAccount account = billingService.updateAccount(
+                request.getPatientId(), request.getName(), request.getEmail(), request.getOrganizationId());
+        responseObserver.onNext(BillingResponse.newBuilder()
+                .setAccountId(account.getId().toString())
+                .setStatus("Billing account updated for patient: " + request.getPatientId())
+                .build());
         responseObserver.onCompleted();
     }
 }

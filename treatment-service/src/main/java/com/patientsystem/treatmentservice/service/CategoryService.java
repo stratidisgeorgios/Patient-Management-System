@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.patientsystem.treatmentservice.model.Category;
 import com.patientsystem.treatmentservice.repository.CategoryRepository;
 import com.patientsystem.treatmentservice.repository.TreatmentRepository;
+
 @Service
 public class CategoryService {
     private final CategoryRepository categoryRepository;
@@ -15,22 +16,24 @@ public class CategoryService {
         this.treatmentRepository = treatmentRepository;
     }
 
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    public List<Category> getAllCategories(String organizationId) {
+        return categoryRepository.findAllByOrganizationId(organizationId);
     }
 
-    public Category createCategory(Category category) {
-        if (categoryRepository.existsByName(category.getName())) {
+    public Category createCategory(Category category, String organizationId) {
+        if (categoryRepository.existsByNameAndOrganizationId(category.getName(), organizationId)) {
             throw new RuntimeException("Category with name " + category.getName() + " already exists.");
         }
+        category.setOrganizationId(organizationId);
         return categoryRepository.save(category);
     }
 
-    public Category updateCategory(UUID categoryId, Category category) {
+    public Category updateCategory(UUID categoryId, Category category, String organizationId) {
         if (!categoryRepository.existsById(categoryId)) {
             throw new RuntimeException("Category not found for ID: " + categoryId);
         }
         category.setId(categoryId);
+        category.setOrganizationId(organizationId);
         return categoryRepository.save(category);
     }
 

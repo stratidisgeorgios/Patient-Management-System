@@ -3,7 +3,8 @@ CREATE TABLE billing_account (
     patient_id VARCHAR(255),
     patient_name VARCHAR(255),
     patient_email VARCHAR(255),
-    balance NUMERIC
+    balance NUMERIC,
+    organization_id VARCHAR(255)
 );
 
 CREATE TABLE charge (

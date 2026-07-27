@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.patientsystem.treatmentservice.model.Category;
@@ -27,20 +28,23 @@ public class CategoryController {
 
     @GetMapping
     @Operation(summary = "Get all categories")
-    public ResponseEntity<List<Category>> getAllCategories() {
-        return ResponseEntity.ok(categoryService.getAllCategories());
+    public ResponseEntity<List<Category>> getAllCategories(
+            @RequestHeader("X-Organization-Id") String organizationId) {
+        return ResponseEntity.ok(categoryService.getAllCategories(organizationId));
     }
 
     @PostMapping
     @Operation(summary = "Create a new category")
-    public ResponseEntity<Category> createCategory(@RequestBody Category category) {
-        return ResponseEntity.status(201).body(categoryService.createCategory(category));
+    public ResponseEntity<Category> createCategory(@RequestBody Category category,
+            @RequestHeader("X-Organization-Id") String organizationId) {
+        return ResponseEntity.status(201).body(categoryService.createCategory(category, organizationId));
     }
 
     @PutMapping("/{categoryId}")
     @Operation(summary = "Update an existing category")
-    public ResponseEntity<Category> updateCategory(@PathVariable UUID categoryId, @RequestBody Category category) {
-        return ResponseEntity.ok(categoryService.updateCategory(categoryId, category));
+    public ResponseEntity<Category> updateCategory(@PathVariable UUID categoryId, @RequestBody Category category,
+            @RequestHeader("X-Organization-Id") String organizationId) {
+        return ResponseEntity.ok(categoryService.updateCategory(categoryId, category, organizationId));
     }
 
     @DeleteMapping("/{categoryId}")

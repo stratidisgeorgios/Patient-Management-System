@@ -1,10 +1,11 @@
 package com.patientsystem.treatmentservice.grpc;
 
 import java.util.UUID;
-import com.patientsystem.treatmentservice.service.TreatmentService;
+import com.patientsystem.treatmentservice.model.Treatment;
+import com.patientsystem.treatmentservice.repository.TreatmentRepository;
 import com.patientsystem.treatment.grpc.TreatmentServiceGrpc;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
-import com.patientsystem.treatmentservice.dto.TreatmentResponseDTO;
 import com.patientsystem.treatment.grpc.TreatmentRequest;
 import com.patientsystem.treatment.grpc.TreatmentResponse;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -12,23 +13,26 @@ import net.devh.boot.grpc.server.service.GrpcService;
 @GrpcService
 public class TreatmentGrpcService extends TreatmentServiceGrpc.TreatmentServiceImplBase {
 
-    private final TreatmentService treatmentService;
+    private final TreatmentRepository treatmentRepository;
 
-    public TreatmentGrpcService(TreatmentService treatmentService) {
-        this.treatmentService = treatmentService;
+    public TreatmentGrpcService(TreatmentRepository treatmentRepository) {
+        this.treatmentRepository = treatmentRepository;
     }
 
     @Override
     public void getTreatment(TreatmentRequest treatmentRequest, StreamObserver<TreatmentResponse> responseObserver) {
-        TreatmentResponseDTO found = treatmentService.getTreatmentById(UUID.fromString(treatmentRequest.getId()));
-
-        TreatmentResponse response = TreatmentResponse.newBuilder()
-                .setId(found.getId())
-                .setName(found.getName())
-                .setCategory(found.getCategory().getName())
-                .setPrice(found.getPrice().toString())
-                .build();
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
+        try {
+            Treatment treatment = treatmentRepository.findById(UUID.fromString(treatmentRequest.getId()))
+                    .orElseThrow(() -> new RuntimeException("Treatment not found: " + treatmentRequest.getId()));
+            responseObserver.onNext(TreatmentResponse.newBuilder()
+                    .setId(treatment.getId().toString())
+                    .setName(treatment.getName())
+                    .setCategory(treatment.getCategory() != null ? treatment.getCategory().getName() : "")
+                    .setPrice(treatment.getPrice().toString())
+                    .build());
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            responseObserver.onError(Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
+        }
     }
 }

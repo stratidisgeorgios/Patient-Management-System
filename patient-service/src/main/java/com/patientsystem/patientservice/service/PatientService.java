@@ -13,6 +13,7 @@ import com.patientsystem.patientservice.kafka.KafkaProducer;
 import com.patientsystem.patientservice.mapper.PatientMapper;
 import com.patientsystem.patientservice.model.Patient;
 import com.patientsystem.patientservice.repository.PatientRepository;
+
 @Service
 public class PatientService {
     private final PatientRepository patientRepository;
@@ -25,25 +26,30 @@ public class PatientService {
         this.kafkaProducer = kafkaProducer;
     }
 
-    public PatientResponseDTO getPatientById(UUID id) {
-        Patient patient = patientRepository.findById(id)
+    public PatientResponseDTO getPatientById(UUID id, String organizationId) {
+        Patient patient = patientRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new IdNotFoundException("Patient with ID " + id + " not found."));
         return PatientMapper.toDTO(patient);
     }
 
     public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO, String organizationId) {
-        if (patientRepository.existsByEmail(patientRequestDTO.getEmail())) {
+        if (patientRepository.existsByEmailAndOrganizationId(patientRequestDTO.getEmail(), organizationId)) {
             throw new EmailAlreadyExistsException("A patient with email " + patientRequestDTO.getEmail() + " already exists.");
         }
-        Patient patient = patientRepository.save(PatientMapper.toModel(patientRequestDTO));
-        billingServiceGrpcClient.createBillingAccount(patient.getId().toString(),patient.getName(),patient.getEmail());
+        Patient patient = PatientMapper.toModel(patientRequestDTO);
+        patient.setOrganizationId(organizationId);
+        patient = patientRepository.save(patient);
+        billingServiceGrpcClient.createBillingAccount(patient.getId().toString(), patient.getName(), patient.getEmail(), organizationId);
         kafkaProducer.sendEvent(patient, "PatientCreated", organizationId, "");
         return PatientMapper.toDTO(patient);
     }
 
     public PatientResponseDTO updatePatient(UUID id, PatientRequestDTO patientRequestDTO, String organizationId) {
-        Patient existingPatient = patientRepository.findById(id).orElseThrow(() -> new IdNotFoundException("Patient with ID " + id + " not found."));
-        if (patientRequestDTO.getEmail() != null && !patientRequestDTO.getEmail().equals(existingPatient.getEmail()) && patientRepository.existsByEmail(patientRequestDTO.getEmail())) {
+        Patient existingPatient = patientRepository.findByIdAndOrganizationId(id, organizationId)
+                .orElseThrow(() -> new IdNotFoundException("Patient with ID " + id + " not found."));
+        if (patientRequestDTO.getEmail() != null
+                && !patientRequestDTO.getEmail().equals(existingPatient.getEmail())
+                && patientRepository.existsByEmailAndOrganizationId(patientRequestDTO.getEmail(), organizationId)) {
             throw new EmailAlreadyExistsException("A patient with email " + patientRequestDTO.getEmail() + " already exists.");
         }
         existingPatient.setName(patientRequestDTO.getName() != null ? patientRequestDTO.getName() : existingPatient.getName());
@@ -52,15 +58,15 @@ public class PatientService {
         existingPatient.setAddress(patientRequestDTO.getAddress() != null ? patientRequestDTO.getAddress() : existingPatient.getAddress());
         existingPatient.setDateOfBirth(patientRequestDTO.getDateOfBirth() != null ? java.time.LocalDate.parse(patientRequestDTO.getDateOfBirth()) : existingPatient.getDateOfBirth());
         Patient saved = patientRepository.save(existingPatient);
-        billingServiceGrpcClient.updateBillingAccount(saved.getId().toString(), saved.getName(), saved.getEmail());
+        billingServiceGrpcClient.updateBillingAccount(saved.getId().toString(), saved.getName(), saved.getEmail(), organizationId);
         kafkaProducer.sendEvent(saved, "PatientUpdated", organizationId, "");
         return PatientMapper.toDTO(saved);
     }
 
     public void deletePatient(UUID id, String organizationId) {
-        billingServiceGrpcClient.deleteBillingAccount(id.toString());
-        Patient patient = patientRepository.findById(id)
-            .orElseThrow(() -> new IdNotFoundException("Patient with ID " + id + " not found."));
+        Patient patient = patientRepository.findByIdAndOrganizationId(id, organizationId)
+                .orElseThrow(() -> new IdNotFoundException("Patient with ID " + id + " not found."));
+        billingServiceGrpcClient.deleteBillingAccount(id.toString(), organizationId);
         patientRepository.deleteById(id);
         kafkaProducer.sendEvent(patient, "PatientDeleted", organizationId, "");
     }

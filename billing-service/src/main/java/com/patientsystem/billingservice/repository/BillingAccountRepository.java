@@ -7,5 +7,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface BillingAccountRepository extends JpaRepository<BillingAccount, UUID> {
+    Optional<BillingAccount> findByPatientIdAndOrganizationId(String patientId, String organizationId);
     Optional<BillingAccount> findByPatientId(String patientId);
 }

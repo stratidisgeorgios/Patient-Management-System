@@ -1,5 +1,6 @@
 package com.patientsystem.analyticsservice.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Entity;
@@ -18,6 +19,8 @@ public class ChargeEvent {
     private String treatmentName;
     private String category;
     private String price;
+    @Column(name = "organization_id")
+    private String organizationId;
     @Id
     private LocalDateTime timestamp;
 
@@ -31,6 +34,8 @@ public class ChargeEvent {
     public void setCategory(String category) { this.category = category; }
     public String getPrice() { return price; }
     public void setPrice(String price) { this.price = price; }
+    public String getOrganizationId() { return organizationId; }
+    public void setOrganizationId(String organizationId) { this.organizationId = organizationId; }
     public LocalDateTime getTimestamp() { return timestamp; }
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 }

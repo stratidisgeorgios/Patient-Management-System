@@ -4,15 +4,19 @@ import com.patientsystem.searchservice.documents.PatientDocument;
 import com.patientsystem.searchservice.documents.TreatmentDocument;
 import jakarta.annotation.PostConstruct;
 import org.opensearch.client.opensearch.OpenSearchClient;
+import org.opensearch.client.opensearch.core.BulkRequest;
 import org.opensearch.client.opensearch.core.DeleteRequest;
 import org.opensearch.client.opensearch.core.IndexRequest;
 import org.opensearch.client.opensearch.core.SearchRequest;
 import org.opensearch.client.opensearch.core.SearchResponse;
+import org.opensearch.client.opensearch.core.bulk.BulkOperation;
 import org.opensearch.client.opensearch._types.query_dsl.TextQueryType;
 import org.opensearch.client.opensearch.core.search.Hit;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.List;
 
 @Service
@@ -67,6 +71,21 @@ public class OpenSearchService {
         } catch (IOException e) {
             throw new IOException("Failed to index patient: " + e.getMessage(), e);
         }
+    }
+
+    public void bulkIndexPatients(List<PatientDocument> docs, String organizationId) throws IOException {
+        if (docs.isEmpty()) return;
+        String index = "patients-" + organizationId;
+        ensurePatientIndexExists(organizationId);
+        List<BulkOperation> operations = new ArrayList<>();
+        for (PatientDocument doc : docs) {
+            operations.add(BulkOperation.of(op -> op.index(idx -> idx
+                .index(index)
+                .id(doc.getId())
+                .document(doc)
+            )));
+        }
+        openSearchClient.bulk(BulkRequest.of(b -> b.operations(operations)));
     }
 
     public void deletePatient(String patientId, String organizationId) throws IOException {

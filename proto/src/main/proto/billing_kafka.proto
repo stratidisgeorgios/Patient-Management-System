@@ -9,4 +9,5 @@ message ChargeEvent {
     string category = 3;
     string price = 4;
     string timestamp = 5;
+    string organization_id = 6;
 }

@@ -75,6 +75,8 @@ patient-frontend/dist/
 
 ### Project specific ###
 FUTURE.md
+patients_import*.csv
+*.csv
 
 ### Claude ###
 .claude/

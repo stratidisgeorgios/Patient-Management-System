@@ -1,12 +1,14 @@
 CREATE TABLE patient (
     id UUID PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL,
     gender VARCHAR(10),
     address VARCHAR(255) NOT NULL,
     date_of_birth DATE NOT NULL,
     registered_date DATE NOT NULL,
-    custom_fields JSONB
+    organization_id VARCHAR(255),
+    custom_fields JSONB,
+    UNIQUE (email, organization_id)
 );
 
 CREATE TABLE import_job (

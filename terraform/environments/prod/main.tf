@@ -12,8 +12,13 @@ provider "aws" {
 }
 
 module "cognito" {
-  source         = "../../modules/cognito"
-  user_pool_name = "patient-system-${var.environment}"
+  source               = "../../modules/cognito"
+  user_pool_name       = "patient-system-${var.environment}"
+  cognito_domain       = var.cognito_domain
+  google_client_id     = var.google_client_id
+  google_client_secret = var.google_client_secret
+  callback_urls        = var.callback_urls
+  logout_urls          = var.logout_urls
   tags = {
     Environment = var.environment
     Project     = "patient-system"
@@ -75,4 +80,80 @@ module "sqs_import" {
 
 output "import_queue_url" {
   value = module.sqs_import.queue_url
+}
+
+module "rds" {
+  source                = "../../modules/rds"
+  environment           = var.environment
+  db_username           = var.db_username
+  db_password           = var.db_password
+  ec2_security_group_id = module.ec2.security_group_id
+  tags = {
+    Environment = var.environment
+    Project     = "patient-system"
+  }
+}
+
+output "rds_endpoint" {
+  value = module.rds.endpoint
+}
+
+output "rds_address" {
+  value = module.rds.address
+}
+
+resource "aws_s3_bucket" "glue_scripts" {
+  bucket        = var.glue_scripts_bucket
+  force_destroy = true
+  tags = {
+    Environment = var.environment
+    Project     = "patient-system"
+  }
+}
+
+module "glue" {
+  source                  = "../../modules/glue"
+  environment             = var.environment
+  rds_endpoint            = module.rds.endpoint
+  db_username             = var.db_username
+  db_password             = var.db_password
+  glue_scripts_bucket     = aws_s3_bucket.glue_scripts.bucket
+  patient_csv_bucket      = module.s3.bucket_name
+  kafka_bootstrap_brokers = module.msk.bootstrap_brokers
+  tags = {
+    Environment = var.environment
+    Project     = "patient-system"
+  }
+}
+
+module "msk" {
+  source                = "../../modules/msk"
+  environment           = var.environment
+  ec2_security_group_id = module.ec2.security_group_id
+  tags = {
+    Environment = var.environment
+    Project     = "patient-system"
+  }
+}
+
+module "opensearch" {
+  source                = "../../modules/opensearch"
+  environment           = var.environment
+  ec2_security_group_id = module.ec2.security_group_id
+  tags = {
+    Environment = var.environment
+    Project     = "patient-system"
+  }
+}
+
+output "msk_bootstrap_brokers" {
+  value = module.msk.bootstrap_brokers
+}
+
+output "opensearch_endpoint" {
+  value = module.opensearch.endpoint
+}
+
+output "glue_job_name" {
+  value = module.glue.glue_job_name
 }

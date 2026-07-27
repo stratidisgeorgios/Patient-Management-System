@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+
 @Service
 public class KafkaProducer {
 
@@ -16,13 +17,14 @@ public class KafkaProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void sendChargeEvent(String patientId, String treatmentName, String category, String price, String timestamp) {
+    public void sendChargeEvent(String patientId, String treatmentName, String category, String price, String timestamp, String organizationId) {
         ChargeEvent chargeEvent = ChargeEvent.newBuilder()
                 .setPatientId(patientId)
                 .setTreatmentName(treatmentName)
                 .setCategory(category)
                 .setPrice(price)
                 .setTimestamp(timestamp)
+                .setOrganizationId(organizationId)
                 .build();
         try {
             kafkaTemplate.send("billing-events", chargeEvent.toByteArray());

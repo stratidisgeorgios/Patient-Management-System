@@ -2,6 +2,7 @@ package com.patientsystem.billingservice.model;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,19 +17,19 @@ public class BillingAccount {
     private String patientName;
     private String patientEmail;
     private BigDecimal balance;
+    @Column(name = "organization_id")
+    private String organizationId;
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
-
     public String getPatientId() { return patientId; }
     public void setPatientId(String patientId) { this.patientId = patientId; }
-
     public String getPatientName() { return patientName; }
     public void setPatientName(String patientName) { this.patientName = patientName; }
-
     public String getPatientEmail() { return patientEmail; }
     public void setPatientEmail(String patientEmail) { this.patientEmail = patientEmail; }
-
     public BigDecimal getBalance() { return balance; }
     public void setBalance(BigDecimal balance) { this.balance = balance; }
+    public String getOrganizationId() { return organizationId; }
+    public void setOrganizationId(String organizationId) { this.organizationId = organizationId; }
 }

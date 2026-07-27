@@ -1,5 +1,7 @@
 package com.patientsystem.billingservice.grpc;
 
+import com.patientsystem.patient.grpc.OrganizationPageRequest;
+import com.patientsystem.patient.grpc.PatientPageResponse;
 import com.patientsystem.patient.grpc.PatientRequest;
 import com.patientsystem.patient.grpc.PatientResponse;
 import com.patientsystem.patient.grpc.PatientServiceGrpc;
@@ -25,5 +27,14 @@ public class PatientServiceGrpcClient {
     public PatientResponse getPatient(String patientId) {
         PatientRequest request = PatientRequest.newBuilder().setPatientId(patientId).build();
         return patientServiceBlockingStub.getPatient(request);
+    }
+
+    public PatientPageResponse getPatientsByOrganization(String organizationId, int page, int size) {
+        return patientServiceBlockingStub.getPatientsByOrganization(
+                OrganizationPageRequest.newBuilder()
+                        .setOrganizationId(organizationId)
+                        .setPage(page)
+                        .setSize(size)
+                        .build());
     }
 }

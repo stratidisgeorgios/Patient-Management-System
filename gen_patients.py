@@ -128,14 +128,12 @@ reg_end   = datetime.date(2026, 7, 25)
 random.seed(42)
 
 output_path = "/home/george/Projects/patient-system/patients_import.csv"
-TOTAL = 100_000
+TOTAL = 70_000_000
 
 with open(output_path, "w", newline="", encoding="utf-8") as f:
     writer = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
     writer.writerow(["name","email","gender","address","dateOfBirth","registeredDate",
                      "bloodType","insuranceProvider","phoneNumber","emergencyContact"])
-
-    seen_emails = set()
 
     for i in range(1, TOTAL + 1):
         gender = random.choice(["MALE","FEMALE"])
@@ -149,13 +147,7 @@ with open(output_path, "w", newline="", encoding="utf-8") as f:
         last = random.choice(LAST_NAMES)
         ec_last = random.choice(LAST_NAMES)
 
-        base_email = f"{slugify(first)}.{slugify(last)}@email.com"
-        email = base_email
-        suffix = 2
-        while email in seen_emails:
-            email = f"{slugify(first)}.{slugify(last)}{suffix}@email.com"
-            suffix += 1
-        seen_emails.add(email)
+        email   = f"{slugify(first)}.{slugify(last)}.{i}@email.com"
 
         number  = random.randint(1, 250)
         street  = random.choice(STREETS)
@@ -166,9 +158,12 @@ with open(output_path, "w", newline="", encoding="utf-8") as f:
         reg  = random_date(reg_start, reg_end).strftime("%Y-%m-%d")
         bt   = random.choice(BLOOD_TYPES)
         ins  = random.choice(INSURERS)
-        phone = f"+353851{i:06d}"
+        phone = f"+353{i:09d}"
         ec   = f"{ec_first} {ec_last}"
 
         writer.writerow([f"{first} {last}", email, gender, address, dob, reg, bt, ins, phone, ec])
 
-print(f"Done — {TOTAL} rows written to {output_path}")
+        if i % 1_000_000 == 0:
+            print(f"{i:,} / {TOTAL:,} rows written", flush=True)
+
+print(f"Done — {TOTAL:,} rows written to {output_path}")

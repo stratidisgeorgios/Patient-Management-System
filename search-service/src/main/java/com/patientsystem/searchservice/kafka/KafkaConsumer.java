@@ -40,8 +40,8 @@ public class KafkaConsumer {
     public void consumeImportEvent(byte[] event) {
         try {
             ImportEvent proto = ImportEvent.parseFrom(event);
-            searchService.broadcastImportComplete();
-            log.info("Import completed for job: " + proto.getJobId());
+            log.info("Import completed for job: {}, bulk indexing org: {}", proto.getJobId(), proto.getOrganizationId());
+            searchService.bulkIndexAndBroadcast(proto.getOrganizationId());
         } catch (Exception e) {
             log.error("Failed to consume import event: " + e.getMessage());
         }

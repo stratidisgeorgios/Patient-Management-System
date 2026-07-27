@@ -30,6 +30,7 @@ public class KafkaConsumer {
             entity.setEventType(proto.getEventType());
             entity.setDateOfBirth(proto.getDateOfBirth());
             entity.setGender(proto.getGender());
+            entity.setOrganizationId(proto.getOrganizationId());
             entity.setTimestamp(LocalDateTime.now());
             patientEventRepository.save(entity);
             log.info("Consumed patient event: " + proto.getEventType() + " for patient: " + proto.getPatientId());
@@ -47,6 +48,7 @@ public class KafkaConsumer {
             entity.setTreatmentName(proto.getTreatmentName());
             entity.setCategory(proto.getCategory());
             entity.setPrice(proto.getPrice());
+            entity.setOrganizationId(proto.getOrganizationId());
             entity.setTimestamp(LocalDateTime.now());
             chargeEventRepository.save(entity);
             log.info("Consumed charge event: " + proto.getTreatmentName() + " for patient: " + proto.getPatientId());

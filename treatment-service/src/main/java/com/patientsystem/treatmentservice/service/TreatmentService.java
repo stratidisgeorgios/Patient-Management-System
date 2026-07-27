@@ -23,13 +23,13 @@ public class TreatmentService {
         this.kafkaProducer = kafkaProducer;
     }
 
-    public TreatmentResponseDTO getTreatmentById(UUID treatmentId) {
-        return TreatmentMapper.toDTO(treatmentRepository.findById(treatmentId)
+    public TreatmentResponseDTO getTreatmentById(UUID treatmentId, String organizationId) {
+        return TreatmentMapper.toDTO(treatmentRepository.findByIdAndOrganizationId(treatmentId, organizationId)
                 .orElseThrow(() -> new RuntimeException("Treatment not found for ID: " + treatmentId)));
     }
 
     public TreatmentResponseDTO createTreatment(TreatmentRequestDTO request, String organizationId) {
-        if (treatmentRepository.existsByName(request.getName())) {
+        if (treatmentRepository.existsByNameAndOrganizationId(request.getName(), organizationId)) {
             throw new RuntimeException("Treatment with name " + request.getName() + " already exists.");
         }
         Category category = categoryRepository.findById(UUID.fromString(request.getCategory()))
@@ -38,13 +38,14 @@ public class TreatmentService {
         treatment.setName(request.getName());
         treatment.setCategory(category);
         treatment.setPrice(new BigDecimal(request.getPrice()));
+        treatment.setOrganizationId(organizationId);
         Treatment savedTreatment = treatmentRepository.save(treatment);
         kafkaProducer.sendTreatmentEvent(savedTreatment, "TreatmentCreated", organizationId);
         return TreatmentMapper.toDTO(savedTreatment);
     }
 
     public TreatmentResponseDTO updateTreatment(UUID treatmentId, TreatmentRequestDTO request, String organizationId) {
-        Treatment treatment = treatmentRepository.findById(treatmentId)
+        Treatment treatment = treatmentRepository.findByIdAndOrganizationId(treatmentId, organizationId)
                 .orElseThrow(() -> new RuntimeException("Treatment not found for ID: " + treatmentId));
         Category category = categoryRepository.findById(UUID.fromString(request.getCategory()))
                 .orElseThrow(() -> new RuntimeException("Category not found for ID: " + request.getCategory()));
@@ -57,7 +58,7 @@ public class TreatmentService {
     }
 
     public void deleteTreatment(UUID treatmentId, String organizationId) {
-        Treatment treatment = treatmentRepository.findById(treatmentId)
+        Treatment treatment = treatmentRepository.findByIdAndOrganizationId(treatmentId, organizationId)
                 .orElseThrow(() -> new RuntimeException("Treatment not found for ID: " + treatmentId));
         treatmentRepository.deleteById(treatmentId);
         kafkaProducer.sendTreatmentEvent(treatment, "TreatmentDeleted", organizationId);

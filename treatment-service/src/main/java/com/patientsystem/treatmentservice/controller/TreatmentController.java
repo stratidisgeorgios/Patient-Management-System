@@ -28,8 +28,9 @@ public class TreatmentController {
 
     @GetMapping("/{treatmentId}")
     @Operation(summary = "Get a treatment by ID")
-    public ResponseEntity<TreatmentResponseDTO> getTreatmentById(@PathVariable UUID treatmentId) {
-        return ResponseEntity.ok(treatmentService.getTreatmentById(treatmentId));
+    public ResponseEntity<TreatmentResponseDTO> getTreatmentById(@PathVariable UUID treatmentId,
+            @RequestHeader("X-Organization-Id") String organizationId) {
+        return ResponseEntity.ok(treatmentService.getTreatmentById(treatmentId, organizationId));
     }
 
     @PostMapping

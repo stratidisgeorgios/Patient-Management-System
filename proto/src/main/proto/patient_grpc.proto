@@ -5,10 +5,22 @@ option java_package = "com.patientsystem.patient.grpc";
 
 service PatientService {
   rpc GetPatient (PatientRequest) returns (PatientResponse);
+  rpc GetPatientsByOrganization (OrganizationPageRequest) returns (PatientPageResponse);
 }
 
 message PatientRequest {
   string patient_id = 1;
+}
+
+message OrganizationPageRequest {
+  string organization_id = 1;
+  int32 page = 2;
+  int32 size = 3;
+}
+
+message PatientPageResponse {
+  repeated PatientResponse patients = 1;
+  bool has_next = 2;
 }
 
 message PatientResponse {

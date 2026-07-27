@@ -55,8 +55,9 @@ public class PatientController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get patient by ID", description = "Retrieve a specific patient's information by their unique ID.")
-    public ResponseEntity<PatientResponseDTO> getPatientById(@PathVariable UUID id) {
-        PatientResponseDTO patient = patientService.getPatientById(id);
+    public ResponseEntity<PatientResponseDTO> getPatientById(@PathVariable UUID id,
+            @RequestHeader("X-Organization-Id") String organizationId) {
+        PatientResponseDTO patient = patientService.getPatientById(id, organizationId);
         return ResponseEntity.ok(patient);
     }
 

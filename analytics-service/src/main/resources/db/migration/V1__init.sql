@@ -5,6 +5,7 @@ CREATE TABLE charge_event (
     category VARCHAR(255),
     price VARCHAR(255),
     timestamp TIMESTAMP,
+    organization_id VARCHAR(255),
     PRIMARY KEY (id, timestamp)
 );
 
@@ -15,5 +16,6 @@ CREATE TABLE patient_event (
     date_of_birth VARCHAR(255),
     gender VARCHAR(255),
     timestamp TIMESTAMP,
+    organization_id VARCHAR(255),
     PRIMARY KEY (id, timestamp)
 );

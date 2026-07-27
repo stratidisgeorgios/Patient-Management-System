@@ -32,7 +32,9 @@ public class BillingService {
     private final BillingServiceGrpcClient billingServiceGrpcClient;
     private final PatientServiceGrpcClient patientServiceGrpcClient;
 
-    public BillingService(BillingAccountRepository billingAccountRepository, ChargeRepository chargeRepository, BillingServiceGrpcClient billingServiceGrpcClient, KafkaProducer kafkaProducer, PatientServiceGrpcClient patientServiceGrpcClient) {
+    public BillingService(BillingAccountRepository billingAccountRepository, ChargeRepository chargeRepository,
+                          BillingServiceGrpcClient billingServiceGrpcClient, KafkaProducer kafkaProducer,
+                          PatientServiceGrpcClient patientServiceGrpcClient) {
         this.billingAccountRepository = billingAccountRepository;
         this.chargeRepository = chargeRepository;
         this.billingServiceGrpcClient = billingServiceGrpcClient;
@@ -40,23 +42,23 @@ public class BillingService {
         this.patientServiceGrpcClient = patientServiceGrpcClient;
     }
 
-
-    public BillingAccount createAccount(String patientId, String name, String email) {
+    public BillingAccount createAccount(String patientId, String name, String email, String organizationId) {
         BillingAccount billingAccount = new BillingAccount();
         billingAccount.setPatientId(patientId);
         billingAccount.setPatientName(name);
         billingAccount.setPatientEmail(email);
         billingAccount.setBalance(BigDecimal.ZERO);
+        billingAccount.setOrganizationId(organizationId);
         return billingAccountRepository.save(billingAccount);
     }
 
-    public BillingAccount getAccount(String patientId) {
-        return billingAccountRepository.findByPatientId(patientId)
+    public BillingAccount getAccount(String patientId, String organizationId) {
+        return billingAccountRepository.findByPatientIdAndOrganizationId(patientId, organizationId)
                 .orElseThrow(() -> new RuntimeException("Billing account not found for patient ID: " + patientId));
     }
 
-    public void addCharge(String patientId, String treatmentId) {
-        BillingAccount billingAccount = getAccount(patientId);
+    public void addCharge(String patientId, String treatmentId, String organizationId) {
+        BillingAccount billingAccount = getAccount(patientId, organizationId);
         TreatmentResponse treatment = billingServiceGrpcClient.getTreatment(treatmentId);
         BigDecimal price = new BigDecimal(treatment.getPrice());
         Charge charge = new Charge();
@@ -69,17 +71,17 @@ public class BillingService {
         chargeRepository.save(charge);
         billingAccount.setBalance(billingAccount.getBalance().add(price));
         billingAccountRepository.save(billingAccount);
-        kafkaProducer.sendChargeEvent(patientId, treatment.getName(), treatment.getCategory(), treatment.getPrice(), LocalDateTime.now().toString());
+        kafkaProducer.sendChargeEvent(patientId, treatment.getName(), treatment.getCategory(), treatment.getPrice(), LocalDateTime.now().toString(), organizationId);
     }
 
-    public BillingResponseDTO getBillingInfo(String patientId) {
-        BillingAccount account = getAccount(patientId);
+    public BillingResponseDTO getBillingInfo(String patientId, String organizationId) {
+        BillingAccount account = getAccount(patientId, organizationId);
         List<Charge> charges = chargeRepository.findAllByBillingAccountId(account.getId());
         return BillingMapper.toDTO(account, charges);
     }
 
-    public void removeCharge(String patientId, UUID chargeId) {
-        BillingAccount billingAccount = getAccount(patientId);
+    public void removeCharge(String patientId, UUID chargeId, String organizationId) {
+        BillingAccount billingAccount = getAccount(patientId, organizationId);
         Charge charge = chargeRepository.findById(chargeId)
                 .orElseThrow(() -> new RuntimeException("Charge not found for ID: " + chargeId));
         if (!charge.getBillingAccountId().equals(billingAccount.getId())) {
@@ -89,22 +91,23 @@ public class BillingService {
         billingAccountRepository.save(billingAccount);
         chargeRepository.delete(charge);
     }
-    public BillingAccount updateAccount(String patientId, String name, String email) {
-        BillingAccount billingAccount = getAccount(patientId);
+
+    public BillingAccount updateAccount(String patientId, String name, String email, String organizationId) {
+        BillingAccount billingAccount = getAccount(patientId, organizationId);
         billingAccount.setPatientName(name);
         billingAccount.setPatientEmail(email);
         return billingAccountRepository.save(billingAccount);
     }
 
-    public void deleteAccount(String patientId) {
-        BillingAccount billingAccount = getAccount(patientId);
+    public void deleteAccount(String patientId, String organizationId) {
+        BillingAccount billingAccount = getAccount(patientId, organizationId);
         List<Charge> charges = chargeRepository.findAllByBillingAccountId(billingAccount.getId());
         chargeRepository.deleteAll(charges);
         billingAccountRepository.delete(billingAccount);
     }
 
-    public byte[] generateInvoice(String patientId) {
-        BillingResponseDTO billingInfo = getBillingInfo(patientId);
+    public byte[] generateInvoice(String patientId, String organizationId) {
+        BillingResponseDTO billingInfo = getBillingInfo(patientId, organizationId);
         PatientResponse patient = patientServiceGrpcClient.getPatient(patientId);
         try {
             InputStream is = getClass().getResourceAsStream("/templates/invoice.html");

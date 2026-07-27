@@ -3,6 +3,8 @@ resource "aws_cognito_user_pool" "patient_system" {
 
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
+  deletion_protection      = "INACTIVE"
+  mfa_configuration        = "OFF"
 
   password_policy {
     minimum_length                   = 8
@@ -18,9 +20,10 @@ resource "aws_cognito_user_pool" "patient_system" {
     attribute_data_type      = "String"
     mutable                  = true
     required                 = false
+    developer_only_attribute = false
     string_attribute_constraints {
-      min_length = 0
-      max_length = 36
+      min_length = "0"
+      max_length = "36"
     }
   }
 
@@ -31,7 +34,46 @@ resource "aws_cognito_user_pool" "patient_system" {
     }
   }
 
+  admin_create_user_config {
+    allow_admin_create_user_only = false
+  }
+
+  email_configuration {
+    email_sending_account = "COGNITO_DEFAULT"
+  }
+
+  user_attribute_update_settings {
+    attributes_require_verification_before_update = []
+  }
+
   tags = var.tags
+}
+
+resource "aws_cognito_user_pool_domain" "main" {
+  domain       = var.cognito_domain
+  user_pool_id = aws_cognito_user_pool.patient_system.id
+}
+
+resource "aws_cognito_identity_provider" "google" {
+  user_pool_id  = aws_cognito_user_pool.patient_system.id
+  provider_name = "Google"
+  provider_type = "Google"
+
+  provider_details = {
+    client_id             = var.google_client_id
+    client_secret         = var.google_client_secret
+    authorize_scopes      = "email profile openid"
+    authorize_url         = "https://accounts.google.com/o/oauth2/v2/auth"
+    token_url             = "https://www.googleapis.com/oauth2/v4/token"
+    token_request_method  = "POST"
+    oidc_issuer           = "https://accounts.google.com"
+    attributes_url        = "https://people.googleapis.com/v1/people/me?personFields="
+    attributes_url_add_attributes = "true"
+  }
+
+  attribute_mapping = {
+    username = "sub"
+  }
 }
 
 resource "aws_cognito_user_pool_client" "frontend" {
@@ -39,14 +81,22 @@ resource "aws_cognito_user_pool_client" "frontend" {
   user_pool_id = aws_cognito_user_pool.patient_system.id
 
   explicit_auth_flows = [
-    "ALLOW_USER_PASSWORD_AUTH",
     "ALLOW_REFRESH_TOKEN_AUTH",
+    "ALLOW_USER_PASSWORD_AUTH",
     "ALLOW_USER_SRP_AUTH"
   ]
+
+  supported_identity_providers         = ["Google"]
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_flows                  = ["code"]
+  allowed_oauth_scopes                 = ["email", "openid", "profile"]
+  callback_urls                        = var.callback_urls
+  logout_urls                          = var.logout_urls
 
   access_token_validity  = 1
   id_token_validity      = 1
   refresh_token_validity = 30
+  auth_session_validity  = 3
 
   token_validity_units {
     access_token  = "hours"
@@ -54,7 +104,11 @@ resource "aws_cognito_user_pool_client" "frontend" {
     refresh_token = "days"
   }
 
-  prevent_user_existence_errors = "ENABLED"
+  enable_token_revocation               = true
+  prevent_user_existence_errors         = "ENABLED"
+  enable_propagate_additional_user_context_data = false
+
+  depends_on = [aws_cognito_identity_provider.google]
 }
 
 resource "aws_cognito_user_group" "admin" {
