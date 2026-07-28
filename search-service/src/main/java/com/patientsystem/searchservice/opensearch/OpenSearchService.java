@@ -14,9 +14,9 @@ import org.opensearch.client.opensearch._types.query_dsl.TextQueryType;
 import org.opensearch.client.opensearch.core.search.Hit;
 import org.springframework.stereotype.Service;
 
+import org.opensearch.client.opensearch._types.OpenSearchException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.List;
 
 @Service
@@ -30,32 +30,40 @@ public class OpenSearchService {
 
     private void ensurePatientIndexExists(String organizationId) throws IOException {
         String index = "patients-" + organizationId;
-        if (!openSearchClient.indices().exists(b -> b.index(index)).value()) {
-            openSearchClient.indices().create(b -> b
-                .index(index)
-                .mappings(m -> m
-                    .properties("id", p -> p.keyword(k -> k))
-                    .properties("name", p -> p.searchAsYouType(s -> s))
-                    .properties("email", p -> p.searchAsYouType(s -> s))
-                    .properties("dateOfBirth", p -> p.keyword(k -> k))
-                    .properties("gender", p -> p.keyword(k -> k))
-                )
-            );
+        try {
+            if (!openSearchClient.indices().exists(b -> b.index(index)).value()) {
+                openSearchClient.indices().create(b -> b
+                    .index(index)
+                    .mappings(m -> m
+                        .properties("id", p -> p.keyword(k -> k))
+                        .properties("name", p -> p.searchAsYouType(s -> s))
+                        .properties("email", p -> p.searchAsYouType(s -> s))
+                        .properties("dateOfBirth", p -> p.keyword(k -> k))
+                        .properties("gender", p -> p.keyword(k -> k))
+                    )
+                );
+            }
+        } catch (OpenSearchException e) {
+            if (!e.getMessage().contains("resource_already_exists_exception")) throw e;
         }
     }
 
     private void ensureTreatmentIndexExists(String organizationId) throws IOException {
         String index = "treatments-" + organizationId;
-        if (!openSearchClient.indices().exists(b -> b.index(index)).value()) {
-            openSearchClient.indices().create(b -> b
-                .index(index)
-                .mappings(m -> m
-                    .properties("id", p -> p.keyword(k -> k))
-                    .properties("name", p -> p.searchAsYouType(s -> s))
-                    .properties("category", p -> p.searchAsYouType(s -> s))
-                    .properties("price", p -> p.keyword(k -> k))
-                )
-            );
+        try {
+            if (!openSearchClient.indices().exists(b -> b.index(index)).value()) {
+                openSearchClient.indices().create(b -> b
+                    .index(index)
+                    .mappings(m -> m
+                        .properties("id", p -> p.keyword(k -> k))
+                        .properties("name", p -> p.searchAsYouType(s -> s))
+                        .properties("category", p -> p.searchAsYouType(s -> s))
+                        .properties("price", p -> p.keyword(k -> k))
+                    )
+                );
+            }
+        } catch (OpenSearchException e) {
+            if (!e.getMessage().contains("resource_already_exists_exception")) throw e;
         }
     }
 

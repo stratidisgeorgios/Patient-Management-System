@@ -57,7 +57,7 @@ export class TreatmentList implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   constructor(private treatmentService: TreatmentService, private categoryService: CategoryService, private searchService: SearchService, private notificationService: NotificationService, private router: Router, private sseService: SseService) {}
 
-  ngOnInit() {
+  private loadCategories() {
     this.categoryService.getCategories().subscribe({
       next: (data: any) => {
         this.categories.set(data.sort((a: CategoryResponse, b: CategoryResponse) => a.name.localeCompare(b.name)));
@@ -66,6 +66,10 @@ export class TreatmentList implements OnInit, OnDestroy {
         this.notificationService.error("Failed to load categories: " + this.extractError(err));
       }
     });
+  }
+
+  ngOnInit() {
+    this.loadCategories();
     this.sseService.connect().pipe(takeUntil(this.destroy$)).subscribe({
       next: (message) => {
         if (message === 'treatment' && this.lastSearchQuery) {
@@ -212,6 +216,7 @@ export class TreatmentList implements OnInit, OnDestroy {
       next: () => {
         this.showCategoryCreateModal.set(false);
         this.notificationService.success("Category created successfully!");
+        this.loadCategories();
       },
       error: (err) => this.notificationService.error("Failed to create category: " + this.extractError(err))
     });
@@ -236,6 +241,7 @@ export class TreatmentList implements OnInit, OnDestroy {
       next: () => {
         this.showCategoryEditModal.set(false);
         this.notificationService.success("Category updated successfully!");
+        this.loadCategories();
       },
       error: (err) => this.notificationService.error("Failed to update category: " + this.extractError(err))
     });
@@ -253,6 +259,7 @@ export class TreatmentList implements OnInit, OnDestroy {
       next: () => {
         this.showCategoryDeleteModal.set(false);
         this.notificationService.success("Category deleted successfully!");
+        this.loadCategories();
       },
       error: (err) => this.notificationService.error("Failed to delete category: " + this.extractError(err))
     });
