@@ -16,9 +16,6 @@ public class TimescaleConfig implements ApplicationRunner{
 
     @Override
     public void run(ApplicationArguments args) {
-        jdbcTemplate.execute("SELECT create_hypertable('patient_event', 'timestamp', if_not_exists => TRUE)");
-        jdbcTemplate.execute("SELECT create_hypertable('charge_event', 'timestamp', if_not_exists => TRUE)");
-
         jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_patient_event_type ON patient_event(event_type)");
         jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_patient_event_patient_id ON patient_event(patient_id)");
         jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_patient_event_gender ON patient_event(gender)");
