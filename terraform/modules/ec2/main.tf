@@ -54,12 +54,12 @@ resource "aws_instance" "main" {
   user_data = <<-EOF
     #!/bin/bash
     set -e
-    dnf update -y
-    dnf install -y docker git postgresql15
+    apt-get update -y
+    apt-get install -y docker.io git postgresql-client
 
     systemctl enable docker
     systemctl start docker
-    usermod -aG docker ec2-user
+    usermod -aG docker ubuntu
 
     mkdir -p /usr/local/lib/docker/cli-plugins
     curl -SL https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-linux-x86_64 \
