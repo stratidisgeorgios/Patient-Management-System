@@ -16,7 +16,7 @@ public class OpenSearchConfig {
 
     @Bean
     public OpenSearchClient openSearchClient() {
-        HttpHost httpHost = new HttpHost("http", host, port);
+        HttpHost httpHost = new HttpHost("https", host, port);
         var transport = ApacheHttpClient5TransportBuilder.builder(new HttpHost[]{httpHost}).build();
         return new OpenSearchClient(transport);
     }
