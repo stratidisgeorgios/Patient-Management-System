@@ -54,7 +54,10 @@ public class BillingService {
 
     public BillingAccount getAccount(String patientId, String organizationId) {
         return billingAccountRepository.findByPatientIdAndOrganizationId(patientId, organizationId)
-                .orElseThrow(() -> new RuntimeException("Billing account not found for patient ID: " + patientId));
+                .orElseGet(() -> {
+                    PatientResponse patient = patientServiceGrpcClient.getPatient(patientId);
+                    return createAccount(patientId, patient.getName(), patient.getEmail(), organizationId);
+                });
     }
 
     public void addCharge(String patientId, String treatmentId, String organizationId) {
