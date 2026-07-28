@@ -1,3 +1,7 @@
+resource "aws_iam_service_linked_role" "opensearch" {
+  aws_service_name = "es.amazonaws.com"
+}
+
 data "aws_vpc" "default" {
   default = true
 }
@@ -32,6 +36,8 @@ resource "aws_security_group" "opensearch" {
 }
 
 resource "aws_opensearch_domain" "main" {
+  depends_on = [aws_iam_service_linked_role.opensearch]
+
   domain_name    = "patient-system-${var.environment}"
   engine_version = "OpenSearch_2.11"
 

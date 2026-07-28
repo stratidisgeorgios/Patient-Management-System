@@ -14,7 +14,7 @@ data "aws_subnets" "default" {
 
 resource "aws_security_group" "glue" {
   name        = "patient-system-${var.environment}-glue-sg"
-  description = "Glue job — self-referencing plus RDS and MSK access"
+  description = "Glue job - self-referencing plus RDS and MSK access"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
