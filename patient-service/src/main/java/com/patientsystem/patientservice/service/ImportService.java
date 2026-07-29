@@ -58,9 +58,8 @@ public class ImportService {
         List<Map<String, Object>> errors = new ArrayList<>();
         int imported = 0;
 
-        InputStream raw = s3Service.download(message.getS3Key());
-        InputStream stream = message.getS3Key().endsWith(".gz") ? new GZIPInputStream(raw) : raw;
-        try (stream; Reader reader = new InputStreamReader(stream)) {
+        try (InputStream stream = openStream(message.getS3Key());
+             Reader reader = new InputStreamReader(stream)) {
 
             Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader);
             List<Patient> chunk = new ArrayList<>();
@@ -123,5 +122,15 @@ public class ImportService {
         if (patient.getRegisteredDate() == null) patient.setRegisteredDate(LocalDate.now());
         patient.setCustomFields(customFields);
         return patient;
+    }
+
+    private InputStream openStream(String s3Key) throws IOException {
+        InputStream raw = s3Service.download(s3Key);
+        try {
+            return s3Key.endsWith(".gz") ? new GZIPInputStream(raw) : raw;
+        } catch (IOException e) {
+            raw.close();
+            throw e;
+        }
     }
 }
