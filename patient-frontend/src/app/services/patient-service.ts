@@ -50,19 +50,24 @@ export class PatientService {
     return this.http.post<void>(`${this.config.apiUrl}/api/patients/import/multipart/complete`, { s3Key, uploadId, parts });
   }
 
-  async uploadLargeFileToS3(file: File, onProgress: (loaded: number, total: number) => void): Promise<string> {
+  compressFile(file: File): Promise<Blob> {
+    const stream = file.stream().pipeThrough(new CompressionStream('gzip'));
+    return new Response(stream).blob();
+  }
+
+  async uploadLargeFileToS3(blob: Blob, onProgress: (loaded: number, total: number) => void): Promise<string> {
     const PART_SIZE = 50 * 1024 * 1024;
     const CONCURRENCY = 8;
     const { uploadId, s3Key } = await firstValueFrom(this.initiateMultipartUpload());
-    const totalParts = Math.ceil(file.size / PART_SIZE);
+    const totalParts = Math.ceil(blob.size / PART_SIZE);
     const parts: { partNumber: number; etag: string }[] = new Array(totalParts);
     const partProgress = new Array(totalParts).fill(0);
 
     const uploadPart = async (i: number): Promise<void> => {
       const partNumber = i + 1;
       const start = i * PART_SIZE;
-      const end = Math.min(start + PART_SIZE, file.size);
-      const chunk = file.slice(start, end);
+      const end = Math.min(start + PART_SIZE, blob.size);
+      const chunk = blob.slice(start, end);
       const { presignedUrl } = await firstValueFrom(this.getPartPresignedUrl(s3Key, uploadId, partNumber));
 
       const etag = await new Promise<string>((resolve, reject) => {
@@ -71,13 +76,13 @@ export class PatientService {
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
             partProgress[i] = e.loaded;
-            onProgress(partProgress.reduce((a, b) => a + b, 0), file.size);
+            onProgress(partProgress.reduce((a, b) => a + b, 0), blob.size);
           }
         };
         xhr.onload = () => {
           if (xhr.status >= 200 && xhr.status < 300) {
             partProgress[i] = end - start;
-            onProgress(partProgress.reduce((a, b) => a + b, 0), file.size);
+            onProgress(partProgress.reduce((a, b) => a + b, 0), blob.size);
             resolve(xhr.getResponseHeader('ETag') ?? '');
           } else {
             reject(new Error(`Part ${partNumber} failed: ${xhr.status} ${xhr.responseText}`));

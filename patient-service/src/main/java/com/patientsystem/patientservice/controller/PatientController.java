@@ -103,7 +103,7 @@ public class PatientController {
     @Operation(summary = "Initiate S3 multipart upload for large files")
     public ResponseEntity<MultipartInitiateResponseDTO> initiateMultipart(
             @RequestHeader("X-Organization-Id") String organizationId) {
-        String s3Key = "imports/" + organizationId + "/" + UUID.randomUUID() + "/raw.csv";
+        String s3Key = "imports/" + organizationId + "/" + UUID.randomUUID() + "/raw.csv.gz";
         String uploadId = s3Service.initiateMultipartUpload(s3Key);
         return ResponseEntity.ok(new MultipartInitiateResponseDTO(uploadId, s3Key));
     }

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.zip.GZIPInputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -57,8 +58,9 @@ public class ImportService {
         List<Map<String, Object>> errors = new ArrayList<>();
         int imported = 0;
 
-        try (InputStream stream = s3Service.download(message.getS3Key());
-             Reader reader = new InputStreamReader(stream)) {
+        InputStream raw = s3Service.download(message.getS3Key());
+        InputStream stream = message.getS3Key().endsWith(".gz") ? new GZIPInputStream(raw) : raw;
+        try (stream; Reader reader = new InputStreamReader(stream)) {
 
             Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(reader);
             List<Patient> chunk = new ArrayList<>();
