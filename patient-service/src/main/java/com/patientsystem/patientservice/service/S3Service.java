@@ -54,7 +54,7 @@ public class S3Service {
 
     public String generatePresignedPartUrl(String key, String uploadId, int partNumber) {
         UploadPartPresignRequest presignRequest = UploadPartPresignRequest.builder()
-            .signatureDuration(Duration.ofHours(2))
+            .signatureDuration(Duration.ofHours(12))
             .uploadPartRequest(UploadPartRequest.builder()
                 .bucket(bucket).key(key).uploadId(uploadId).partNumber(partNumber).build())
             .build();

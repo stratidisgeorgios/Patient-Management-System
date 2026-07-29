@@ -102,10 +102,20 @@ export class PatientService {
       parts[i] = { partNumber, etag };
     };
 
+    const uploadPartWithRetry = async (i: number, attempts = 3): Promise<void> => {
+      try {
+        await uploadPart(i);
+      } catch (err) {
+        if (attempts <= 1) throw err;
+        await new Promise(r => setTimeout(r, 3000));
+        return uploadPartWithRetry(i, attempts - 1);
+      }
+    };
+
     for (let i = 0; i < totalParts; i += CONCURRENCY) {
       const batch: Promise<void>[] = [];
       for (let j = 0; j < CONCURRENCY && i + j < totalParts; j++) {
-        batch.push(uploadPart(i + j));
+        batch.push(uploadPartWithRetry(i + j));
       }
       await Promise.all(batch);
     }

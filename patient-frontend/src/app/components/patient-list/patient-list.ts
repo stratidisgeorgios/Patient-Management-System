@@ -217,6 +217,10 @@ export class PatientList implements OnInit, OnDestroy {
   onFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
+    if (file.size > 50 * 1024 * 1024) {
+      this.notificationService.error("File too large. Maximum upload size is 50 MB. For larger files, contact your administrator.");
+      return;
+    }
     this.isUploading.set(true);
     this.uploadProgress.set(0);
     this.uploadSpeed.set('');
