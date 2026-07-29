@@ -52,12 +52,13 @@ export class PatientService {
 
   async uploadLargeFileToS3(file: File, onProgress: (loaded: number, total: number) => void): Promise<string> {
     const PART_SIZE = 50 * 1024 * 1024;
+    const CONCURRENCY = 8;
     const { uploadId, s3Key } = await firstValueFrom(this.initiateMultipartUpload());
     const totalParts = Math.ceil(file.size / PART_SIZE);
-    const parts: { partNumber: number; etag: string }[] = [];
-    let uploadedBytes = 0;
+    const parts: { partNumber: number; etag: string }[] = new Array(totalParts);
+    const partProgress = new Array(totalParts).fill(0);
 
-    for (let i = 0; i < totalParts; i++) {
+    const uploadPart = async (i: number): Promise<void> => {
       const partNumber = i + 1;
       const start = i * PART_SIZE;
       const end = Math.min(start + PART_SIZE, file.size);
@@ -68,11 +69,15 @@ export class PatientService {
         const xhr = new XMLHttpRequest();
         xhr.open('PUT', presignedUrl);
         xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) onProgress(uploadedBytes + e.loaded, file.size);
+          if (e.lengthComputable) {
+            partProgress[i] = e.loaded;
+            onProgress(partProgress.reduce((a, b) => a + b, 0), file.size);
+          }
         };
         xhr.onload = () => {
           if (xhr.status >= 200 && xhr.status < 300) {
-            uploadedBytes += end - start;
+            partProgress[i] = end - start;
+            onProgress(partProgress.reduce((a, b) => a + b, 0), file.size);
             resolve(xhr.getResponseHeader('ETag') ?? '');
           } else {
             reject(new Error(`Part ${partNumber} failed: ${xhr.status} ${xhr.responseText}`));
@@ -82,7 +87,15 @@ export class PatientService {
         xhr.send(chunk);
       });
 
-      parts.push({ partNumber, etag });
+      parts[i] = { partNumber, etag };
+    };
+
+    for (let i = 0; i < totalParts; i += CONCURRENCY) {
+      const batch: Promise<void>[] = [];
+      for (let j = 0; j < CONCURRENCY && i + j < totalParts; j++) {
+        batch.push(uploadPart(i + j));
+      }
+      await Promise.all(batch);
     }
 
     await firstValueFrom(this.completeMultipartUpload(s3Key, uploadId, parts));
