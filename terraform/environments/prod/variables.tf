@@ -56,15 +56,4 @@ variable "db_password" {
   sensitive   = true
 }
 
-variable "glue_scripts_bucket" {
-  description = "S3 bucket for Glue scripts, jars, and temp files"
-  type        = string
-  default     = "patient-system-glue-scripts"
-}
-
-variable "organization_id" {
-  description = "Default organization ID for Glue patient import"
-  type        = string
-  default     = "dbdd1a49-0881-4d95-83fa-ab2a4f740b63"
-}
 

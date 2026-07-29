@@ -24,12 +24,12 @@ export class PatientService {
   getPresignedUrl(): Observable<PresignedUrlResponse> {
     return this.http.get<PresignedUrlResponse>(`${this.config.apiUrl}/api/patients/import/presigned-url`);
   }
-  uploadToS3(presignedUrl: string, file: File, onProgress: (percent: number) => void): Promise<void> {
+  uploadToS3(presignedUrl: string, file: File, onProgress: (loaded: number, total: number) => void): Promise<void> {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open('PUT', presignedUrl);
       xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+        if (e.lengthComputable) onProgress(e.loaded, e.total);
       };
       xhr.onload = () => (xhr.status >= 200 && xhr.status < 300) ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`));
       xhr.onerror = () => reject(new Error('Upload network error'));

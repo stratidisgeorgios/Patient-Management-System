@@ -200,10 +200,12 @@
         <div class="modal-body">
           @if (isUploading()) {
             <div class="import-uploading">
-              <div class="spinner"></div>
-              <span class="label">Uploading... {{ uploadProgress() }}%</span>
               <div class="import-progress-track" style="margin-top:8px">
                 <div class="import-progress-fill" [style.width.%]="uploadProgress()"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:0.85rem;">
+                <span>{{ uploadProgress() }}% &nbsp;·&nbsp; {{ uploadSpeed() }}</span>
+                <span>{{ uploadEta() }}</span>
               </div>
             </div>
           } @else {

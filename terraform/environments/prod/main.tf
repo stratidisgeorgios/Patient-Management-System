@@ -102,30 +102,6 @@ output "rds_address" {
   value = module.rds.address
 }
 
-resource "aws_s3_bucket" "glue_scripts" {
-  bucket        = var.glue_scripts_bucket
-  force_destroy = true
-  tags = {
-    Environment = var.environment
-    Project     = "patient-system"
-  }
-}
-
-module "glue" {
-  source                  = "../../modules/glue"
-  environment             = var.environment
-  rds_endpoint            = module.rds.address
-  db_username             = var.db_username
-  db_password             = var.db_password
-  glue_scripts_bucket     = aws_s3_bucket.glue_scripts.bucket
-  patient_csv_bucket      = module.s3.bucket_name
-  kafka_bootstrap_brokers = module.msk.bootstrap_brokers
-  organization_id         = var.organization_id
-  tags = {
-    Environment = var.environment
-    Project     = "patient-system"
-  }
-}
 
 module "msk" {
   source                = "../../modules/msk"
@@ -155,6 +131,3 @@ output "opensearch_endpoint" {
   value = module.opensearch.endpoint
 }
 
-output "glue_job_name" {
-  value = module.glue.glue_job_name
-}

@@ -55,6 +55,9 @@ export class PatientList implements OnInit, OnDestroy {
   importJobStatus = signal<ImportJobStatus | null>(null);
   isUploading = signal(false);
   uploadProgress = signal(0);
+  uploadSpeed = signal('');
+  uploadEta = signal('');
+  private uploadStartTime = 0;
   private isPolling = false;
 
   readonly knownFields = [
@@ -216,6 +219,9 @@ export class PatientList implements OnInit, OnDestroy {
     if (!file) return;
     this.isUploading.set(true);
     this.uploadProgress.set(0);
+    this.uploadSpeed.set('');
+    this.uploadEta.set('');
+    this.uploadStartTime = Date.now();
 
     this.readCsvInfo(file).then(({ headers, estimatedRows }) => {
       this.importMapping = this.mapHeaders(headers);
@@ -224,7 +230,15 @@ export class PatientList implements OnInit, OnDestroy {
       this.patientService.getPresignedUrl().subscribe({
         next: ({ presignedUrl, s3Key }) => {
           this.importS3Key = s3Key;
-          this.patientService.uploadToS3(presignedUrl, file, (pct) => this.uploadProgress.set(pct)).then(() => {
+          this.patientService.uploadToS3(presignedUrl, file, (loaded, total) => {
+            const pct = Math.round((loaded / total) * 100);
+            const elapsed = (Date.now() - this.uploadStartTime) / 1000;
+            const speedBps = loaded / elapsed;
+            const remaining = (total - loaded) / speedBps;
+            this.uploadProgress.set(pct);
+            this.uploadSpeed.set(this.formatSpeed(speedBps));
+            this.uploadEta.set(remaining > 0 ? this.formatTime(remaining) : '');
+          }).then(() => {
             this.isUploading.set(false);
             this.importStep.set('mapping');
           }).catch((err) => {
@@ -259,6 +273,18 @@ export class PatientList implements OnInit, OnDestroy {
       reader.onerror = () => reject(new Error('Failed to read file'));
       reader.readAsText(blob);
     });
+  }
+
+  private formatSpeed(bps: number): string {
+    if (bps >= 1024 * 1024) return `${(bps / 1024 / 1024).toFixed(1)} MB/s`;
+    if (bps >= 1024) return `${(bps / 1024).toFixed(1)} KB/s`;
+    return `${bps.toFixed(0)} B/s`;
+  }
+
+  private formatTime(seconds: number): string {
+    if (seconds >= 3600) return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m left`;
+    if (seconds >= 60) return `${Math.floor(seconds / 60)}m ${Math.floor(seconds % 60)}s left`;
+    return `${Math.floor(seconds)}s left`;
   }
 
   private mapHeaders(headers: string[]): Record<string, string> {
