@@ -198,12 +198,7 @@
 
       @if (importStep() === 'upload') {
         <div class="modal-body">
-          @if (isCompressing()) {
-            <div class="import-uploading">
-              <div class="spinner"></div>
-              <span class="label" style="margin-top:12px">Compressing file…</span>
-            </div>
-          } @else if (isUploading()) {
+          @if (isUploading()) {
             <div class="import-uploading">
               <div class="import-progress-track" style="margin-top:8px">
                 <div class="import-progress-fill" [style.width.%]="uploadProgress()"></div>

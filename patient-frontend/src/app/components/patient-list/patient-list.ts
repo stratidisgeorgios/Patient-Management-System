@@ -54,7 +54,6 @@ export class PatientList implements OnInit, OnDestroy {
   importJobId = '';
   importJobStatus = signal<ImportJobStatus | null>(null);
   isUploading = signal(false);
-  isCompressing = signal(false);
   uploadProgress = signal(0);
   uploadSpeed = signal('');
   uploadEta = signal('');
@@ -207,7 +206,6 @@ export class PatientList implements OnInit, OnDestroy {
     this.importJobId = '';
     this.importJobStatus.set(null);
     this.isUploading.set(false);
-    this.isCompressing.set(false);
     this.isPolling = false;
   }
 
@@ -251,16 +249,9 @@ export class PatientList implements OnInit, OnDestroy {
       this.importTotalRows = estimatedRows;
 
       if (file.size >= 50 * 1024 * 1024) {
-        this.isUploading.set(false);
-        this.isCompressing.set(true);
-        this.patientService.compressFile(file).then((compressed) => {
-          this.isCompressing.set(false);
-          this.isUploading.set(true);
-          this.uploadStartTime = Date.now();
-          this.patientService.uploadLargeFileToS3(compressed, onProgress)
-            .then((s3Key) => onUploadDone(s3Key))
-            .catch((err) => onUploadError("Failed to upload file: " + err.message));
-        }).catch((err) => onUploadError("Failed to compress file: " + err.message));
+        this.patientService.uploadLargeFileToS3(file, onProgress)
+          .then((s3Key) => onUploadDone(s3Key))
+          .catch((err: Error) => onUploadError("Failed to upload file: " + err.message));
       } else {
         this.patientService.getPresignedUrl().subscribe({
           next: ({ presignedUrl, s3Key }) => {
