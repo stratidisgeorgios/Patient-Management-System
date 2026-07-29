@@ -223,34 +223,45 @@ export class PatientList implements OnInit, OnDestroy {
     this.uploadEta.set('');
     this.uploadStartTime = Date.now();
 
+    const onProgress = (loaded: number, total: number) => {
+      const pct = Math.round((loaded / total) * 100);
+      const elapsed = (Date.now() - this.uploadStartTime) / 1000;
+      const speedBps = loaded / elapsed;
+      const remaining = (total - loaded) / speedBps;
+      this.uploadProgress.set(pct);
+      this.uploadSpeed.set(this.formatSpeed(speedBps));
+      this.uploadEta.set(remaining > 0 ? this.formatTime(remaining) : '');
+    };
+
+    const onUploadDone = (s3Key: string) => {
+      this.importS3Key = s3Key;
+      this.isUploading.set(false);
+      this.importStep.set('mapping');
+    };
+
+    const onUploadError = (msg: string) => {
+      this.isUploading.set(false);
+      this.notificationService.error(msg);
+    };
+
     this.readCsvInfo(file).then(({ headers, estimatedRows }) => {
       this.importMapping = this.mapHeaders(headers);
       this.importTotalRows = estimatedRows;
 
-      this.patientService.getPresignedUrl().subscribe({
-        next: ({ presignedUrl, s3Key }) => {
-          this.importS3Key = s3Key;
-          this.patientService.uploadToS3(presignedUrl, file, (loaded, total) => {
-            const pct = Math.round((loaded / total) * 100);
-            const elapsed = (Date.now() - this.uploadStartTime) / 1000;
-            const speedBps = loaded / elapsed;
-            const remaining = (total - loaded) / speedBps;
-            this.uploadProgress.set(pct);
-            this.uploadSpeed.set(this.formatSpeed(speedBps));
-            this.uploadEta.set(remaining > 0 ? this.formatTime(remaining) : '');
-          }).then(() => {
-            this.isUploading.set(false);
-            this.importStep.set('mapping');
-          }).catch((err) => {
-            this.isUploading.set(false);
-            this.notificationService.error("Failed to upload file: " + err.message);
-          });
-        },
-        error: (err) => {
-          this.isUploading.set(false);
-          this.notificationService.error("Failed to get upload URL: " + this.extractError(err));
-        }
-      });
+      if (file.size >= 50 * 1024 * 1024) {
+        this.patientService.uploadLargeFileToS3(file, onProgress)
+          .then((s3Key) => onUploadDone(s3Key))
+          .catch((err) => onUploadError("Failed to upload file: " + err.message));
+      } else {
+        this.patientService.getPresignedUrl().subscribe({
+          next: ({ presignedUrl, s3Key }) => {
+            this.patientService.uploadToS3(presignedUrl, file, onProgress)
+              .then(() => onUploadDone(s3Key))
+              .catch((err) => onUploadError("Failed to upload file: " + err.message));
+          },
+          error: (err) => onUploadError("Failed to get upload URL: " + this.extractError(err))
+        });
+      }
     }).catch((err) => {
       this.isUploading.set(false);
       this.notificationService.error("Failed to read file: " + err.message);

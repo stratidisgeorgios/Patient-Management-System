@@ -99,6 +99,33 @@ public class PatientController {
         return ResponseEntity.ok(new PresignedUrlResponseDTO(url, s3Key));
     }
 
+    @PostMapping("/import/multipart/initiate")
+    @Operation(summary = "Initiate S3 multipart upload for large files")
+    public ResponseEntity<MultipartInitiateResponseDTO> initiateMultipart(
+            @RequestHeader("X-Organization-Id") String organizationId) {
+        String s3Key = "imports/" + organizationId + "/" + UUID.randomUUID() + "/raw.csv";
+        String uploadId = s3Service.initiateMultipartUpload(s3Key);
+        return ResponseEntity.ok(new MultipartInitiateResponseDTO(uploadId, s3Key));
+    }
+
+    @GetMapping("/import/multipart/part-url")
+    @Operation(summary = "Get presigned URL for uploading a single part")
+    public ResponseEntity<MultipartPartUrlResponseDTO> getPartUrl(
+            @RequestParam String s3Key,
+            @RequestParam String uploadId,
+            @RequestParam int partNumber) {
+        String url = s3Service.generatePresignedPartUrl(s3Key, uploadId, partNumber);
+        return ResponseEntity.ok(new MultipartPartUrlResponseDTO(url));
+    }
+
+    @PostMapping("/import/multipart/complete")
+    @Operation(summary = "Complete S3 multipart upload")
+    public ResponseEntity<Void> completeMultipart(
+            @RequestBody CompleteMultipartRequestDTO request) {
+        s3Service.completeMultipartUpload(request.getS3Key(), request.getUploadId(), request.getParts());
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping(value = "/import/upload", consumes = "multipart/form-data")
     @Operation(summary = "Upload CSV and get column mapping preview")
     public ResponseEntity<ImportUploadResponseDTO> uploadCsv(
