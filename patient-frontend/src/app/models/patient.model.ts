@@ -23,6 +23,11 @@ export interface ImportUploadResponse {
   totalRows: number;
 }
 
+export interface PresignedUrlResponse {
+  presignedUrl: string;
+  s3Key: string;
+}
+
 export interface ImportStartResponse {
   importJobId: string;
 }

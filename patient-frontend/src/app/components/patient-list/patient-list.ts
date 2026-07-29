@@ -54,6 +54,7 @@ export class PatientList implements OnInit, OnDestroy {
   importJobId = '';
   importJobStatus = signal<ImportJobStatus | null>(null);
   isUploading = signal(false);
+  uploadProgress = signal(0);
   private isPolling = false;
 
   readonly knownFields = [
@@ -214,19 +215,68 @@ export class PatientList implements OnInit, OnDestroy {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
     this.isUploading.set(true);
-    this.patientService.uploadFile(file).subscribe({
-      next: (response) => {
-        this.importS3Key = response.s3Key;
-        this.importMapping = { ...response.mapping };
-        this.importTotalRows = response.totalRows;
-        this.isUploading.set(false);
-        this.importStep.set('mapping');
-      },
-      error: (err) => {
-        this.isUploading.set(false);
-        this.notificationService.error("Failed to upload file: " + this.extractError(err));
-      }
+    this.uploadProgress.set(0);
+
+    this.readCsvInfo(file).then(({ headers, estimatedRows }) => {
+      this.importMapping = this.mapHeaders(headers);
+      this.importTotalRows = estimatedRows;
+
+      this.patientService.getPresignedUrl().subscribe({
+        next: ({ presignedUrl, s3Key }) => {
+          this.importS3Key = s3Key;
+          this.patientService.uploadToS3(presignedUrl, file, (pct) => this.uploadProgress.set(pct)).then(() => {
+            this.isUploading.set(false);
+            this.importStep.set('mapping');
+          }).catch((err) => {
+            this.isUploading.set(false);
+            this.notificationService.error("Failed to upload file: " + err.message);
+          });
+        },
+        error: (err) => {
+          this.isUploading.set(false);
+          this.notificationService.error("Failed to get upload URL: " + this.extractError(err));
+        }
+      });
+    }).catch((err) => {
+      this.isUploading.set(false);
+      this.notificationService.error("Failed to read file: " + err.message);
     });
+  }
+
+  private readCsvInfo(file: File): Promise<{ headers: string[], estimatedRows: number }> {
+    return new Promise((resolve, reject) => {
+      const blob = file.slice(0, 64 * 1024);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        const lines = text.split('\n').filter(l => l.trim());
+        if (!lines.length) { reject(new Error('Empty file')); return; }
+        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        const avgLineBytes = text.length / lines.length;
+        const estimatedRows = Math.max(0, Math.round(file.size / avgLineBytes) - 1);
+        resolve({ headers, estimatedRows });
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsText(blob);
+    });
+  }
+
+  private mapHeaders(headers: string[]): Record<string, string> {
+    const aliases: Record<string, string[]> = {
+      name: ['name', 'fullname', 'patientname', 'nombre', 'firstname', 'lastname', 'surname'],
+      email: ['email', 'emailaddress', 'mail', 'correo'],
+      dateOfBirth: ['dateofbirth', 'dob', 'birthday', 'birthdate'],
+      gender: ['gender', 'sex'],
+      address: ['address', 'addr', 'direccion'],
+      registeredDate: ['registereddate', 'joindate', 'registrationdate'],
+    };
+    const mapping: Record<string, string> = {};
+    for (const header of headers) {
+      const normalized = header.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const found = Object.entries(aliases).find(([, list]) => list.includes(normalized));
+      mapping[header] = found ? found[0] : header;
+    }
+    return mapping;
   }
 
   updateMapping(csvColumn: string, event: Event) {

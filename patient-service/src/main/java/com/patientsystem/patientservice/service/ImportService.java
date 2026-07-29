@@ -20,7 +20,7 @@ import java.util.*;
 @Service
 public class ImportService {
     private static final Logger log = LoggerFactory.getLogger(ImportService.class);
-    private static final int CHUNK_SIZE = 1000;
+    private static final int CHUNK_SIZE = 5000;
 
     private final SqsTemplate sqsTemplate;
     private final S3Service s3Service;

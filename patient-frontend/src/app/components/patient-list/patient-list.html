@@ -201,7 +201,10 @@
           @if (isUploading()) {
             <div class="import-uploading">
               <div class="spinner"></div>
-              <span class="label">Uploading...</span>
+              <span class="label">Uploading... {{ uploadProgress() }}%</span>
+              <div class="import-progress-track" style="margin-top:8px">
+                <div class="import-progress-fill" [style.width.%]="uploadProgress()"></div>
+              </div>
             </div>
           } @else {
             <label class="import-upload-area">

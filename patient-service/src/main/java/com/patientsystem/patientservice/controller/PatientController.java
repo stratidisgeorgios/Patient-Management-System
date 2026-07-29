@@ -90,6 +90,15 @@ public class PatientController {
     }
 
 
+    @GetMapping("/import/presigned-url")
+    @Operation(summary = "Get presigned S3 URL for direct browser upload")
+    public ResponseEntity<PresignedUrlResponseDTO> getPresignedUrl(
+            @RequestHeader("X-Organization-Id") String organizationId) {
+        String s3Key = "imports/" + organizationId + "/" + UUID.randomUUID() + "/raw.csv";
+        String url = s3Service.generatePresignedPutUrl(s3Key);
+        return ResponseEntity.ok(new PresignedUrlResponseDTO(url, s3Key));
+    }
+
     @PostMapping(value = "/import/upload", consumes = "multipart/form-data")
     @Operation(summary = "Upload CSV and get column mapping preview")
     public ResponseEntity<ImportUploadResponseDTO> uploadCsv(
