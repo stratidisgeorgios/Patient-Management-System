@@ -29,6 +29,12 @@ variable "kafka_bootstrap_brokers" {
   type = string
 }
 
+variable "organization_id" {
+  type        = string
+  description = "Default organization ID to import patients into"
+  default     = ""
+}
+
 variable "tags" {
   type    = map(string)
   default = {}

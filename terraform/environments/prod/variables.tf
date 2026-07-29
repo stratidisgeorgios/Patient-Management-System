@@ -62,3 +62,9 @@ variable "glue_scripts_bucket" {
   default     = "patient-system-glue-scripts"
 }
 
+variable "organization_id" {
+  description = "Default organization ID for Glue patient import"
+  type        = string
+  default     = "dbdd1a49-0881-4d95-83fa-ab2a4f740b63"
+}
+
