@@ -90,3 +90,5 @@ patients_import*.csv
 *.tfstate.backup
 *.tfvars
 .terraform.lock.hclDONE.md
+DONE.md
+terraform/environments/prod/.terraform.lock.hcl
