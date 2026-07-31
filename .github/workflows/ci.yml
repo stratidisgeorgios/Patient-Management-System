@@ -54,3 +54,22 @@ jobs:
       - name: Run Angular unit tests
         run: npx ng test --no-watch
         working-directory: patient-frontend
+
+      - name: Audit npm dependencies
+        run: npm audit --omit=dev --audit-level=high
+        working-directory: patient-frontend
+
+  sca:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan dependencies with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'

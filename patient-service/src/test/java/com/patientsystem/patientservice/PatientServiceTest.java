@@ -138,7 +138,6 @@ class PatientServiceTest {
         req.setDateOfBirth("1990-01-15");
 
         when(patientRepository.findByIdAndOrganizationId(id, orgId)).thenReturn(Optional.of(existing));
-        when(patientRepository.existsByEmailAndOrganizationId("alice@example.com", orgId)).thenReturn(false);
         when(patientRepository.save(any(Patient.class))).thenReturn(saved);
 
         PatientResponseDTO result = patientService.updatePatient(id, req, orgId);
