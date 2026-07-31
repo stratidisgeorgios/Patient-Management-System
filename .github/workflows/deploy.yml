@@ -3,6 +3,12 @@ name: Deploy
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      build_all:
+        description: 'Build all services (bootstrap deploy)'
+        type: boolean
+        default: false
 
 permissions:
   id-token: write   # OIDC token for AWS role assumption
@@ -58,9 +64,13 @@ jobs:
       - name: Detect changed services
         id: changes
         run: |
-          CHANGED=$(git diff --name-only HEAD~1 HEAD \
-            | grep -oP '^(api-gateway|patient-service|search-service|organization-service|billing-service|analytics-service|treatment-service)' \
-            | sort -u | jq -Rsc 'split("\n")[:-1]')
+          if [ "${{ github.event.inputs.build_all }}" = "true" ]; then
+            CHANGED='["api-gateway","patient-service","search-service","organization-service","billing-service","analytics-service","treatment-service"]'
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD \
+              | grep -oP '^(api-gateway|patient-service|search-service|organization-service|billing-service|analytics-service|treatment-service)' \
+              | sort -u | jq -Rsc 'split("\n")[:-1]')
+          fi
           echo "services=$CHANGED" >> $GITHUB_OUTPUT
           echo "Changed services: $CHANGED"
 
