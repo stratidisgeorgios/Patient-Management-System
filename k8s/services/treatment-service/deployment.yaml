@@ -4,7 +4,7 @@ metadata:
   name: treatment-service
   namespace: patient-system
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: treatment-service

@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init
+  namespace: patient-system
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: db-init
+          image: postgres:16-alpine
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: patient-system-secrets
+                  key: db-password
+            - name: RDS_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: patient-system-secrets
+                  key: rds-address
+          command:
+            - sh
+            - -c
+            - |
+              for DB in billing_db treatment_db analytics_db organization_db; do
+                psql -h "$RDS_ADDRESS" -U admin_user -d patient_db \
+                  -c "SELECT 1 FROM pg_database WHERE datname='$DB'" | grep -q 1 \
+                  || psql -h "$RDS_ADDRESS" -U admin_user -d patient_db \
+                       -c "CREATE DATABASE $DB"
+                echo "$DB: ready"
+              done
