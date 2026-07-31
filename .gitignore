@@ -89,6 +89,7 @@ patients_import*.csv
 *.tfstate
 *.tfstate.backup
 *.tfvars
-.terraform.lock.hclDONE.md
+.terraform.lock.hcl
 DONE.md
+PLAN.md
 terraform/environments/prod/.terraform.lock.hcl
