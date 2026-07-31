@@ -26,7 +26,7 @@ spec:
               mountPath: /otel
       containers:
         - name: api-gateway
-          image: 303357409766.dkr.ecr.eu-west-1.amazonaws.com/patient-system/api-gateway:46ca7817bccce5ca5ad0d50be6f3f8e35de6fd87
+          image: 303357409766.dkr.ecr.eu-west-1.amazonaws.com/patient-system/api-gateway:43777bca888704c5c76c30679e0c0a85a82a0449
           ports:
             - containerPort: 4004
               name: http
