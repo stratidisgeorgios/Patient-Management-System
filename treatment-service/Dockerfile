@@ -13,6 +13,7 @@ COPY treatment-service/src treatment-service/src
 RUN ./mvnw package -f treatment-service/pom.xml -DskipTests
 
 FROM eclipse-temurin:25-jre-alpine
+RUN apk upgrade --no-cache
 WORKDIR /app
 COPY --from=build /app/treatment-service/target/treatment-service-0.0.1-SNAPSHOT.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]

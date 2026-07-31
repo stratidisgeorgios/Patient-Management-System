@@ -13,6 +13,7 @@ COPY patient-service/src patient-service/src
 RUN ./mvnw package -f patient-service/pom.xml -DskipTests
 
 FROM eclipse-temurin:25-jre-alpine
+RUN apk upgrade --no-cache
 WORKDIR /app
 COPY --from=build /app/patient-service/target/patient-service-0.0.1-SNAPSHOT.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
