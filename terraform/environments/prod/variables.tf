@@ -56,4 +56,15 @@ variable "db_password" {
   sensitive   = true
 }
 
+variable "e2e_test_email" {
+  description = "Email for the E2E Cognito test user"
+  type        = string
+}
+
+variable "e2e_test_password" {
+  description = "Password for the E2E Cognito test user"
+  type        = string
+  sensitive   = true
+}
+
 

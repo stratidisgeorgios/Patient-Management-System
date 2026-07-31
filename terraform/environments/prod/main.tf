@@ -106,6 +106,8 @@ module "cognito" {
   google_client_secret = var.google_client_secret
   callback_urls        = var.callback_urls
   logout_urls          = var.logout_urls
+  e2e_test_email       = var.e2e_test_email
+  e2e_test_password    = var.e2e_test_password
   tags = {
     Environment = var.environment
     Project     = "patient-system"

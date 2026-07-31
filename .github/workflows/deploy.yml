@@ -38,7 +38,7 @@ jobs:
         run: npm ci
         working-directory: patient-frontend
       - name: Run Angular unit tests
-        run: npx ng test --no-watch --browsers=ChromeHeadless
+        run: npx ng test --no-watch
         working-directory: patient-frontend
 
   detect-changes:

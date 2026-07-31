@@ -29,6 +29,17 @@ variable "logout_urls" {
   type        = list(string)
 }
 
+variable "e2e_test_email" {
+  description = "Email for the E2E Cognito test user"
+  type        = string
+}
+
+variable "e2e_test_password" {
+  description = "Password for the E2E Cognito test user"
+  type        = string
+  sensitive   = true
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
