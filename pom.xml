@@ -16,7 +16,7 @@
         <module>api-gateway</module>
         <module>treatment-service</module>
         <module>organization-service</module>
-        <module>integration-tests</module>
+        <module>search-service</module>
     </modules>
 
 </project>

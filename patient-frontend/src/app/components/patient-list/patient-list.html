@@ -53,68 +53,6 @@
   }
 </div>
 
-@if (showEditModal()) {
-  <div class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header">
-        <span class="label">Edit Patient</span>
-        <button (click)="showEditModal.set(false)" class="btn-ghost">✕ Close</button>
-      </div>
-      <form [formGroup]="editForm" (ngSubmit)="submitUpdate()" class="modal-body">
-        <div class="form-field">
-          <label class="form-label">Name</label>
-          <input formControlName="name" placeholder="Full name" class="form-input" />
-          @if (editForm.get('name')?.touched && editForm.get('name')?.errors?.['required']) {
-            <span class="form-error">Name is required</span>
-          }
-          @if (editForm.get('name')?.touched && editForm.get('name')?.errors?.['maxlength']) {
-            <span class="form-error">Max 100 characters</span>
-          }
-        </div>
-        <div class="form-field">
-          <label class="form-label">Email</label>
-          <input formControlName="email" type="email" placeholder="email@example.com" class="form-input patient-mono" />
-          @if (editForm.get('email')?.touched && editForm.get('email')?.errors?.['required']) {
-            <span class="form-error">Email is required</span>
-          }
-          @if (editForm.get('email')?.touched && editForm.get('email')?.errors?.['email']) {
-            <span class="form-error">Enter a valid email</span>
-          }
-        </div>
-        <div class="form-field">
-          <label class="form-label">Gender</label>
-          <select formControlName="gender" class="form-input">
-            <option value="" disabled>Select gender</option>
-            <option value="MALE">Male</option>
-            <option value="FEMALE">Female</option>
-          </select>
-          @if (editForm.get('gender')?.touched && editForm.get('gender')?.errors?.['required']) {
-            <span class="form-error">Gender is required</span>
-          }
-        </div>
-        <div class="form-field">
-          <label class="form-label">Address</label>
-          <input formControlName="address" placeholder="Street address" class="form-input" />
-          @if (editForm.get('address')?.touched && editForm.get('address')?.errors?.['required']) {
-            <span class="form-error">Address is required</span>
-          }
-        </div>
-        <div class="form-field">
-          <label class="form-label">Date of Birth</label>
-          <input formControlName="dateOfBirth" type="date" class="form-input patient-mono" />
-          @if (editForm.get('dateOfBirth')?.touched && editForm.get('dateOfBirth')?.errors?.['required']) {
-            <span class="form-error">Date of birth is required</span>
-          }
-        </div>
-        <div class="modal-actions">
-          <button type="submit" [disabled]="editForm.invalid" class="btn-primary flex-1 text-center">Save Changes</button>
-          <button type="button" (click)="showEditModal.set(false)" class="btn-secondary flex-1 text-center">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-}
-
 @if (showCreateModal()) {
   <div class="modal-overlay">
     <div class="modal-card">
@@ -182,10 +120,6 @@
       </form>
     </div>
   </div>
-}
-
-@if (showDeleteModal()) {
-  <app-confirm-modal (confirm)="submitDelete()" (cancel)="cancelDelete()"></app-confirm-modal>
 }
 
 @if (showImportModal()) {

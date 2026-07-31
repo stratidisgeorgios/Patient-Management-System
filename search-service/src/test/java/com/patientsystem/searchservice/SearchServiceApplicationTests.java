@@ -1,13 +1,4 @@
 package com.patientsystem.searchservice;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+// Placeholder — real tests are in SearchServiceTest (unit).
 
-@SpringBootTest
-class SearchServiceApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
-}

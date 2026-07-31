@@ -1,5 +1,5 @@
 variable "instance_type" {
-  description = "Type of the EC2 service"
+  description = "EC2 instance type"
   type        = string
 }
 
@@ -9,7 +9,17 @@ variable "public_key" {
 }
 
 variable "environment" {
-  description = "Environment that the EC2 uses"
+  description = "Environment name"
+  type        = string
+}
+
+variable "vpc_id" {
+  description = "VPC to place the EC2 instance and its security group in"
+  type        = string
+}
+
+variable "subnet_id" {
+  description = "Public subnet to launch the EC2 instance into"
   type        = string
 }
 

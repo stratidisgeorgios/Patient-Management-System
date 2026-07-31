@@ -1,1 +1,112 @@
-<p>analytics works!</p>
+<div class="analytics-page">
+  <div class="analytics-header">
+    <span class="label">Analytics</span>
+    <h1 class="analytics-title">Overview</h1>
+    <p class="analytics-subtitle">{{ currentYear }} — Organisation-wide metrics</p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="analytics-loading">
+      <div class="spinner"></div>
+    </div>
+  } @else if (error()) {
+    <div class="analytics-error">
+      <span class="label">{{ error() }}</span>
+    </div>
+  } @else {
+
+    <!-- Stat cards -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <span class="stat-label">Active Patients</span>
+        <span class="stat-value">{{ formatCount(activePatients()) }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Average Age</span>
+        <span class="stat-value">{{ averageAge() }}<span class="stat-unit">yrs</span></span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Revenue {{ currentYear }}</span>
+        <span class="stat-value">{{ formatRevenue(annualRevenue()) }}</span>
+      </div>
+    </div>
+
+    <!-- Gender distribution -->
+    <div class="analytics-card">
+      <span class="label">Gender Distribution</span>
+      <div class="gender-bar-wrap">
+        <div class="gender-bar">
+          <div class="gender-bar-male" [style.width.%]="malePct()"></div>
+          <div class="gender-bar-female" [style.width.%]="femalePct()"></div>
+        </div>
+        <div class="gender-legend">
+          <div class="gender-legend-item">
+            <span class="gender-dot gender-dot--male"></span>
+            <span class="gender-legend-label">Male</span>
+            <span class="gender-legend-pct">{{ malePct() }}%</span>
+          </div>
+          <div class="gender-legend-item">
+            <span class="gender-dot gender-dot--female"></span>
+            <span class="gender-legend-label">Female</span>
+            <span class="gender-legend-pct">{{ femalePct() }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly registrations bar chart -->
+    <div class="analytics-card">
+      <span class="label">Patient Registrations — {{ currentYear }}</span>
+      <div class="bar-chart">
+        @for (m of monthlyRegistrations(); track m.month) {
+          <div class="bar-col">
+            <span class="bar-value">{{ m.count > 0 ? formatCount(m.count) : '' }}</span>
+            <div class="bar-track">
+              <div class="bar-fill" [style.height.%]="(m.count / maxMonthCount) * 100"></div>
+            </div>
+            <span class="bar-label">{{ m.month }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Treatments + Revenue side by side -->
+    <div class="analytics-double">
+
+      <div class="analytics-card">
+        <span class="label">Most Used Treatments</span>
+        @if (mostUsedTreatments().length === 0) {
+          <p class="analytics-empty">No data yet</p>
+        } @else {
+          <ol class="rank-list">
+            @for (t of mostUsedTreatments(); track t.name; let i = $index) {
+              <li class="rank-item">
+                <span class="rank-index">{{ i + 1 }}</span>
+                <span class="rank-name">{{ t.name }}</span>
+                <span class="rank-value">{{ formatCount(t.count) }}</span>
+              </li>
+            }
+          </ol>
+        }
+      </div>
+
+      <div class="analytics-card">
+        <span class="label">Revenue by Category</span>
+        @if (revenuePerCategory().length === 0) {
+          <p class="analytics-empty">No data yet</p>
+        } @else {
+          <ol class="rank-list">
+            @for (c of revenuePerCategory(); track c.category; let i = $index) {
+              <li class="rank-item">
+                <span class="rank-index">{{ i + 1 }}</span>
+                <span class="rank-name">{{ c.category }}</span>
+                <span class="rank-value">{{ formatAmount(c.amount) }}</span>
+              </li>
+            }
+          </ol>
+        }
+      </div>
+
+    </div>
+  }
+</div>

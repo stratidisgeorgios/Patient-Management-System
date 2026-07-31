@@ -2,27 +2,26 @@ resource "aws_iam_service_linked_role" "opensearch" {
   aws_service_name = "es.amazonaws.com"
 }
 
-data "aws_vpc" "default" {
-  default = true
-}
-
-data "aws_subnets" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
-  }
-}
-
 resource "aws_security_group" "opensearch" {
   name        = "patient-system-${var.environment}-opensearch-sg"
-  description = "Allow HTTPS to OpenSearch from EC2"
-  vpc_id      = data.aws_vpc.default.id
+  description = "Allow HTTPS to OpenSearch from EC2 and EKS pods"
+  vpc_id      = var.vpc_id
 
   ingress {
+    description     = "HTTPS from EC2"
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
     security_groups = [var.ec2_security_group_id]
+  }
+
+  # All resources inside the VPC (EKS pods, etc.)
+  ingress {
+    description = "HTTPS from within VPC"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
   }
 
   egress {
@@ -54,7 +53,8 @@ resource "aws_opensearch_domain" "main" {
   }
 
   vpc_options {
-    subnet_ids         = [tolist(data.aws_subnets.default.ids)[0]]
+    # Single-node OpenSearch only uses one subnet
+    subnet_ids         = [var.subnet_ids[0]]
     security_group_ids = [aws_security_group.opensearch.id]
   }
 

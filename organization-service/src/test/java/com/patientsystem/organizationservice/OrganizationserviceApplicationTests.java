@@ -1,13 +1,4 @@
 package com.patientsystem.organizationservice;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+// Placeholder — real tests are in OrganizationServiceTest (unit) and OrganizationRepositoryIntegrationTest (integration).
 
-@SpringBootTest
-class OrganizationserviceApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
-}

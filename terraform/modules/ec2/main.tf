@@ -1,6 +1,7 @@
 resource "aws_security_group" "main" {
   name        = "patient-system-${var.environment}-sg"
   description = "Security group for patient-system EC2"
+  vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 22
@@ -44,6 +45,7 @@ resource "aws_instance" "main" {
   ami                    = "ami-0d64bb532e0502c46"
   instance_type          = var.instance_type
   key_name               = aws_key_pair.main.key_name
+  subnet_id              = var.subnet_id
   vpc_security_group_ids = [aws_security_group.main.id]
 
   root_block_device {

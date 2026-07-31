@@ -8,7 +8,6 @@ import com.patientsystem.searchservice.grpc.PatientServiceGrpcClient;
 import com.patientsystem.searchservice.opensearch.OpenSearchService;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;

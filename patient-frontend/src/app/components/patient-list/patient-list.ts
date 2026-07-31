@@ -1,9 +1,8 @@
 import { Component, OnDestroy, OnInit, signal } from "@angular/core";
-import { ImportJobStatus, PatientResponse } from "../../models/patient.model";
+import { ImportJobStatus } from "../../models/patient.model";
 import { PatientSearchResponse } from "../../models/search.model";
 import { PatientService } from "../../services/patient-service";
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import { ConfirmModal } from "../../shared/confirm-modal/confirm-modal";
 import { NotificationService } from "../../services/notification-service";
 import { SearchService } from "../../services/search-service";
 import { Router } from "@angular/router";
@@ -12,22 +11,14 @@ import { SseService } from "../../services/sse-service";
 
 @Component({
   selector: "app-patient-list",
-  imports: [ReactiveFormsModule, ConfirmModal],
+  imports: [ReactiveFormsModule],
   standalone: true,
   templateUrl: "./patient-list.html",
   styleUrl: "./patient-list.css",
 })
 export class PatientList implements OnInit, OnDestroy {
   patients = signal<PatientSearchResponse[]>([]);
-  selectedPatient = signal<PatientResponse | null>(null);
 
-  editForm: FormGroup = new FormGroup({
-    name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
-    email: new FormControl('', [Validators.required, Validators.email]),
-    gender: new FormControl('', [Validators.required]),
-    address: new FormControl('', [Validators.required, Validators.maxLength(200)]),
-    dateOfBirth: new FormControl('', [Validators.required])
-  });
   createForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -38,8 +29,6 @@ export class PatientList implements OnInit, OnDestroy {
   });
 
   showCreateModal = signal(false);
-  showEditModal = signal(false);
-  showDeleteModal = signal(false);
   searchQuery = new Subject<string>();
   hasSearched = signal(false);
   isLoading = signal(false);
@@ -119,15 +108,7 @@ export class PatientList implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private closeAllModals() {
-    this.showCreateModal.set(false);
-    this.showEditModal.set(false);
-    this.showDeleteModal.set(false);
-    this.selectedPatient.set(null);
-  }
-
   createPatient() {
-    this.closeAllModals();
     this.showCreateModal.set(true);
     this.createForm.reset();
     this.createForm.patchValue({ registeredDate: new Date().toISOString().split('T')[0] });
@@ -141,56 +122,6 @@ export class PatientList implements OnInit, OnDestroy {
       },
       error: (err) => this.notificationService.error("Failed to create patient: " + this.extractError(err))
     });
-  }
-
-  updatePatient(patient: PatientSearchResponse) {
-    this.closeAllModals();
-    this.patientService.getById(patient.id).subscribe({
-      next: (fullPatient) => {
-        this.selectedPatient.set(fullPatient);
-        this.showEditModal.set(true);
-        this.editForm.patchValue({
-          name: fullPatient.name,
-          email: fullPatient.email,
-          gender: fullPatient.gender,
-          address: fullPatient.address,
-          dateOfBirth: fullPatient.dateOfBirth
-        });
-      },
-      error: (err) => this.notificationService.error("Failed to load patient: " + this.extractError(err))
-    });
-  }
-
-  submitUpdate() {
-    this.patientService.update(this.selectedPatient()!.id, this.editForm.value).subscribe({
-      next: () => {
-        this.showEditModal.set(false);
-        this.notificationService.success('Patient updated successfully');
-      },
-      error: (err) => this.notificationService.error("Failed to update patient: " + this.extractError(err))
-    });
-  }
-
-  deletePatient(patient: PatientSearchResponse) {
-    this.closeAllModals();
-    this.selectedPatient.set(patient as unknown as PatientResponse);
-    this.showDeleteModal.set(true);
-  }
-
-  submitDelete() {
-    const id = this.selectedPatient()!.id;
-    this.patientService.delete(id).subscribe({
-      next: () => {
-        this.showDeleteModal.set(false);
-        this.notificationService.success('Patient deleted successfully');
-      },
-      error: (err) => this.notificationService.error("Failed to delete patient: " + this.extractError(err))
-    });
-  }
-
-  cancelDelete() {
-    this.showDeleteModal.set(false);
-    this.selectedPatient.set(null);
   }
 
   openProfile(id: string) {
@@ -252,20 +183,14 @@ export class PatientList implements OnInit, OnDestroy {
       this.importMapping = this.mapHeaders(headers);
       this.importTotalRows = estimatedRows;
 
-      if (file.size >= 50 * 1024 * 1024) {
-        this.patientService.uploadLargeFileToS3(file, onProgress)
-          .then((s3Key) => onUploadDone(s3Key))
-          .catch((err: Error) => onUploadError("Failed to upload file: " + err.message));
-      } else {
-        this.patientService.getPresignedUrl().subscribe({
-          next: ({ presignedUrl, s3Key }) => {
-            this.patientService.uploadToS3(presignedUrl, file, onProgress)
-              .then(() => onUploadDone(s3Key))
-              .catch((err) => onUploadError("Failed to upload file: " + err.message));
-          },
-          error: (err) => onUploadError("Failed to get upload URL: " + this.extractError(err))
-        });
-      }
+      this.patientService.getPresignedUrl().subscribe({
+        next: ({ presignedUrl, s3Key }) => {
+          this.patientService.uploadToS3(presignedUrl, file, onProgress)
+            .then(() => onUploadDone(s3Key))
+            .catch((err) => onUploadError("Failed to upload file: " + err.message));
+        },
+        error: (err) => onUploadError("Failed to get upload URL: " + this.extractError(err))
+      });
     }).catch((err) => {
       this.isUploading.set(false);
       this.notificationService.error("Failed to read file: " + err.message);

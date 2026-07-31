@@ -17,12 +17,6 @@ export interface PatientResponse {
   gender: string;
 }
 
-export interface ImportUploadResponse {
-  s3Key: string;
-  mapping: Record<string, string>;
-  totalRows: number;
-}
-
 export interface PresignedUrlResponse {
   presignedUrl: string;
   s3Key: string;

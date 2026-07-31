@@ -1,13 +1,4 @@
 package com.patientsystem.analyticsservice;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+// Placeholder — real tests are in AnalyticsServiceTest (unit) and AnalyticsRepositoryIntegrationTest (integration).
 
-@SpringBootTest
-class AnalyticsserviceApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
-}

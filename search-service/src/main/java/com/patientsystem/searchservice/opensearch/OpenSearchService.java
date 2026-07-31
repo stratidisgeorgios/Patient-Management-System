@@ -2,7 +2,6 @@ package com.patientsystem.searchservice.opensearch;
 
 import com.patientsystem.searchservice.documents.PatientDocument;
 import com.patientsystem.searchservice.documents.TreatmentDocument;
-import jakarta.annotation.PostConstruct;
 import org.opensearch.client.opensearch.OpenSearchClient;
 import org.opensearch.client.opensearch.core.BulkRequest;
 import org.opensearch.client.opensearch.core.DeleteRequest;

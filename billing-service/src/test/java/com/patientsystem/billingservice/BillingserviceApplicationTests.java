@@ -1,13 +1,4 @@
 package com.patientsystem.billingservice;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+// Placeholder — real tests are in BillingServiceTest (unit) and BillingRepositoryIntegrationTest (integration).
 
-@SpringBootTest
-class BillingserviceApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
-}

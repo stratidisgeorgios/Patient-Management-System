@@ -1,32 +1,25 @@
-data "aws_vpc" "default" {
-  default = true
-}
-
-data "aws_subnets" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
-  }
-}
-
 resource "aws_security_group" "rds" {
   name        = "patient-system-${var.environment}-rds-sg"
-  description = "Allow PostgreSQL from EC2"
-  vpc_id      = data.aws_vpc.default.id
+  description = "Allow PostgreSQL from EC2 and EKS pods"
+  vpc_id      = var.vpc_id
 
+  # Existing EC2 instance (Docker Compose era, kept as bastion during migration)
   ingress {
+    description     = "PostgreSQL from EC2"
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
     security_groups = [var.ec2_security_group_id]
   }
 
+  # All resources inside the VPC (EKS pods, etc.)
+  # More granular: in Phase 4 we'll narrow this to the EKS node security group
   ingress {
-    description = "Glue and other VPC resources"
+    description = "PostgreSQL from within VPC"
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["172.31.0.0/16"]
+    cidr_blocks = [var.vpc_cidr]
   }
 
   egress {
@@ -41,7 +34,7 @@ resource "aws_security_group" "rds" {
 
 resource "aws_db_subnet_group" "main" {
   name       = "patient-system-${var.environment}-subnet-group"
-  subnet_ids = data.aws_subnets.default.ids
+  subnet_ids = var.subnet_ids
   tags       = var.tags
 }
 
