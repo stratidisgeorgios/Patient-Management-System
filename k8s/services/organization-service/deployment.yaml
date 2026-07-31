@@ -27,7 +27,7 @@ spec:
               mountPath: /otel
       containers:
         - name: organization-service
-          image: 303357409766.dkr.ecr.eu-west-1.amazonaws.com/patient-system/organization-service:bd37f7fa18c31ef27fc44646f8620be3740b9b0c
+          image: 303357409766.dkr.ecr.eu-west-1.amazonaws.com/patient-system/organization-service:46ca7817bccce5ca5ad0d50be6f3f8e35de6fd87
           ports:
             - containerPort: 4005
               name: http
