@@ -24,6 +24,12 @@ variable "private_subnet_ids" {
   type        = list(string)
 }
 
+variable "admin_role_arns" {
+  description = "IAM role ARNs to grant EKS cluster-admin access (e.g. CI role)"
+  type        = list(string)
+  default     = []
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)

@@ -27,6 +27,18 @@ module "eks" {
 
   cluster_enabled_log_types = ["api", "audit", "authenticator"]
 
+  access_entries = {
+    for arn in var.admin_role_arns : arn => {
+      principal_arn = arn
+      policy_associations = {
+        admin = {
+          policy_arn   = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = { type = "cluster" }
+        }
+      }
+    }
+  }
+
   eks_managed_node_groups = {
     main = {
       instance_types = ["t3.medium"]
