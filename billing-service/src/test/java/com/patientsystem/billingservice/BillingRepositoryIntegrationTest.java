@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@TestPropertySource(properties = "spring.flyway.enabled=true")
+@TestPropertySource(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 class BillingRepositoryIntegrationTest {
 
     @Container

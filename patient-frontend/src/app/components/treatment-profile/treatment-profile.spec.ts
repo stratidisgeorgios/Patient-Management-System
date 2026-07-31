@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideRouter } from "@angular/router";
 import { provideHttpClient } from "@angular/common/http";
+import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { APP_SERVICE_CONFIG } from "../../app-config.interface";
 import { TreatmentProfile } from "./treatment-profile";
 
@@ -15,6 +16,7 @@ describe("TreatmentProfile", () => {
         provideRouter([]),
         { provide: APP_SERVICE_CONFIG, useValue: { apiUrl: "" } },
         provideHttpClient(),
+        provideHttpClientTesting(),
       ],
     }).compileComponents();
 
