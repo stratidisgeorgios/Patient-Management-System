@@ -12,6 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
+
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
@@ -80,7 +82,7 @@ class SearchServiceTest {
     @Test
     void indexPatient_wrapsException_inRuntimeException() throws Exception {
         PatientDocument doc = samplePatientDoc();
-        doThrow(new Exception("OpenSearch unavailable")).when(openSearchService).indexPatient(doc);
+        doThrow(new IOException("OpenSearch unavailable")).when(openSearchService).indexPatient(doc);
 
         assertThatThrownBy(() -> searchService.indexPatient(doc, "PatientCreated", null))
                 .isInstanceOf(RuntimeException.class)
