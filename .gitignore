@@ -81,6 +81,9 @@ patients_import*.csv
 ### Claude ###
 .claude/
 
+### Eclipse IDE output ###
+**/bin/
+
 ### Terraform ###
 **/.terraform/
 *.tfstate

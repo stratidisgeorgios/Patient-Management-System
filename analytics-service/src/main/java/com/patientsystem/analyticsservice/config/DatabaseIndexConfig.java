@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class DatabaseIndexConfig implements ApplicationRunner{
     private final JdbcTemplate jdbcTemplate;
 
-    public TimescaleConfig(JdbcTemplate jdbcTemplate) {
+    public DatabaseIndexConfig(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

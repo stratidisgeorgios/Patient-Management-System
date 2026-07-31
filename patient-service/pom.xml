@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.6</version>
+		<version>4.0.7</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.patientsystem</groupId>
@@ -28,6 +28,8 @@
 	</scm>
 	<properties>
 		<java.version>25</java.version>
+		<postgresql.version>42.7.12</postgresql.version>
+		<netty.version>4.2.16.Final</netty.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -122,7 +124,7 @@
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-netty-shaded</artifactId>
-			<version>1.69.0</version>
+			<version>1.75.0</version>
 		</dependency>
 		<dependency>
 			<groupId>net.devh</groupId>
