@@ -64,6 +64,8 @@ jwt:
   issuer-uri: https://cognito-idp.eu-west-1.amazonaws.com/eu-west-1_Sb4mcDano
 
 management:
+  server:
+    port: 4040
   endpoints:
     web:
       exposure:

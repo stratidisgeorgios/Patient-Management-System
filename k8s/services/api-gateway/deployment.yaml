@@ -15,7 +15,7 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/path: "/actuator/prometheus"
-        prometheus.io/port: "4004"
+        prometheus.io/port: "4040"
     spec:
       initContainers:
         - name: otel-agent
@@ -57,7 +57,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
-              port: 4004
+              port: 4040
             initialDelaySeconds: 90
             timeoutSeconds: 5
             periodSeconds: 10
