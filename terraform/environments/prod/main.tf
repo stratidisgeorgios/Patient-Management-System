@@ -4,11 +4,39 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.0"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.0"
+    }
   }
 }
 
 provider "aws" {
   region = var.aws_region
+}
+
+# Helm and Kubernetes providers talk to the EKS cluster that module.eks creates.
+# Run `terraform apply -target=module.eks` first, then apply everything else.
+data "aws_eks_cluster_auth" "main" {
+  name = module.eks.cluster_name
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+    token                  = data.aws_eks_cluster_auth.main.token
+  }
+}
+
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+  token                  = data.aws_eks_cluster_auth.main.token
 }
 
 # Derived from environment so every module that needs the cluster name
@@ -246,4 +274,102 @@ module "opensearch" {
 
 output "opensearch_endpoint" {
   value = module.opensearch.endpoint
+}
+
+# ────────────────────────────────────────────────────────────
+# Phase 3 — ALB Ingress Controller
+# Run after: terraform apply -target=module.eks
+# ────────────────────────────────────────────────────────────
+
+module "alb_controller" {
+  source = "../../modules/alb-controller"
+
+  cluster_name        = module.eks.cluster_name
+  oidc_provider_arn   = module.eks.oidc_provider_arn
+  vpc_id              = module.vpc.vpc_id
+  environment         = var.environment
+  acm_certificate_arn = var.acm_certificate_arn
+
+  tags = {
+    Environment = var.environment
+    Project     = "patient-system"
+  }
+}
+
+output "acm_certificate_arn" {
+  description = "Paste into k8s/ingress/ingress.yaml annotation alb.ingress.kubernetes.io/certificate-arn"
+  value       = module.alb_controller.acm_certificate_arn
+}
+
+output "acm_dns_validation_records" {
+  description = "Add these CNAME records in Cloudflare to validate the ACM certificate"
+  value       = module.alb_controller.acm_certificate_domain_validation_options
+}
+
+# ────────────────────────────────────────────────────────────
+# Phase 4 — App Config (secrets + ESO + IRSA for services)
+# ────────────────────────────────────────────────────────────
+
+module "app_config" {
+  source     = "../../modules/app-config"
+  depends_on = [module.alb_controller]
+
+  environment           = var.environment
+  oidc_provider_arn     = module.eks.oidc_provider_arn
+  rds_address           = module.rds.address
+  db_password           = var.db_password
+  msk_bootstrap_brokers = module.msk.bootstrap_brokers
+  opensearch_endpoint   = module.opensearch.endpoint
+  cognito_user_pool_id  = module.cognito.user_pool_id
+  s3_bucket_name        = module.s3.bucket_name
+  import_queue_url      = module.sqs_import.queue_url
+
+  tags = {
+    Environment = var.environment
+    Project     = "patient-system"
+  }
+}
+
+output "patient_service_role_arn" {
+  description = "Update k8s/services/patient-service/serviceaccount.yaml annotation if this changes"
+  value       = module.app_config.patient_service_role_arn
+}
+
+output "organization_service_role_arn" {
+  description = "Update k8s/services/organization-service/serviceaccount.yaml annotation if this changes"
+  value       = module.app_config.organization_service_role_arn
+}
+
+# ────────────────────────────────────────────────────────────
+# Phase 6 — Observability (Prometheus + Grafana + Loki + Tempo)
+# ────────────────────────────────────────────────────────────
+
+module "monitoring" {
+  source     = "../../modules/monitoring"
+  depends_on = [module.alb_controller]
+
+  environment            = var.environment
+  grafana_admin_password = var.grafana_admin_password
+
+  tags = {
+    Environment = var.environment
+    Project     = "patient-system"
+  }
+}
+
+# ────────────────────────────────────────────────────────────
+# Phase 7 — ArgoCD (GitOps)
+# ────────────────────────────────────────────────────────────
+
+module "argocd" {
+  source     = "../../modules/argocd"
+  depends_on = [module.alb_controller]
+
+  environment                  = var.environment
+  argocd_admin_password_bcrypt = var.argocd_admin_password_bcrypt
+
+  tags = {
+    Environment = var.environment
+    Project     = "patient-system"
+  }
 }

@@ -62,3 +62,18 @@ spring:
 
 jwt:
   issuer-uri: https://cognito-idp.eu-west-1.amazonaws.com/eu-west-1_Sb4mcDano
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true

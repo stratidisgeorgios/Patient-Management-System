@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: patient-service
+  namespace: patient-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: patient-service
+  template:
+    metadata:
+      labels:
+        app: patient-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "4000"
+    spec:
+      serviceAccountName: patient-service
+      initContainers:
+        - name: otel-agent
+          image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:1.32.0
+          command: ["cp", "/javaagent.jar", "/otel/opentelemetry-javaagent.jar"]
+          volumeMounts:
+            - name: otel-agent
+              mountPath: /otel
+      containers:
+        - name: patient-service
+          image: 303357409766.dkr.ecr.eu-west-1.amazonaws.com/patient-system/patient-service:latest
+          ports:
+            - containerPort: 4000
+              name: http
+            - containerPort: 9003
+              name: grpc
+          env:
+            - name: RDS_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: patient-system-secrets
+                  key: rds-address
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://$(RDS_ADDRESS)/patient_db"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: admin_user
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: patient-system-secrets
+                  key: db-password
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: update
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              valueFrom:
+                secretKeyRef:
+                  name: patient-system-secrets
+                  key: msk-bootstrap-brokers
+            - name: AWS_S3_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: patient-system-secrets
+                  key: s3-bucket-name
+            - name: AWS_SQS_IMPORT_QUEUE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: patient-system-secrets
+                  key: import-queue-url
+            - name: AWS_REGION
+              value: eu-west-1
+            - name: BILLING_SERVICE_ADDRESS
+              value: billing-service
+            - name: BILLING_SERVICE_GRPC_PORT
+              value: "9001"
+            - name: JAVA_TOOL_OPTIONS
+              value: "-javaagent:/otel/opentelemetry-javaagent.jar"
+            - name: OTEL_SERVICE_NAME
+              value: patient-service
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://$(HOST_IP):4317"
+            - name: OTEL_METRICS_EXPORTER
+              value: otlp
+            - name: OTEL_TRACES_EXPORTER
+              value: otlp
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 4000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 4000
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: otel-agent
+              mountPath: /otel
+      volumes:
+        - name: otel-agent
+          emptyDir: {}

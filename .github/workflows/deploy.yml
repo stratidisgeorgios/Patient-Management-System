@@ -6,7 +6,7 @@ on:
 
 permissions:
   id-token: write   # OIDC token for AWS role assumption
-  contents: read
+  contents: write   # write needed to commit updated image tags for ArgoCD
 
 jobs:
   test-backend:
@@ -121,9 +121,15 @@ jobs:
           docker push $ECR_REGISTRY/patient-system/${{ matrix.service }}:latest
 
   deploy:
-    needs: build-push
+    needs: [build-push, detect-changes]
     runs-on: ubuntu-latest
+    env:
+      ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com
     steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -133,7 +139,43 @@ jobs:
       - name: Configure kubectl
         run: aws eks update-kubeconfig --region eu-west-1 --name prod-patient-system
 
-      # kubectl set image commands are added in Phase 4 when K8s manifests exist
+      - name: Update image tags in K8s manifests
+        run: |
+          SERVICES='${{ needs.detect-changes.outputs.services }}'
+          for SERVICE in $(echo "$SERVICES" | jq -r '.[]'); do
+            MANIFEST="k8s/services/${SERVICE}/deployment.yaml"
+            if [ -f "$MANIFEST" ]; then
+              sed -i "s|${ECR_REGISTRY}/patient-system/${SERVICE}:.*|${ECR_REGISTRY}/patient-system/${SERVICE}:${{ github.sha }}|g" "$MANIFEST"
+              echo "Updated $MANIFEST to ${{ github.sha }}"
+            fi
+          done
+
+      - name: Commit updated image tags
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s/services/
+          if git diff --staged --quiet; then
+            echo "No manifest changes to commit"
+          else
+            git commit -m "ci: update image tags to ${{ github.sha }}"
+            git push
+          fi
+
+      - name: Apply K8s manifests
+        run: |
+          kubectl apply -f k8s/namespaces.yaml
+          kubectl apply -f k8s/secrets/ -n patient-system
+          kubectl apply -f k8s/services/ --recursive
+          kubectl apply -f k8s/ingress/
+
+      - name: Wait for rollout
+        run: |
+          SERVICES='${{ needs.detect-changes.outputs.services }}'
+          for SERVICE in $(echo "$SERVICES" | jq -r '.[]'); do
+            echo "Waiting for $SERVICE rollout..."
+            kubectl rollout status deployment/$SERVICE -n patient-system --timeout=300s
+          done
 
   e2e:
     needs: deploy

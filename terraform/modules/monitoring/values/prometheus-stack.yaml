@@ -1,0 +1,53 @@
+grafana:
+  adminPassword: "${grafana_admin_password}"
+
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      url: http://loki:3100
+      access: proxy
+      isDefault: false
+    - name: Tempo
+      type: tempo
+      url: http://tempo:3100
+      access: proxy
+      isDefault: false
+      jsonData:
+        tracesToLogs:
+          datasourceUid: loki
+          filterByTraceID: true
+
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: patient-system
+          folder: Patient System
+          type: file
+          options:
+            path: /var/lib/grafana/dashboards/patient-system
+
+prometheus:
+  prometheusSpec:
+    podMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+    additionalScrapeConfigs:
+      - job_name: spring-boot-services
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: [patient-system]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: "true"
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            target_label: service

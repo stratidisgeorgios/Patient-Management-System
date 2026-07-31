@@ -114,19 +114,13 @@ resource "aws_cognito_user_pool_client" "frontend" {
 resource "aws_cognito_user" "e2e_test" {
   user_pool_id   = aws_cognito_user_pool.patient_system.id
   username       = var.e2e_test_email
+  password       = var.e2e_test_password
   message_action = "SUPPRESS"
 
   attributes = {
     email          = var.e2e_test_email
     email_verified = "true"
   }
-}
-
-resource "aws_cognito_user_password" "e2e_test" {
-  user_pool_id = aws_cognito_user_pool.patient_system.id
-  username     = aws_cognito_user.e2e_test.username
-  password     = var.e2e_test_password
-  permanent    = true
 }
 
 resource "aws_cognito_user_group" "admin" {

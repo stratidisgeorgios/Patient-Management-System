@@ -67,4 +67,21 @@ variable "e2e_test_password" {
   sensitive   = true
 }
 
+variable "grafana_admin_password" {
+  description = "Grafana admin password"
+  type        = string
+  sensitive   = true
+}
+
+variable "argocd_admin_password_bcrypt" {
+  description = "bcrypt hash of ArgoCD admin password (htpasswd -nbBC 10 '' PASSWORD | tr -d ':')"
+  type        = string
+  sensitive   = true
+}
+
+variable "acm_certificate_arn" {
+  description = "Existing ACM certificate ARN for patientsystem.me. Leave empty to create one."
+  type        = string
+  default     = ""
+}
 
