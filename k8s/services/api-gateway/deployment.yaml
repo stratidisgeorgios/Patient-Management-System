@@ -58,14 +58,16 @@ spec:
             httpGet:
               path: /actuator/health/liveness
               port: 4004
-            initialDelaySeconds: 30
+            initialDelaySeconds: 90
+            timeoutSeconds: 5
             periodSeconds: 10
             failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 4004
-            initialDelaySeconds: 20
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
             periodSeconds: 5
             failureThreshold: 3
           volumeMounts:
