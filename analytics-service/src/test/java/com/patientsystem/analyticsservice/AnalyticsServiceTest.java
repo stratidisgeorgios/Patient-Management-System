@@ -80,7 +80,7 @@ class AnalyticsServiceTest {
 
     @Test
     void getPatientRegistrationsPerMonth_delegatesToRepository() {
-        List<Object[]> expected = List.of(new Object[]{1.0, 5L});
+        List<Object[]> expected = List.<Object[]>of(new Object[]{1.0, 5L});
         when(patientEventRepository.countCreatedPerMonth(2024)).thenReturn(expected);
 
         var result = analyticsService.getPatientRegistrationsPerMonth(2024);
