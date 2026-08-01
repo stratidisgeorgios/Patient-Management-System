@@ -73,6 +73,13 @@
 			<artifactId>cognitoidentityprovider</artifactId>
 			<version>2.31.64</version>
 		</dependency>
+		<!-- Required for IRSA: SDK v2 needs sts on the classpath to exchange
+		     the web identity token for credentials via WebIdentityTokenFileCredentialsProvider -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>sts</artifactId>
+			<version>2.31.64</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
