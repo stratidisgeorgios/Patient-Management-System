@@ -23,12 +23,29 @@ setup('authenticate and set up organisation', async ({ page }) => {
     await page.locator('input[placeholder="admin@example.com"]').pressSequentially(email);
     await page.waitForTimeout(500); // let Angular change detection mark the form valid
 
-    // Navigate includes: POST /api/organizations → cognitoService.refreshSession() → router.navigate
-    // refreshSession is a Cognito round-trip and can be slow
-    await Promise.all([
-      page.waitForURL(/\/app\/patients/, { timeout: 60000 }),
+    // Intercept the org creation API response so we know when it succeeds,
+    // without relying on refreshSession() completing (it can hang in CI).
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        r => r.url().includes('/api/organizations') && r.request().method() === 'POST',
+        { timeout: 15000 }
+      ),
       page.click('button:has-text("Create Organisation")'),
     ]);
+
+    if (!response.ok()) {
+      throw new Error(`Organisation creation failed with status ${response.status()}`);
+    }
+
+    // Org created — Cognito attribute custom:organizationId is now set on the user.
+    // Sign out and back in so Amplify gets a fresh ID token that includes the attribute.
+    // This is more reliable than waiting for cognitoService.refreshSession() to navigate.
+    await page.click('button:has-text("Logout")');
+    await page.waitForURL(/\/login/, { timeout: 10000 });
+    await page.fill('input[type="email"]', email);
+    await page.fill('input[type="password"]', password);
+    await page.click('button:has-text("Sign In")');
+    await page.waitForURL(/\/app\/patients/, { timeout: 30000 });
   }
 
   fs.mkdirSync(path.dirname(authFile), { recursive: true });
