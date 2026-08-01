@@ -93,3 +93,8 @@ patients_import*.csv
 DONE.md
 PLAN.md
 terraform/environments/prod/.terraform.lock.hcl
+
+### Playwright ###
+patient-frontend/e2e/.auth/
+patient-frontend/playwright-report/
+patient-frontend/test-results/
