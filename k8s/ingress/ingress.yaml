@@ -6,7 +6,7 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-1:303357409766:certificate/f728bf7f-1de6-4b01-8160-2262fb3b1883
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-1:303357409766:certificate/f728bf7f-1de6-4b01-8160-2262fb3b1883,arn:aws:acm:eu-west-1:303357409766:certificate/91529ead-1e30-4d35-9a5b-7294a1811991
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: "443"
     alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
@@ -18,6 +18,16 @@ spec:
       http:
         paths:
           - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 4004
+    - host: api.patientsystem.me
+      http:
+        paths:
+          - path: /
             pathType: Prefix
             backend:
               service:

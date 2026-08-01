@@ -132,6 +132,8 @@ jobs:
 
   deploy:
     needs: [build-push, detect-changes]
+    # Always run so e2e can depend on it reliably; steps guard themselves on build-push success
+    if: always() && needs.detect-changes.result == 'success'
     runs-on: ubuntu-latest
     env:
       ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-west-1.amazonaws.com
@@ -141,15 +143,18 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure AWS credentials (OIDC)
+        if: needs.build-push.result == 'success'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-deploy
           aws-region: eu-west-1
 
       - name: Configure kubectl
+        if: needs.build-push.result == 'success'
         run: aws eks update-kubeconfig --region eu-west-1 --name prod-patient-system
 
       - name: Update image tags in K8s manifests
+        if: needs.build-push.result == 'success'
         run: |
           SERVICES='${{ needs.detect-changes.outputs.services }}'
           for SERVICE in $(echo "$SERVICES" | jq -r '.[]'); do
@@ -161,6 +166,7 @@ jobs:
           done
 
       - name: Commit updated image tags
+        if: needs.build-push.result == 'success'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -174,6 +180,7 @@ jobs:
           fi
 
       - name: Apply K8s manifests
+        if: needs.build-push.result == 'success'
         run: |
           kubectl apply -f k8s/namespaces.yaml
           kubectl apply -f k8s/secrets/ -n patient-system
@@ -183,6 +190,7 @@ jobs:
           kubectl apply -f k8s/ingress/
 
       - name: Wait for rollout
+        if: needs.build-push.result == 'success'
         run: |
           SERVICES='${{ needs.detect-changes.outputs.services }}'
           for SERVICE in $(echo "$SERVICES" | jq -r '.[]'); do
@@ -191,7 +199,8 @@ jobs:
           done
 
   e2e:
-    needs: deploy
+    needs: [test-backend, test-frontend, deploy]
+    if: needs.test-backend.result == 'success' && needs.test-frontend.result == 'success' && needs.deploy.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
