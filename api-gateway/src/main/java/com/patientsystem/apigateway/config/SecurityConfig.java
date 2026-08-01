@@ -1,6 +1,7 @@
 package com.patientsystem.apigateway.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.security.autoconfigure.actuate.web.reactive.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -54,16 +55,26 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Order(-1)
+    public SecurityWebFilterChain actuatorChain(ServerHttpSecurity http) {
+        return http
+                .securityMatcher(EndpointRequest.toAnyEndpoint())
+                .authorizeExchange(auth -> auth.anyExchange().permitAll())
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .build();
+    }
+
+    @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
-            .cors(ServerHttpSecurity.CorsSpec::disable)
-            .csrf(ServerHttpSecurity.CsrfSpec::disable)
-            .authorizeExchange(auth -> auth
-                .anyExchange().authenticated()
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.jwtDecoder(reactiveJwtDecoder()))
-            )
-            .build();
+                .cors(ServerHttpSecurity.CorsSpec::disable)
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(auth -> auth
+                        .anyExchange().authenticated()
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtDecoder(reactiveJwtDecoder()))
+                )
+                .build();
     }
 }
