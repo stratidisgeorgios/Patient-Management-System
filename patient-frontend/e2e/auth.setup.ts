@@ -19,8 +19,12 @@ setup('authenticate and set up organisation', async ({ page }) => {
   if (page.url().includes('create-organization')) {
     await page.fill('input[placeholder="e.g. City Medical Centre"]', 'E2E Test Organisation');
     await page.fill('input[placeholder="admin@example.com"]', email);
-    await page.click('button:has-text("Create Organisation")');
-    await page.waitForURL(/\/app\/patients/, { timeout: 15000 });
+    // Start watching before clicking — navigation includes a Cognito session refresh
+    // which is a network round-trip and can take 20-30s in CI
+    await Promise.all([
+      page.waitForURL(/\/app\/patients/, { timeout: 40000 }),
+      page.click('button:has-text("Create Organisation")'),
+    ]);
   }
 
   fs.mkdirSync(path.dirname(authFile), { recursive: true });

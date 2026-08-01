@@ -15,6 +15,7 @@ export default defineConfig({
     {
       name: 'setup',
       testMatch: '**/auth.setup.ts',
+      use: { actionTimeout: 60000 },
     },
     {
       name: 'chromium',
