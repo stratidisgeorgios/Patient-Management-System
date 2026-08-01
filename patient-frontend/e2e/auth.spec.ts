@@ -7,7 +7,7 @@ test.describe('Unauthenticated', () => {
     await page.goto('/login');
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();
-    await expect(page.locator('button:has-text("Sign In")')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Sign In', exact: true })).toBeVisible();
   });
 
   test('visiting /app/patients without a session redirects to /login', async ({ page }) => {

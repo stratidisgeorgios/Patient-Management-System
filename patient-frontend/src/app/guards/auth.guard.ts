@@ -7,5 +7,5 @@ export const authGuard: CanActivateFn = () => {
   if (cognitoService.authenticated()) {
     return true;
   }
-  return inject(Router).createUrlTree(['/']);
+  return inject(Router).createUrlTree(['/login']);
 };

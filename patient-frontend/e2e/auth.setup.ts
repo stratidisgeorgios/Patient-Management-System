@@ -42,8 +42,11 @@ setup('authenticate and set up organisation', async ({ page }) => {
     // This is more reliable than waiting for cognitoService.refreshSession() to navigate.
     await page.click('button:has-text("Logout")');
     await page.waitForURL(/\/login/, { timeout: 10000 });
-    await page.fill('input[type="email"]', email);
-    await page.fill('input[type="password"]', password);
+    // Wait for Angular to finish bootstrapping the login form before interacting.
+    // networkidle ensures auth-state checks complete and the DOM stops re-rendering.
+    await page.waitForLoadState('networkidle');
+    await page.locator('input[type="email"]').fill(email);
+    await page.locator('input[type="password"]').fill(password);
     await page.click('button:has-text("Sign In")');
     await page.waitForURL(/\/app\/patients/, { timeout: 30000 });
   }

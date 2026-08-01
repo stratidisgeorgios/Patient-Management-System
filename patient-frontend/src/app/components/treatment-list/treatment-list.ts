@@ -124,6 +124,7 @@ export class TreatmentList implements OnInit, OnDestroy {
     this.showTreatmentCreateModal.set(false);
     this.showTreatmentEditModal.set(false);
     this.showTreatmentDeleteModal.set(false);
+    this.showCategoriesModal.set(false);
     this.showCategoryCreateModal.set(false);
     this.showCategoryEditModal.set(false);
     this.showCategoryDeleteModal.set(false);
