@@ -45,9 +45,13 @@ test('billing: charge a patient for a treatment then remove it', async ({ page }
   await expect(patModal).toBeHidden({ timeout: 8000 });
 
   // Navigate to patient profile
-  await page.fill('input[placeholder="Search patients..."]', patientName);
+  // Retry search until the item appears in the search index (Elasticsearch has indexing delay)
   const patRow = page.locator('tr.patient-row', { hasText: patientName });
-  await expect(patRow).toBeVisible({ timeout: 12000 });
+  await expect(async () => {
+    await page.fill('input[placeholder="Search patients..."]', '');
+    await page.fill('input[placeholder="Search patients..."]', patientName);
+    await expect(patRow).toBeVisible({ timeout: 5000 });
+  }).toPass({ timeout: 30000 });
   await patRow.locator('button.action-view').click();
   await expect(page).toHaveURL(/\/app\/patients\/\d+/, { timeout: 10000 });
 
@@ -83,9 +87,12 @@ test('billing: charge a patient for a treatment then remove it', async ({ page }
 
   // --- Cleanup: delete treatment ---
   await page.goto('/app/treatments');
-  await page.fill('input[placeholder="Search treatments..."]', treatmentName);
   const treatRow = page.locator('tr.treatment-row', { hasText: treatmentName });
-  await expect(treatRow).toBeVisible({ timeout: 12000 });
+  await expect(async () => {
+    await page.fill('input[placeholder="Search treatments..."]', '');
+    await page.fill('input[placeholder="Search treatments..."]', treatmentName);
+    await expect(treatRow).toBeVisible({ timeout: 5000 });
+  }).toPass({ timeout: 30000 });
   await treatRow.locator('button.action-view').click();
   await expect(page).toHaveURL(/\/app\/treatments\/\d+/, { timeout: 10000 });
   await page.click('button:has-text("Delete")');

@@ -34,9 +34,13 @@ test('treatment and category CRUD: create, search, view, edit, delete', async ({
   await expect(createModal).toBeHidden({ timeout: 8000 });
 
   // --- Search ---
-  await page.fill('input[placeholder="Search treatments..."]', treatmentName);
+  // Retry search until the item appears in the search index (Elasticsearch has indexing delay)
   const row = page.locator('tr.treatment-row', { hasText: treatmentName });
-  await expect(row).toBeVisible({ timeout: 12000 });
+  await expect(async () => {
+    await page.fill('input[placeholder="Search treatments..."]', '');
+    await page.fill('input[placeholder="Search treatments..."]', treatmentName);
+    await expect(row).toBeVisible({ timeout: 5000 });
+  }).toPass({ timeout: 30000 });
 
   // --- View profile ---
   await row.locator('button.action-view').click();

@@ -27,9 +27,13 @@ test('patient CRUD: create, search, view, edit, delete', async ({ page }) => {
   await expect(modal).toBeHidden({ timeout: 8000 });
 
   // --- Search ---
-  await page.fill('input[placeholder="Search patients..."]', name);
+  // Retry search until the item appears in the search index (Elasticsearch has indexing delay)
   const row = page.locator('tr.patient-row', { hasText: name });
-  await expect(row).toBeVisible({ timeout: 12000 });
+  await expect(async () => {
+    await page.fill('input[placeholder="Search patients..."]', '');
+    await page.fill('input[placeholder="Search patients..."]', name);
+    await expect(row).toBeVisible({ timeout: 5000 });
+  }).toPass({ timeout: 30000 });
 
   // --- View profile ---
   await row.locator('button.action-view').click();
