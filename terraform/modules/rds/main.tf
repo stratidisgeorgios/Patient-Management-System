@@ -41,7 +41,7 @@ resource "aws_db_subnet_group" "main" {
 resource "aws_db_instance" "main" {
   identifier        = "patient-system-${var.environment}"
   engine            = "postgres"
-  engine_version    = "16.9"
+  engine_version    = "16.13"
   instance_class    = "db.t3.medium"
   allocated_storage = 100
   storage_type      = "gp2"
