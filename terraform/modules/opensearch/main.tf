@@ -8,16 +8,7 @@ resource "aws_security_group" "opensearch" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description     = "HTTPS from EC2"
-    from_port       = 443
-    to_port         = 443
-    protocol        = "tcp"
-    security_groups = [var.ec2_security_group_id]
-  }
-
-  # All resources inside the VPC (EKS pods, etc.)
-  ingress {
-    description = "HTTPS from within VPC"
+    description = "HTTPS from within VPC (EKS pods)"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"

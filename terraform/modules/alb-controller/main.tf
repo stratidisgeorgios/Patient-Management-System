@@ -27,9 +27,10 @@ module "lb_controller_irsa" {
 # ── ACM certificate (skip if caller passes an existing ARN) ───────────────────
 
 resource "aws_acm_certificate" "patient_system" {
-  count             = var.acm_certificate_arn == "" ? 1 : 0
-  domain_name       = "patientsystem.me"
-  validation_method = "DNS"
+  count                     = var.acm_certificate_arn == "" ? 1 : 0
+  domain_name               = "patientsystem.me"
+  subject_alternative_names = ["api.patientsystem.me"]
+  validation_method         = "DNS"
 
   lifecycle {
     create_before_destroy = true

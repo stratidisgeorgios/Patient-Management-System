@@ -10,11 +10,6 @@ variable "environment" {
   default     = "prod"
 }
 
-variable "public_key" {
-  description = "Public SSH key to import into AWS"
-  type        = string
-}
-
 variable "cognito_domain" {
   description = "Domain prefix for the Cognito hosted UI"
   type        = string

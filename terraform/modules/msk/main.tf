@@ -1,19 +1,10 @@
 resource "aws_security_group" "msk" {
   name        = "patient-system-${var.environment}-msk-sg"
-  description = "Allow Kafka from EC2 and EKS pods"
+  description = "Allow Kafka from EKS pods"
   vpc_id      = var.vpc_id
 
   ingress {
-    description     = "Kafka from EC2"
-    from_port       = 9092
-    to_port         = 9092
-    protocol        = "tcp"
-    security_groups = [var.ec2_security_group_id]
-  }
-
-  # All resources inside the VPC (EKS pods, etc.)
-  ingress {
-    description = "Kafka from within VPC"
+    description = "Kafka from within VPC (EKS pods)"
     from_port   = 9092
     to_port     = 9092
     protocol    = "tcp"

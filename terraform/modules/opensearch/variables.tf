@@ -18,11 +18,6 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
-variable "ec2_security_group_id" {
-  description = "Security group ID of the EC2 instance (allowed to reach OpenSearch)"
-  type        = string
-}
-
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)

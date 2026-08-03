@@ -156,31 +156,6 @@ output "jwks_uri" {
 }
 
 # ────────────────────────────────────────────────────────────
-# EC2 (Docker Compose server — kept as bastion during migration)
-# ────────────────────────────────────────────────────────────
-
-module "ec2" {
-  source        = "../../modules/ec2"
-  instance_type = "t3.large"
-  public_key    = var.public_key
-  environment   = var.environment
-  vpc_id        = module.vpc.vpc_id
-  subnet_id     = module.vpc.public_subnet_ids[0]
-  tags = {
-    Environment = var.environment
-    Project     = "patient-system"
-  }
-}
-
-output "ec2_public_ip" {
-  value = module.ec2.public_ip
-}
-
-output "ec2_instance_id" {
-  value = module.ec2.instance_id
-}
-
-# ────────────────────────────────────────────────────────────
 # Storage
 # ────────────────────────────────────────────────────────────
 
@@ -223,8 +198,6 @@ module "rds" {
   vpc_id                = module.vpc.vpc_id
   vpc_cidr              = module.vpc.vpc_cidr
   subnet_ids            = module.vpc.private_subnet_ids
-  ec2_security_group_id = module.ec2.security_group_id
-
   tags = {
     Environment = var.environment
     Project     = "patient-system"
@@ -246,8 +219,6 @@ module "msk" {
   vpc_id                = module.vpc.vpc_id
   vpc_cidr              = module.vpc.vpc_cidr
   subnet_ids            = module.vpc.private_subnet_ids
-  ec2_security_group_id = module.ec2.security_group_id
-
   tags = {
     Environment = var.environment
     Project     = "patient-system"
@@ -265,8 +236,6 @@ module "opensearch" {
   vpc_id                = module.vpc.vpc_id
   vpc_cidr              = module.vpc.vpc_cidr
   subnet_ids            = module.vpc.private_subnet_ids
-  ec2_security_group_id = module.ec2.security_group_id
-
   tags = {
     Environment = var.environment
     Project     = "patient-system"
@@ -339,6 +308,79 @@ output "patient_service_role_arn" {
 output "organization_service_role_arn" {
   description = "Update k8s/services/organization-service/serviceaccount.yaml annotation if this changes"
   value       = module.app_config.organization_service_role_arn
+}
+
+# ────────────────────────────────────────────────────────────
+# Ingress (managed here so the ACM cert ARN is never hardcoded)
+# ────────────────────────────────────────────────────────────
+
+resource "kubernetes_namespace" "patient_system" {
+  depends_on = [module.eks]
+
+  metadata {
+    name = "patient-system"
+  }
+
+  lifecycle {
+    # ArgoCD may add its own labels/annotations — let it.
+    ignore_changes = [metadata[0].labels, metadata[0].annotations]
+  }
+}
+
+resource "kubernetes_ingress_v1" "patient_system" {
+  depends_on = [module.alb_controller, kubernetes_namespace.patient_system]
+
+  wait_for_load_balancer = false
+
+  metadata {
+    name      = "patient-system"
+    namespace = kubernetes_namespace.patient_system.metadata[0].name
+    annotations = {
+      "alb.ingress.kubernetes.io/scheme"           = "internet-facing"
+      "alb.ingress.kubernetes.io/target-type"      = "ip"
+      "alb.ingress.kubernetes.io/certificate-arn"  = module.alb_controller.acm_certificate_arn
+      "alb.ingress.kubernetes.io/listen-ports"     = jsonencode([{ HTTP = 80 }, { HTTPS = 443 }])
+      "alb.ingress.kubernetes.io/ssl-redirect"     = "443"
+      "alb.ingress.kubernetes.io/healthcheck-path" = "/actuator/health"
+      "alb.ingress.kubernetes.io/healthcheck-port" = "4004"
+    }
+  }
+
+  spec {
+    ingress_class_name = "alb"
+
+    rule {
+      host = "patientsystem.me"
+      http {
+        path {
+          path      = "/api"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "api-gateway"
+              port { number = 4004 }
+            }
+          }
+        }
+      }
+    }
+
+    rule {
+      host = "api.patientsystem.me"
+      http {
+        path {
+          path      = "/"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "api-gateway"
+              port { number = 4004 }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 # ────────────────────────────────────────────────────────────

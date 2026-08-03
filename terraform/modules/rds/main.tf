@@ -3,19 +3,8 @@ resource "aws_security_group" "rds" {
   description = "Allow PostgreSQL from EC2 and EKS pods"
   vpc_id      = var.vpc_id
 
-  # Existing EC2 instance (Docker Compose era, kept as bastion during migration)
   ingress {
-    description     = "PostgreSQL from EC2"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [var.ec2_security_group_id]
-  }
-
-  # All resources inside the VPC (EKS pods, etc.)
-  # More granular: in Phase 4 we'll narrow this to the EKS node security group
-  ingress {
-    description = "PostgreSQL from within VPC"
+    description = "PostgreSQL from within VPC (EKS pods)"
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"

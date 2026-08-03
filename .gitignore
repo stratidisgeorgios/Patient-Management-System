@@ -75,6 +75,7 @@ patient-frontend/dist/
 
 ### Project specific ###
 FUTURE.md
+INTERVIEW_STUDY_GUIDE.md
 patients_import*.csv
 *.csv
 
@@ -88,6 +89,7 @@ patients_import*.csv
 **/.terraform/
 *.tfstate
 *.tfstate.backup
+*.tfstate.*.backup
 *.tfvars
 .terraform.lock.hcl
 DONE.md
